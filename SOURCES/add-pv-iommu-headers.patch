@@ -1,0 +1,102 @@
+diff --git a/xen/arch/x86/hypercall.c b/xen/arch/x86/hypercall.c
+index ff7445f..481b888 100644
+--- a/xen/arch/x86/hypercall.c
++++ b/xen/arch/x86/hypercall.c
+@@ -68,6 +68,7 @@ const hypercall_args_t hypercall_args_table[NR_hypercalls] =
+     ARGS(xenpmu_op, 2),
+     ARGS(dm_op, 3),
+     ARGS(mca, 1),
++    ARGS(iommu_op, 2),
+     ARGS(arch_1, 1),
+ };
+ 
+@@ -131,6 +132,7 @@ static const hypercall_table_t pv_hypercall_table[] = {
+     HYPERCALL(xenpmu_op),
+     COMPAT_CALL(dm_op),
+     HYPERCALL(mca),
++    HYPERCALL(iommu_op),
+     HYPERCALL(arch_1),
+ };
+ 
+diff --git a/xen/common/Makefile b/xen/common/Makefile
+index 0fd5de9..aeb8e2b 100644
+--- a/xen/common/Makefile
++++ b/xen/common/Makefile
+@@ -29,6 +29,7 @@ obj-y += page_alloc.o
+ obj-$(CONFIG_HAS_PDX) += pdx.o
+ obj-$(CONFIG_PERF_COUNTERS) += perfc.o
+ obj-y += preempt.o
++obj-y += pv_iommu.o
+ obj-y += random.o
+ obj-y += rangeset.o
+ obj-y += radix-tree.o
+diff --git a/xen/common/pv_iommu.c b/xen/common/pv_iommu.c
+new file mode 100644
+index 0000000..304fccf
+--- /dev/null
++++ b/xen/common/pv_iommu.c
+@@ -0,0 +1,38 @@
++/******************************************************************************
++ * common/pv_iommu.c
++ * 
++ * Paravirtualised IOMMU functionality
++ * 
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ * 
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License
++ * along with this program; If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <xen/guest_access.h>
++
++#define ret_t long
++
++ret_t do_iommu_op(XEN_GUEST_HANDLE_PARAM(void) arg, unsigned int count)
++{
++    return -ENOSYS;
++}
++
++/*
++ * Local variables:
++ * mode: C
++ * c-file-style: "BSD"
++ * c-basic-offset: 4
++ * tab-width: 4
++ * indent-tabs-mode: nil
++ * End:
++ */
++
+diff --git a/xen/include/asm-x86/hypercall.h b/xen/include/asm-x86/hypercall.h
+index c59aa69..8a318d1 100644
+--- a/xen/include/asm-x86/hypercall.h
++++ b/xen/include/asm-x86/hypercall.h
+@@ -128,6 +128,9 @@ do_set_segment_base(
+     unsigned int which,
+     unsigned long base);
+ 
++extern long do_iommu_op(
++    XEN_GUEST_HANDLE_PARAM(void) arg, unsigned int count);
++
+ #ifdef CONFIG_COMPAT
+ 
+ #include <compat/arch-x86/xen.h>
+diff --git a/xen/include/public/xen.h b/xen/include/public/xen.h
+index 6601e05..f9cfe03 100644
+--- a/xen/include/public/xen.h
++++ b/xen/include/public/xen.h
+@@ -127,6 +127,7 @@ DEFINE_XEN_GUEST_HANDLE(xen_ulong_t);
+ #define __HYPERVISOR_arch_6               54
+ #define __HYPERVISOR_arch_7               55
+ 
++#define __HYPERVISOR_iommu_op             56
+ /* ` } */
+ 
+ /*

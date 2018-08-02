@@ -471,7 +471,6 @@ Xen Hypervisor.
 
 %package hypervisor
 Summary: The Xen Hypervisor
-License: Various (See description)
 Group: System/Hypervisor
 Requires(post): coreutils grep
 %description hypervisor

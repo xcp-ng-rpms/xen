@@ -25,7 +25,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.5
-Release: 5.2
+Release: 5.4.1.xcp
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -404,6 +404,10 @@ Patch371: xen-xsm-allow-access-unlabeled-resources.patch
 Patch372: xen-xsm-treat-unlabeled-domain-domU.patch
 Patch373: 0001-x86-xpti-Introduce-an-ability-to-disable-XPTI-for-do.patch
 Patch374: backport-e9281adb4768.patch
+Patch375: 0001-x86-Support-fully-eager-FPU-context-switching.patch
+Patch376: 0002-x86-spec-ctrl-Mitigations-for-LazyFPU.patch
+Patch377: xsa264-4.10.patch
+Patch378: xsa265-4.7.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
@@ -1142,3 +1146,8 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %systemd_postun xenstored_ro.socket
 %endif
 
+%changelog
+* Thu Aug 02 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-7.4.1xcp
+- Security update
+- Fix CVE-2018-12893: x86: #DB exception safety check can be triggered by a guest
+- Fix CVE-2018-12891: preemption checks bypassed in x86 PV MM handling

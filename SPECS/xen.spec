@@ -25,7 +25,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.5
-Release: 5.4.1.xcp
+Release: 5.5.1.xcp
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -408,6 +408,39 @@ Patch375: 0001-x86-Support-fully-eager-FPU-context-switching.patch
 Patch376: 0002-x86-spec-ctrl-Mitigations-for-LazyFPU.patch
 Patch377: xsa264-4.10.patch
 Patch378: xsa265-4.7.patch
+Patch379: backport-55674ed8c826.patch
+Patch380: backport-839826b094a0.patch
+Patch381: backport-e7956461f76f.patch
+Patch382: backport-bd63f041923a.patch
+Patch383: backport-087369973214.patch
+Patch384: backport-dc111e9f0d99.patch
+Patch385: backport-a4041364c3ae.patch
+Patch386: backport-9858a1f3fb9a.patch
+Patch387: backport-c0e854be515b.patch
+Patch388: backport-e90e2431a4ae.patch
+Patch389: backport-97aff087fd0b.patch
+Patch390: backport-fa807e2ff69d.patch
+Patch391: backport-bce2dd64b52e.patch
+Patch392: backport-91ca84c862b1.patch
+Patch393: backport-f30e3cf34042.patch
+Patch394: backport-730dc8d2c9e1.patch
+Patch395: backport-f54b63e8617a.patch
+Patch396: backport-94fda356fcdc.patch
+Patch397: backport-4d94828cf111.patch
+Patch398: backport-80599f0b7701.patch
+Patch399: backport-be73a842e642.patch
+Patch400: backport-ee7689b94ac7.patch
+Patch401: backport-1ac46b556326.patch
+Patch402: xsa269-4.8.patch
+Patch403: 0001-x86-spec-ctrl-Yet-more-fixes-for-xpti-parsing.patch
+Patch404: 0002-x86-spec-ctrl-Calculate-safe-PTE-addresses-for-L1TF-.patch
+Patch405: 0003-x86-spec-ctrl-Introduce-an-option-to-control-L1TF-mi.patch
+Patch406: 0004-x86-shadow-Infrastructure-to-force-a-PV-guest-into-s.patch
+Patch407: 0005-x86-mm-Plumbing-to-allow-any-PTE-update-to-fail-with.patch
+Patch408: 0006-x86-pv-Force-a-guest-into-shadow-mode-when-it-writes.patch
+Patch409: 0007-x86-spec-ctrl-CPUID-MSR-definitions-for-L1D_FLUSH.patch
+Patch410: 0008-x86-msr-Virtualise-MSR_FLUSH_CMD-for-guests.patch
+Patch411: 0009-x86-spec-ctrl-Introduce-an-option-to-control-L1D_FLU.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
@@ -1114,6 +1147,18 @@ fi
 mkdir -p %{_rundir}/reboot-required.d/%{name}
 touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 
+# Update grub.cfg to avoid Dom0 vCPU oversubscription
+
+%triggerin hypervisor -- grub
+if [ -e /boot/grub/grub.cfg ]; then
+    sed -i 's/dom0_max_vcpus=\([0-9a-fA-FxX]\+\)\( \|$\)/dom0_max_vcpus=1-\1\2/g' /boot/grub/grub.cfg
+fi
+
+%triggerin hypervisor -- grub-efi
+if [ -e /boot/efi/EFI/xenserver/grub.cfg ]; then
+    sed -i 's/dom0_max_vcpus=\([0-9a-fA-FxX]\+\)\( \|$\)/dom0_max_vcpus=1-\1\2/g' /boot/efi/EFI/xenserver/grub.cfg
+fi
+
 %if %with_systemd
 %post dom0-tools
 %systemd_post proc-xen.mount
@@ -1147,7 +1192,10 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
-* Thu Aug 02 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-7.4.1xcp
+* Wed Aug 15 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-5.5.1xcp
+- Multiple security updates
+
+* Thu Aug 02 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-5.4.1xcp
 - Security update
 - Fix CVE-2018-12893: x86: #DB exception safety check can be triggered by a guest
 - Fix CVE-2018-12891: preemption checks bypassed in x86 PV MM handling

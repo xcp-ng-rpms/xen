@@ -17,10 +17,10 @@ rather than resulting in a parse error.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 diff --git a/xen/arch/x86/spec_ctrl.c b/xen/arch/x86/spec_ctrl.c
-index dfede94..ce9effb 100644
+index 3950625..1798d1c 100644
 --- a/xen/arch/x86/spec_ctrl.c
 +++ b/xen/arch/x86/spec_ctrl.c
-@@ -259,8 +259,7 @@ static bool_t __init should_use_eager_fpu(void)
+@@ -404,8 +404,7 @@ static bool_t __init should_use_eager_fpu(void)
      }
  }
  
@@ -28,10 +28,10 @@ index dfede94..ce9effb 100644
 -uint8_t __read_mostly opt_xpti = OPT_XPTI_DEFAULT;
 +int8_t __read_mostly opt_xpti = -1;
  
- static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+ static __init void xpti_init_default(uint64_t caps)
  {
-@@ -426,6 +425,10 @@ static __init int parse_xpti(const char *s)
-     const char *ss;
+@@ -423,10 +422,16 @@ static __init int parse_xpti(char *s)
+     char *ss;
      int val, rc = 0;
  
 +    /* Inhibit the defaults as an explicit choice has been given. */
@@ -40,8 +40,14 @@ index dfede94..ce9effb 100644
 +
      do {
          ss = strchr(s, ',');
-         if ( !ss )
-@@ -438,12 +441,15 @@ static __init int parse_xpti(const char *s)
+         if ( ss )
+             *ss = '\0';
++        else
++            ss = strchr(s, '\0');
+ 
+         switch ( parse_bool(s) )
+         {
+@@ -435,12 +440,15 @@ static __init int parse_xpti(char *s)
              break;
  
          case 1:
@@ -59,7 +65,7 @@ index dfede94..ce9effb 100644
              else if ( (val = parse_boolean("dom0", s, ss)) >= 0 )
                  opt_xpti = (opt_xpti & ~OPT_XPTI_DOM0) |
                             (val ? OPT_XPTI_DOM0 : 0);
-@@ -607,7 +613,7 @@ void __init init_speculation_mitigations(void)
+@@ -602,7 +610,7 @@ void __init init_speculation_mitigations(void)
      if ( default_xen_spec_ctrl )
          __set_bit(X86_FEATURE_SC_MSR_IDLE, boot_cpu_data.x86_capability);
  

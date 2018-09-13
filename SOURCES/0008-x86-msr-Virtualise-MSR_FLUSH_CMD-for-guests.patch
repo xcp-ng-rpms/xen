@@ -17,10 +17,10 @@ This is part of XSA-273 / CVE-2018-3646.
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 diff --git a/xen/arch/x86/hvm/hvm.c b/xen/arch/x86/hvm/hvm.c
-index 53de417..c53e3a4 100644
+index a357fbf..8923f5f 100644
 --- a/xen/arch/x86/hvm/hvm.c
 +++ b/xen/arch/x86/hvm/hvm.c
-@@ -3870,6 +3870,7 @@ int hvm_msr_read_intercept(unsigned int msr, uint64_t *msr_content)
+@@ -3864,6 +3864,7 @@ int hvm_msr_read_intercept(unsigned int msr, uint64_t *msr_content)
      case MSR_AMD_PATCHLOADER:
      case MSR_IA32_UCODE_WRITE:
      case MSR_PRED_CMD:
@@ -28,8 +28,8 @@ index 53de417..c53e3a4 100644
          /* Write-only */
          goto gp_fault;
  
-@@ -4095,6 +4096,17 @@ int hvm_msr_write_intercept(unsigned int msr, uint64_t msr_content,
-         wrmsrl(MSR_PRED_CMD, PRED_CMD_IBPB);
+@@ -4090,6 +4091,17 @@ int hvm_msr_write_intercept(unsigned int msr, uint64_t msr_content,
+         wrmsrl(MSR_PRED_CMD, msr_content);
          break;
  
 +    case MSR_FLUSH_CMD:
@@ -47,7 +47,7 @@ index 53de417..c53e3a4 100644
          /* Read-only */
          goto gp_fault;
 diff --git a/xen/arch/x86/hvm/vmx/vmx.c b/xen/arch/x86/hvm/vmx/vmx.c
-index 4ad29cb..c981156 100644
+index 86d6e76..a489b7d 100644
 --- a/xen/arch/x86/hvm/vmx/vmx.c
 +++ b/xen/arch/x86/hvm/vmx/vmx.c
 @@ -574,6 +574,12 @@ static void vmx_cpuid_policy_changed(struct vcpu *v)
@@ -64,11 +64,11 @@ index 4ad29cb..c981156 100644
  
  static int vmx_guest_x86_mode(struct vcpu *v)
 diff --git a/xen/arch/x86/traps.c b/xen/arch/x86/traps.c
-index d3e2b21..5a0d1fa 100644
+index 90200cf..7506edf 100644
 --- a/xen/arch/x86/traps.c
 +++ b/xen/arch/x86/traps.c
-@@ -2942,6 +2942,17 @@ static int emulate_privileged_op(struct cpu_user_regs *regs)
-             wrmsrl(MSR_PRED_CMD, PRED_CMD_IBPB);
+@@ -2962,6 +2962,17 @@ static int emulate_privileged_op(struct cpu_user_regs *regs)
+             wrmsrl(MSR_PRED_CMD, msr_content);
              break;
  
 +        case MSR_FLUSH_CMD:
@@ -85,7 +85,7 @@ index d3e2b21..5a0d1fa 100644
          case MSR_P6_PERFCTR(0)...MSR_P6_PERFCTR(7):
          case MSR_P6_EVNTSEL(0)...MSR_P6_EVNTSEL(3):
          case MSR_CORE_PERF_FIXED_CTR0...MSR_CORE_PERF_FIXED_CTR2:
-@@ -3079,6 +3090,7 @@ static int emulate_privileged_op(struct cpu_user_regs *regs)
+@@ -3099,6 +3110,7 @@ static int emulate_privileged_op(struct cpu_user_regs *regs)
              break;
  
          case MSR_PRED_CMD:
@@ -94,11 +94,11 @@ index d3e2b21..5a0d1fa 100644
              goto fail;
  
 diff --git a/xen/include/public/arch-x86/cpufeatureset.h b/xen/include/public/arch-x86/cpufeatureset.h
-index cc0c4f3..f5fb483 100644
+index 6e0cfdb..d0f82c1 100644
 --- a/xen/include/public/arch-x86/cpufeatureset.h
 +++ b/xen/include/public/arch-x86/cpufeatureset.h
-@@ -229,7 +229,7 @@ XEN_CPUFEATURE(IBPB,          8*32+12) /*A  IBPB support only (no IBRS, used by
- /* Intel-defined CPU features, CPUID level 0x00000007:0.edx, word 9 */
+@@ -241,7 +241,7 @@ XEN_CPUFEATURE(AVX512_4VNNIW, 9*32+ 2) /*A AVX512 Neural Network Instructions */
+ XEN_CPUFEATURE(AVX512_4FMAPS, 9*32+ 3) /*A AVX512 Multiply Accumulation Single Precision */
  XEN_CPUFEATURE(IBRSB,         9*32+26) /*A  IBRS and IBPB support (used by Intel) */
  XEN_CPUFEATURE(STIBP,         9*32+27) /*A! STIBP */
 -XEN_CPUFEATURE(L1D_FLUSH,     9*32+28) /*   MSR_FLUSH_CMD and L1D flush. */

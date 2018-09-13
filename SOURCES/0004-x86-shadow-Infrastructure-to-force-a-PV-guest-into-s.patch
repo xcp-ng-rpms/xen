@@ -22,18 +22,18 @@ Signed-off-by: Juergen Gross <jgross@suse.com>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Tim Deegan <tim@xen.org>
 diff --git a/xen/arch/x86/domain.c b/xen/arch/x86/domain.c
-index 723a005..3f3c6b5 100644
+index 7e7d26e..44e9d01 100644
 --- a/xen/arch/x86/domain.c
 +++ b/xen/arch/x86/domain.c
-@@ -64,6 +64,7 @@
+@@ -66,6 +66,7 @@
  #include <xen/iommu.h>
  #include <compat/vcpu.h>
  #include <asm/psr.h>
 +#include <asm/shadow.h>
  #include <asm/spec_ctrl.h>
- #include <asm/m2b.h>
  
-@@ -623,6 +624,8 @@ int arch_domain_create(struct domain *d, unsigned int domcr_flags,
+ static __read_mostly enum {
+@@ -687,6 +688,8 @@ int arch_domain_create(struct domain *d, unsigned int domcr_flags,
          rc = 0;
      else
      {
@@ -42,7 +42,7 @@ index 723a005..3f3c6b5 100644
          d->arch.pv_domain.gdt_ldt_l1tab =
              alloc_xenheap_pages(0, MEMF_node(domain_to_node(d)));
          if ( !d->arch.pv_domain.gdt_ldt_l1tab )
-@@ -739,6 +742,8 @@ int arch_domain_create(struct domain *d, unsigned int domcr_flags,
+@@ -805,6 +808,8 @@ int arch_domain_create(struct domain *d, unsigned int domcr_flags,
      free_perdomain_mappings(d);
      if ( is_pv_domain(d) )
      {
@@ -51,7 +51,7 @@ index 723a005..3f3c6b5 100644
          xfree(d->arch.pv_domain.cpuidmasks);
          free_xenheap_page(d->arch.pv_domain.gdt_ldt_l1tab);
      }
-@@ -763,6 +768,8 @@ void arch_domain_destroy(struct domain *d)
+@@ -829,6 +834,8 @@ void arch_domain_destroy(struct domain *d)
      free_perdomain_mappings(d);
      if ( is_pv_domain(d) )
      {
@@ -74,10 +74,10 @@ index 57defac..7a846eb 100644
              printk("hap ");
          if ( paging_mode_refcounts(d) )
 diff --git a/xen/arch/x86/mm/shadow/common.c b/xen/arch/x86/mm/shadow/common.c
-index 9ab5dd0..49b8d9a 100644
+index d703fc2..67bad18 100644
 --- a/xen/arch/x86/mm/shadow/common.c
 +++ b/xen/arch/x86/mm/shadow/common.c
-@@ -3141,6 +3141,15 @@ static void sh_new_mode(struct domain *d, u32 new_mode)
+@@ -3137,6 +3137,15 @@ static void sh_new_mode(struct domain *d, u32 new_mode)
      ASSERT(paging_locked_by_me(d));
      ASSERT(d != current->domain);
  
@@ -93,7 +93,7 @@ index 9ab5dd0..49b8d9a 100644
      d->arch.paging.mode = new_mode;
      for_each_vcpu(d, v)
          sh_update_paging_modes(v);
-@@ -4024,6 +4033,29 @@ void shadow_audit_tables(struct vcpu *v)
+@@ -4020,6 +4029,29 @@ void shadow_audit_tables(struct vcpu *v)
  
  #endif /* Shadow audit */
  
@@ -147,7 +147,7 @@ index 4e42fa7..9567944 100644
  }
  
 diff --git a/xen/include/asm-x86/domain.h b/xen/include/asm-x86/domain.h
-index 5118330..1a1b63f 100644
+index dce56ed..9a280e1 100644
 --- a/xen/include/asm-x86/domain.h
 +++ b/xen/include/asm-x86/domain.h
 @@ -121,6 +121,9 @@ struct shadow_domain {
@@ -160,10 +160,10 @@ index 5118330..1a1b63f 100644
  #endif
  };
  
-@@ -259,6 +262,8 @@ struct pv_domain
- 
-     /* XPTI active? */
-     bool xpti;
+@@ -261,6 +264,8 @@ struct pv_domain
+     bool_t xpti;
+     /* Use PCID feature? */
+     bool_t pcid;
 +    /* Mitigate L1TF with shadow/crashing? */
 +    bool_t check_l1tf;
  

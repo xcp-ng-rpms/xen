@@ -16,10 +16,10 @@ This is part of XSA-273 / CVE-2018-3620.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 diff --git a/docs/misc/xen-command-line.markdown b/docs/misc/xen-command-line.markdown
-index d1ee1cd..2f0a8c8 100644
+index 3a9fff0..e5bf5d3 100644
 --- a/docs/misc/xen-command-line.markdown
 +++ b/docs/misc/xen-command-line.markdown
-@@ -1389,6 +1389,30 @@ do; there may be other custom operating systems which do.  If you're
+@@ -1388,6 +1388,30 @@ do; there may be other custom operating systems which do.  If you're
  certain you don't plan on having PV guests which use this feature,
  turning it off can reduce the attack surface.
  
@@ -63,10 +63,10 @@ index 8de35fe..615ecf3 100644
            Under a small number of specific workloads, shadow paging may be
            deliberately used as a performance optimisation.
 diff --git a/xen/arch/x86/spec_ctrl.c b/xen/arch/x86/spec_ctrl.c
-index d5b61f2..c3f51df 100644
+index ceccc94..28081df 100644
 --- a/xen/arch/x86/spec_ctrl.c
 +++ b/xen/arch/x86/spec_ctrl.c
-@@ -187,6 +187,56 @@ static int __init parse_spec_ctrl(const char *s)
+@@ -187,6 +187,56 @@ static int __init parse_spec_ctrl(char *s)
  }
  custom_param("spec-ctrl", parse_spec_ctrl);
  
@@ -120,12 +120,12 @@ index d5b61f2..c3f51df 100644
 +}
 +custom_param("pv-l1tf", parse_pv_l1tf);
 +
- /* Calculate whether this CPU speculates past #NM */
- static bool_t __init should_use_eager_fpu(void)
+ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
  {
-@@ -437,9 +487,16 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+     unsigned int _7d0 = 0, e8b = 0, tmp;
+@@ -210,9 +260,16 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
             (caps & ARCH_CAPS_RSBA)                  ? " RSBA"      : "",
-            (caps & ARCH_CAPS_SSBD_NO)               ? " SSBD_NO"   : "");
+            (caps & ARCH_CAPS_SSB_NO)                ? " SSB_NO"    : "");
  
 -    /* Compiled-in support which pertains to BTI mitigations. */
 -    if ( IS_ENABLED(CONFIG_INDIRECT_THUNK) )
@@ -143,7 +143,7 @@ index d5b61f2..c3f51df 100644
  
      /* Settings for Xen's protection, irrespective of guests. */
      printk("  Xen settings: BTI-Thunk %s, SPEC_CTRL: %s%s, Other:%s\n",
-@@ -454,6 +511,13 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+@@ -226,6 +283,13 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
             (default_xen_spec_ctrl & SPEC_CTRL_SSBD)  ? " SSBD+" : " SSBD-",
             opt_ibpb                                  ? " IBPB"  : "");
  
@@ -157,8 +157,8 @@ index d5b61f2..c3f51df 100644
      /*
       * Alternatives blocks for protecting against and/or virtualising
       * mitigation support for guests.
-@@ -475,6 +539,10 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
-     printk("XPTI: Dom0 %s, DomU (64-bit PV only) %s\n",
+@@ -247,6 +311,10 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+     printk("  XPTI (64-bit PV only): Dom0 %s, DomU %s\n",
             opt_xpti & OPT_XPTI_DOM0 ? "enabled" : "disabled",
             opt_xpti & OPT_XPTI_DOMU ? "enabled" : "disabled");
 +
@@ -168,7 +168,7 @@ index d5b61f2..c3f51df 100644
  }
  
  /* Calculate whether Retpoline is known-safe on this CPU. */
-@@ -774,6 +842,18 @@ void __init init_speculation_mitigations(void)
+@@ -771,6 +839,18 @@ void __init init_speculation_mitigations(void)
  
      l1tf_calculations(caps);
  

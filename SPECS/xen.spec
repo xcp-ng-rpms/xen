@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.6
-Release: 6.1.1.xcp
+Release: 6.2.1.xcp
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -420,6 +420,7 @@ Patch384: xen-xsm-default-policy.patch
 Patch385: xen-xsm-allow-access-unlabeled-resources.patch
 Patch386: xen-xsm-treat-unlabeled-domain-domU.patch
 Patch387: 0001-cc-memory-scrubbing.patch
+Patch388: xsa278-4.7.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
@@ -1176,6 +1177,10 @@ fi
 %endif
 
 %changelog
+* Fri Oct 26 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.2.1.xcp
+- Security update
+- Fix CVE-2018-TBA: Nested VT-x usable even when disabled
+
 * Thu Sep 13 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.1.1.xcp
 - Update for XCP-ng 7.6
 

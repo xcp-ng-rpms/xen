@@ -25,7 +25,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.5
-Release: 5.5
+Release: 5.6
 License: Portions GPLv2 (See COPYING)
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -441,6 +441,7 @@ Patch408: 0006-x86-pv-Force-a-guest-into-shadow-mode-when-it-writes.patch
 Patch409: 0007-x86-spec-ctrl-CPUID-MSR-definitions-for-L1D_FLUSH.patch
 Patch410: 0008-x86-msr-Virtualise-MSR_FLUSH_CMD-for-guests.patch
 Patch411: 0009-x86-spec-ctrl-Introduce-an-option-to-control-L1D_FLU.patch
+Patch412: xsa278-4.7.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools

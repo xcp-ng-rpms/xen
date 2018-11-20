@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.6
-Release: 6.2
+Release: 6.3
 License: Portions GPLv2 (See COPYING)
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -421,6 +421,13 @@ Patch385: xen-xsm-allow-access-unlabeled-resources.patch
 Patch386: xen-xsm-treat-unlabeled-domain-domU.patch
 Patch387: 0001-cc-memory-scrubbing.patch
 Patch388: xsa278-4.7.patch
+Patch389: xsa275-4.7-1.patch
+Patch390: xsa275-4.7-2.patch
+Patch391: xsa279-4.9.patch
+Patch392: xsa280-4.9-1.patch
+Patch393: xsa280-4.7-2.patch
+Patch394: xsa282-4.9-1.patch
+Patch395: xsa282-4.8-2.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools

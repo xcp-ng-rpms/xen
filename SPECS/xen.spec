@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.6
-Release: 6.3.1.xcp
+Release: 6.4.1%dist
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -428,6 +428,19 @@ Patch392: xsa280-4.9-1.patch
 Patch393: xsa280-4.7-2.patch
 Patch394: xsa282-4.9-1.patch
 Patch395: xsa282-4.8-2.patch
+Patch396: 0001-VMX-allow-migration-of-guests-with-SSBD-enabled.patch
+Patch397: xsa283.patch
+Patch398: xsa284.patch
+Patch399: xsa285-4.11.patch
+Patch400: xsa287-4.7.patch
+Patch401: xsa288-4.7.patch
+Patch402: xsa290-4.7-1.patch
+Patch403: xsa290-4.7-2.patch
+Patch404: xsa292.patch
+Patch405: xsa293-4.7-1.patch
+Patch406: xsa293-4.7-2.patch
+Patch407: xsa293-4.7-3.patch
+Patch408: xsa294-4.7.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
@@ -1184,6 +1197,12 @@ fi
 %endif
 
 %changelog
+* Tue Mar 07 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.4.1
+- Security update
+- Fix XSA-283, XSA-284, XSA-285, XSA-287, XSA-288, XSA-290, XSA-292, XSA-293 and XSA-294
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Tue Nov 20 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.3.1.xcp
 - Security update
 - Fix XSA-275, XSA-279, XSA-280 and XSA-282

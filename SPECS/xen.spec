@@ -25,7 +25,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.5
-Release: 5.7
+Release: 5.8
 License: Portions GPLv2 (See COPYING)
 URL:     http://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{base_cset}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -448,6 +448,17 @@ Patch415: xsa280-4.9-1.patch
 Patch416: xsa280-4.7-2.patch
 Patch417: xsa282-4.9-1.patch
 Patch418: xsa282-4.8-2.patch
+Patch419: 0001-VMX-allow-migration-of-guests-with-SSBD-enabled.patch
+Patch420: xsa283.patch
+Patch421: xsa284.patch
+Patch422: xsa285.patch
+Patch423: xsa287-4.7.patch
+Patch424: xsa288-4.7.patch
+Patch425: xsa290-4.7-1.patch
+Patch426: xsa290-4.7-2.patch
+Patch427: xsa293-4.7-1.patch
+Patch428: xsa293-4.7-2.patch
+Patch429: xsa293-4.7-3.patch
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools

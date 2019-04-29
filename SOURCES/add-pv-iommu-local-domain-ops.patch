@@ -1,8 +1,8 @@
 diff --git a/xen/common/pv_iommu.c b/xen/common/pv_iommu.c
-index 304fccf..5fbf550 100644
+index 304fccf349..e6ede8566c 100644
 --- a/xen/common/pv_iommu.c
 +++ b/xen/common/pv_iommu.c
-@@ -17,13 +17,238 @@
+@@ -17,13 +17,244 @@
   * along with this program; If not, see <http://www.gnu.org/licenses/>.
   */
  
@@ -25,7 +25,7 @@ index 304fccf..5fbf550 100644
 +                             (readonly) ? P2M_ALLOC : P2M_UNSHARE);
 +    if ( !(*page) )
 +    {
-+        *frame = INVALID_MFN;
++        *frame = mfn_x(INVALID_MFN);
 +        if ( p2m_is_shared(p2mt) )
 +            return -EIO;
 +        if ( p2m_is_paging(p2mt) )
@@ -35,13 +35,13 @@ index 304fccf..5fbf550 100644
 +        }
 +        return -EIO;
 +    }
-+    *frame = page_to_mfn(*page);
++    *frame = mfn_x(page_to_mfn(*page));
 +#else
 +    *frame = gmfn_to_mfn(rd, gfn);
-+    *page = mfn_valid(*frame) ? mfn_to_page(*frame) : NULL;
++    *page = mfn_valid(_mfn(*frame)) ? mfn_to_page(*frame) : NULL;
 +    if ( (!(page)) || (!get_page*page, rd) )
 +    {
-+        *frame = INVALID_MFN;
++        *frame = mfn_x(INVALID_MFN);
 +        *page = NULL;
 +        rc = -EIO;
 +    }
@@ -112,7 +112,7 @@ index 304fccf..5fbf550 100644
 +            if ( (op->flags & IOMMU_MAP_OP_no_ref_cnt) )
 +            {
 +                mfn = op->u.map_page.gfn;
-+                page = mfn_to_page(mfn);
++                page = mfn_to_page(_mfn(mfn));
 +                if (!page)
 +                {
 +                    op->status = -EPERM; // Should this be something else?
@@ -139,7 +139,7 @@ index 304fccf..5fbf550 100644
 +            if ( op->flags & IOMMU_OP_writeable )
 +                flags |= IOMMUF_writable;
 +
-+            if ( iommu_map_page(d, op->u.map_page.bfn, mfn, flags) )
++            if ( iommu_legacy_map(d, op->u.map_page.bfn, mfn, 0, flags) )
 +            {
 +                if ( !(op->flags & IOMMU_MAP_OP_no_ref_cnt) )
 +                    put_page(page);
@@ -162,7 +162,7 @@ index 304fccf..5fbf550 100644
 +                goto finish;
 +            }
 +
-+            if ( iommu_unmap_page(d, op->u.unmap_page.bfn) )
++            if ( iommu_legacy_unmap(d, op->u.unmap_page.bfn, 0) )
 +            {
 +                op->status = -EIO;
 +                goto finish;
@@ -222,6 +222,18 @@ index 304fccf..5fbf550 100644
 +    }
 +
 +flush_pages:
++    if ( count > 1 )
++    {
++        int rc = 0;
++
++        this_cpu(iommu_dont_flush_iotlb) = 0;
++        if ( i )
++            rc = iommu_iotlb_flush_all(
++                d, IOMMU_FLUSHF_added | IOMMU_FLUSHF_modified);
++
++        if ( rc < 0 )
++            ret = rc;
++    }
 +    if ( ret > 0 )
 +    {
 +        XEN_GUEST_HANDLE_PARAM(pv_iommu_op_t) op =
@@ -232,19 +244,13 @@ index 304fccf..5fbf550 100644
 +        ret = hypercall_create_continuation(__HYPERVISOR_iommu_op,
 +                                           "hi", arg, count - i);
 +    }
-+    if ( count > 1 )
-+    {
-+        this_cpu(iommu_dont_flush_iotlb) = 0;
-+        if ( i )
-+            iommu_iotlb_flush_all(d);
-+    }
 +    return ret;
  }
  
  /*
 diff --git a/xen/include/public/pv-iommu.h b/xen/include/public/pv-iommu.h
 new file mode 100644
-index 0000000..0f19f96
+index 0000000000..0f19f96c16
 --- /dev/null
 +++ b/xen/include/public/pv-iommu.h
 @@ -0,0 +1,69 @@

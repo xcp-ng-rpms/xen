@@ -2,18 +2,26 @@ Various configuration files.
 
 Most notibly, the cached results of
 
-./configure --prefix=/usr --libdir=/usr/lib64 --libexecdir=/usr/libexec --disable-seabios --disable-stubdom --disable-xsmpolicy --disable-blktap2 --with-system-qemu=/usr/lib64/xen/bin/qemu-system-i386 --with-xenstored=oxenstored --enable-systemd
+WGET=/bin/false FETCHER=/bin/false \
+./configure --prefix=/usr \
+            --libdir=/usr/lib64 \
+            --libexecdir=/usr/libexec \
+            --disable-seabios \
+            --disable-stubdom \
+            --disable-xsmpolicy \
+            --enable-systemd \
+            --with-xenstored=oxenstored \
+            --with-system-qemu=/usr/lib64/xen/bin/qemu-system-i386 \
+            --with-system-ipxe=/usr/share/ipxe/ipxe.bin \
+            --with-system-ovmf=/usr/share/edk2/OVMF.fd
 
 diff --git a/.config b/.config
 new file mode 100644
-index 0000000..5a6e37f
+index 0000000..6e67d21
 --- /dev/null
 +++ b/.config
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,14 @@
 +# -*- mode: Makefile; -*-
-+
-+# Perform a debug build for trunk
-+debug := y
 +
 +# Always produce debug symbols for debuginfo RPMs
 +debug_symbols := y
@@ -27,101 +35,15 @@ index 0000000..5a6e37f
 +
 +# No remus netbuffering
 +override CONFIG_REMUS_NETBUF := n
-diff --git a/buildconfigs/config-coverage b/buildconfigs/config-coverage
-new file mode 100644
-index 0000000..b60f90e
---- /dev/null
-+++ b/buildconfigs/config-coverage
-@@ -0,0 +1,80 @@
-+#
-+# Automatically generated file; DO NOT EDIT.
-+# Xen/x86 4.7.5 Configuration
-+#
-+CONFIG_X86_64=y
-+CONFIG_X86=y
-+CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"
-+
-+#
-+# Architecture Features
-+#
-+CONFIG_NR_CPUS=512
-+CONFIG_PV_LINEAR_PT=y
-+CONFIG_SHADOW_PAGING=y
-+# CONFIG_BIGMEM is not set
-+CONFIG_HVM_FEP=y
-+
-+#
-+# Common Features
-+#
-+CONFIG_COMPAT=y
-+CONFIG_CORE_PARKING=y
-+CONFIG_HAS_MEM_ACCESS=y
-+CONFIG_HAS_MEM_PAGING=y
-+CONFIG_HAS_MEM_SHARING=y
-+CONFIG_HAS_PDX=y
-+CONFIG_HAS_KEXEC=y
-+CONFIG_HAS_GDBSX=y
-+CONFIG_HAS_IOPORTS=y
-+CONFIG_KEXEC=y
-+# CONFIG_LATE_HWDOM is not set
-+# CONFIG_TMEM is not set
-+CONFIG_XENOPROF=y
-+CONFIG_XSM=y
-+# CONFIG_XSM_FLASK is not set
-+CONFIG_XSM_SILO=y
-+
-+#
-+# Schedulers
-+#
-+CONFIG_SCHED_CREDIT=y
-+CONFIG_SCHED_CREDIT2=y
-+CONFIG_SCHED_RTDS=y
-+CONFIG_SCHED_ARINC653=y
-+CONFIG_SCHED_CREDIT_DEFAULT=y
-+# CONFIG_SCHED_CREDIT2_DEFAULT is not set
-+# CONFIG_SCHED_RTDS_DEFAULT is not set
-+# CONFIG_SCHED_ARINC653_DEFAULT is not set
-+CONFIG_SCHED_DEFAULT="credit"
-+# CONFIG_LIVEPATCH is not set
-+
-+#
-+# Device Drivers
-+#
-+CONFIG_ACPI=y
-+CONFIG_ACPI_LEGACY_TABLES_LOOKUP=y
-+CONFIG_NUMA=y
-+CONFIG_HAS_NS16550=y
-+CONFIG_HAS_EHCI=y
-+CONFIG_HAS_CPUFREQ=y
-+CONFIG_HAS_PASSTHROUGH=y
-+CONFIG_HAS_PCI=y
-+CONFIG_VIDEO=y
-+CONFIG_VGA=y
-+CONFIG_DEFCONFIG_LIST="$ARCH_DEFCONFIG"
-+
-+#
-+# Debugging Options
-+#
-+CONFIG_DEBUG=y
-+# CONFIG_CRASH_DEBUG is not set
-+CONFIG_FRAME_POINTER=y
-+CONFIG_GCOV=y
-+CONFIG_GCOV_FORMAT_AUTODETECT=y
-+# CONFIG_GCOV_FORMAT_5 is not set
-+# CONFIG_GCOV_FORMAT_4_9 is not set
-+# CONFIG_GCOV_FORMAT_4_7 is not set
-+# CONFIG_GCOV_FORMAT_3_4 is not set
-+# CONFIG_PERF_COUNTERS is not set
-+CONFIG_VERBOSE_DEBUG=y
 diff --git a/buildconfigs/config-debug b/buildconfigs/config-debug
 new file mode 100644
-index 0000000..a0881ad
+index 0000000..44c730d
 --- /dev/null
 +++ b/buildconfigs/config-debug
-@@ -0,0 +1,75 @@
+@@ -0,0 +1,91 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Xen/x86 4.7.5 Configuration
++# Xen/x86 4.11.1 Configuration
 +#
 +CONFIG_X86_64=y
 +CONFIG_X86=y
@@ -131,30 +53,37 @@ index 0000000..a0881ad
 +# Architecture Features
 +#
 +CONFIG_NR_CPUS=512
++CONFIG_PV=y
 +CONFIG_PV_LINEAR_PT=y
++CONFIG_HVM=y
 +CONFIG_SHADOW_PAGING=y
 +# CONFIG_BIGMEM is not set
 +CONFIG_HVM_FEP=y
++CONFIG_TBOOT=y
++# CONFIG_XEN_GUEST is not set
 +
 +#
 +# Common Features
 +#
 +CONFIG_COMPAT=y
 +CONFIG_CORE_PARKING=y
++CONFIG_HAS_ALTERNATIVE=y
++CONFIG_HAS_EX_TABLE=y
 +CONFIG_HAS_MEM_ACCESS=y
 +CONFIG_HAS_MEM_PAGING=y
 +CONFIG_HAS_MEM_SHARING=y
 +CONFIG_HAS_PDX=y
++CONFIG_HAS_UBSAN=y
 +CONFIG_HAS_KEXEC=y
 +CONFIG_HAS_GDBSX=y
 +CONFIG_HAS_IOPORTS=y
 +CONFIG_KEXEC=y
-+# CONFIG_LATE_HWDOM is not set
 +# CONFIG_TMEM is not set
 +CONFIG_XENOPROF=y
 +CONFIG_XSM=y
 +# CONFIG_XSM_FLASK is not set
 +CONFIG_XSM_SILO=y
++# CONFIG_LATE_HWDOM is not set
 +
 +#
 +# Schedulers
@@ -163,13 +92,17 @@ index 0000000..a0881ad
 +CONFIG_SCHED_CREDIT2=y
 +CONFIG_SCHED_RTDS=y
 +CONFIG_SCHED_ARINC653=y
++CONFIG_SCHED_NULL=y
 +CONFIG_SCHED_CREDIT_DEFAULT=y
 +# CONFIG_SCHED_CREDIT2_DEFAULT is not set
 +# CONFIG_SCHED_RTDS_DEFAULT is not set
 +# CONFIG_SCHED_ARINC653_DEFAULT is not set
++# CONFIG_SCHED_NULL_DEFAULT is not set
 +CONFIG_SCHED_DEFAULT="credit"
++CONFIG_CRYPTO=y
 +CONFIG_LIVEPATCH=y
 +CONFIG_FAST_SYMBOL_LOOKUP=y
++CONFIG_CMDLINE=""
 +
 +#
 +# Device Drivers
@@ -184,7 +117,9 @@ index 0000000..a0881ad
 +CONFIG_HAS_PCI=y
 +CONFIG_VIDEO=y
 +CONFIG_VGA=y
++CONFIG_HAS_VPCI=y
 +CONFIG_DEFCONFIG_LIST="$ARCH_DEFCONFIG"
++CONFIG_ARCH_SUPPORTS_INT128=y
 +
 +#
 +# Debugging Options
@@ -192,17 +127,20 @@ index 0000000..a0881ad
 +CONFIG_DEBUG=y
 +# CONFIG_CRASH_DEBUG is not set
 +CONFIG_FRAME_POINTER=y
++# CONFIG_LOCK_PROFILE is not set
 +# CONFIG_PERF_COUNTERS is not set
 +CONFIG_VERBOSE_DEBUG=y
++CONFIG_SCRUB_DEBUG=y
++# CONFIG_UBSAN is not set
 diff --git a/buildconfigs/config-release b/buildconfigs/config-release
 new file mode 100644
-index 0000000..79f9d50
+index 0000000..6edfbd9
 --- /dev/null
 +++ b/buildconfigs/config-release
-@@ -0,0 +1,75 @@
+@@ -0,0 +1,91 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Xen/x86 4.7.5 Configuration
++# Xen/x86 4.11.1 Configuration
 +#
 +CONFIG_X86_64=y
 +CONFIG_X86=y
@@ -212,30 +150,37 @@ index 0000000..79f9d50
 +# Architecture Features
 +#
 +CONFIG_NR_CPUS=512
++CONFIG_PV=y
 +CONFIG_PV_LINEAR_PT=y
++CONFIG_HVM=y
 +CONFIG_SHADOW_PAGING=y
 +# CONFIG_BIGMEM is not set
 +CONFIG_HVM_FEP=y
++CONFIG_TBOOT=y
++# CONFIG_XEN_GUEST is not set
 +
 +#
 +# Common Features
 +#
 +CONFIG_COMPAT=y
 +CONFIG_CORE_PARKING=y
++CONFIG_HAS_ALTERNATIVE=y
++CONFIG_HAS_EX_TABLE=y
 +CONFIG_HAS_MEM_ACCESS=y
 +CONFIG_HAS_MEM_PAGING=y
 +CONFIG_HAS_MEM_SHARING=y
 +CONFIG_HAS_PDX=y
++CONFIG_HAS_UBSAN=y
 +CONFIG_HAS_KEXEC=y
 +CONFIG_HAS_GDBSX=y
 +CONFIG_HAS_IOPORTS=y
 +CONFIG_KEXEC=y
-+# CONFIG_LATE_HWDOM is not set
 +# CONFIG_TMEM is not set
 +CONFIG_XENOPROF=y
 +CONFIG_XSM=y
 +# CONFIG_XSM_FLASK is not set
 +CONFIG_XSM_SILO=y
++# CONFIG_LATE_HWDOM is not set
 +
 +#
 +# Schedulers
@@ -244,13 +189,17 @@ index 0000000..79f9d50
 +CONFIG_SCHED_CREDIT2=y
 +CONFIG_SCHED_RTDS=y
 +CONFIG_SCHED_ARINC653=y
++CONFIG_SCHED_NULL=y
 +CONFIG_SCHED_CREDIT_DEFAULT=y
 +# CONFIG_SCHED_CREDIT2_DEFAULT is not set
 +# CONFIG_SCHED_RTDS_DEFAULT is not set
 +# CONFIG_SCHED_ARINC653_DEFAULT is not set
++# CONFIG_SCHED_NULL_DEFAULT is not set
 +CONFIG_SCHED_DEFAULT="credit"
++CONFIG_CRYPTO=y
 +CONFIG_LIVEPATCH=y
 +CONFIG_FAST_SYMBOL_LOOKUP=y
++CONFIG_CMDLINE=""
 +
 +#
 +# Device Drivers
@@ -265,7 +214,9 @@ index 0000000..79f9d50
 +CONFIG_HAS_PCI=y
 +CONFIG_VIDEO=y
 +CONFIG_VGA=y
++CONFIG_HAS_VPCI=y
 +CONFIG_DEFCONFIG_LIST="$ARCH_DEFCONFIG"
++CONFIG_ARCH_SUPPORTS_INT128=y
 +
 +#
 +# Debugging Options
@@ -273,11 +224,14 @@ index 0000000..79f9d50
 +# CONFIG_DEBUG is not set
 +# CONFIG_CRASH_DEBUG is not set
 +# CONFIG_FRAME_POINTER is not set
++# CONFIG_LOCK_PROFILE is not set
 +# CONFIG_PERF_COUNTERS is not set
 +# CONFIG_VERBOSE_DEBUG is not set
++# CONFIG_SCRUB_DEBUG is not set
++# CONFIG_UBSAN is not set
 diff --git a/config/Docs.mk b/config/Docs.mk
 new file mode 100644
-index 0000000..b1a32cb
+index 0000000..a52db5c
 --- /dev/null
 +++ b/config/Docs.mk
 @@ -0,0 +1,10 @@
@@ -288,15 +242,15 @@ index 0000000..b1a32cb
 +POD2MAN             := /usr/bin/pod2man
 +POD2HTML            := /usr/bin/pod2html
 +POD2TEXT            := /usr/bin/pod2text
-+MARKDOWN            := 
-+PANDOC              := 
++MARKDOWN            := /usr/bin/markdown_py
++PANDOC              := /usr/bin/pandoc
 +PERL                := /usr/bin/perl
 diff --git a/config/Paths.mk b/config/Paths.mk
 new file mode 100644
-index 0000000..1952bb0
+index 0000000..4a1c36e
 --- /dev/null
 +++ b/config/Paths.mk
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,61 @@
 +# Xen system configuration
 +# ========================
 +#
@@ -339,7 +293,9 @@ index 0000000..1952bb0
 +
 +XEN_RUN_DIR              := /var/run/xen
 +XEN_LOG_DIR              := /var/log/xen
++XEN_LIB_DIR              := /var/lib/xen
 +XEN_LIB_STORED           := /var/lib/xenstored
++XEN_RUN_STORED           := /var/run/xenstored
 +
 +CONFIG_DIR               := /etc
 +INITD_DIR                := /etc/rc.d/init.d
@@ -348,11 +304,14 @@ index 0000000..1952bb0
 +XEN_LOCK_DIR             := /var/lock
 +XEN_PAGING_DIR           := /var/lib/xen/xenpaging
 +XEN_DUMP_DIR             := /var/lib/xen/dump
++DEBUG_DIR                := /usr/lib/debug
 +
 +XENFIRMWAREDIR           := /usr/libexec/xen/boot
 +
 +XEN_CONFIG_DIR           := /etc/xen
 +XEN_SCRIPT_DIR           := /etc/xen/scripts
++
++PKG_INSTALLDIR           := ${SHAREDIR}/pkgconfig
 diff --git a/config/Stubdom.mk b/config/Stubdom.mk
 new file mode 100644
 index 0000000..a8bb1d3
@@ -406,10 +365,10 @@ index 0000000..a8bb1d3
 +TPMEMU_URL          := $(XEN_EXTFILES_URL)
 diff --git a/config/Tools.mk b/config/Tools.mk
 new file mode 100644
-index 0000000..130672b
+index 0000000..276caba
 --- /dev/null
 +++ b/config/Tools.mk
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,77 @@
 +-include $(XEN_ROOT)/config/Paths.mk
 +
 +CONFIG_RUMP         := n
@@ -424,8 +383,6 @@ index 0000000..130672b
 +PYTHON_PATH         := /usr/bin/python
 +PY_NOOPT_CFLAGS     := -O1
 +PERL                := /usr/bin/perl
-+CURL_CONFIG         := 
-+XML2_CONFIG         := 
 +BASH                := /bin/sh
 +XGETTTEXT           := /usr/bin/xgettext
 +AS86                := /usr/bin/as86
@@ -434,8 +391,6 @@ index 0000000..130672b
 +IASL                := /usr/bin/iasl
 +AWK                 := /usr/bin/awk
 +FETCHER             := /bin/false -c -O
-+SEABIOS_PATH        := 
-+OVMF_PATH           := 
 +
 +# Extra folder for libs/includes
 +PREPEND_INCLUDES    := 
@@ -466,6 +421,7 @@ index 0000000..130672b
 +CONFIG_OVMF         := n
 +CONFIG_ROMBIOS      := y
 +CONFIG_SEABIOS      := n
++CONFIG_IPXE         := n
 +CONFIG_QEMU_TRAD    := y
 +CONFIG_QEMU_XEN     := n
 +CONFIG_BLKTAP2      := n
@@ -483,7 +439,7 @@ index 0000000..130672b
 +#System options
 +ZLIB                :=  -DHAVE_BZLIB -lbz2 -DHAVE_LZMA -llzma -DHAVE_LZO1X -llzo2
 +CONFIG_LIBICONV     := n
-+CONFIG_GCRYPT       := y
++CONFIG_GCRYPT       := n
 +EXTFS_LIBS          := -lext2fs
 +CURSES_LIBS         := -lncurses
 +TINFO_LIBS          := -ltinfo
@@ -500,10 +456,10 @@ index 0000000..ac13a6f
 +GIT_HTTP                 := n
 diff --git a/tools/config.h b/tools/config.h
 new file mode 100644
-index 0000000..4351c9b
+index 0000000..91d157e
 --- /dev/null
 +++ b/tools/config.h
-@@ -0,0 +1,136 @@
+@@ -0,0 +1,145 @@
 +/* config.h.  Generated from config.h.in by configure.  */
 +/* config.h.in.  Generated from configure.ac by autoheader.  */
 +
@@ -537,11 +493,11 @@ index 0000000..4351c9b
 +/* Define to 1 if you have the `aio' library (-laio). */
 +/* #undef HAVE_LIBAIO */
 +
-+/* Define to 1 if you have the `crypto' library (-lcrypto). */
-+#define HAVE_LIBCRYPTO 1
-+
 +/* Define to 1 if you have the `fdt' library (-lfdt). */
 +/* #undef HAVE_LIBFDT */
++
++/* Define to 1 if you have the `lzma' library (-llzma). */
++#define HAVE_LIBLZMA 1
 +
 +/* Define to 1 if you have the `yajl' library (-lyajl). */
 +#define HAVE_LIBYAJL 1
@@ -606,6 +562,12 @@ index 0000000..4351c9b
 +/* libutil header file name */
 +/* #undef INCLUDE_LIBUTIL_H */
 +
++/* IPXE path */
++#define IPXE_PATH "/usr/share/ipxe/ipxe.bin"
++
++/* OVMF path */
++#define OVMF_PATH "/usr/share/edk2/OVMF.fd"
++
 +/* Define to the address where bug reports for this package should be sent. */
 +#define PACKAGE_BUGREPORT "xen-devel@lists.xen.org"
 +
@@ -613,7 +575,7 @@ index 0000000..4351c9b
 +#define PACKAGE_NAME "Xen Hypervisor Tools"
 +
 +/* Define to the full name and version of this package. */
-+#define PACKAGE_STRING "Xen Hypervisor Tools 4.7"
++#define PACKAGE_STRING "Xen Hypervisor Tools 4.11"
 +
 +/* Define to the one symbol short name of this package. */
 +#define PACKAGE_TARNAME "xen"
@@ -622,10 +584,13 @@ index 0000000..4351c9b
 +#define PACKAGE_URL "http://www.xen.org/"
 +
 +/* Define to the version of this package. */
-+#define PACKAGE_VERSION "4.7"
++#define PACKAGE_VERSION "4.11"
 +
 +/* Qemu Xen path */
 +#define QEMU_XEN_PATH "/usr/lib64/xen/bin/qemu-system-i386"
++
++/* SeaBIOS path */
++/* #undef SEABIOS_PATH */
 +
 +/* Define to 1 if you have the ANSI C header files. */
 +#define STDC_HEADERS 1
@@ -640,10 +605,10 @@ index 0000000..4351c9b
 +
 +/* Define for large files, on AIX-style hosts. */
 +/* #undef _LARGE_FILES */
-diff --git a/tools/ocaml/xenstored/oxenstored.conf b/tools/ocaml/xenstored/oxenstored.conf
-index dd9649b..da40df6 100644
---- a/tools/ocaml/xenstored/oxenstored.conf
-+++ b/tools/ocaml/xenstored/oxenstored.conf
+diff --git a/tools/ocaml/xenstored/oxenstored.conf.in b/tools/ocaml/xenstored/oxenstored.conf.in
+index 6579b84..3013b69 100644
+--- a/tools/ocaml/xenstored/oxenstored.conf.in
++++ b/tools/ocaml/xenstored/oxenstored.conf.in
 @@ -46,9 +46,9 @@ perms-activate = true
  
  # Activate quota
@@ -657,13 +622,13 @@ index dd9649b..da40df6 100644
  quota-maxrequests = 1024
  
 @@ -59,12 +59,14 @@ persistent = false
- # xenstored-log-file = /var/log/xenstored.log
+ # xenstored-log-file = @XEN_LOG_DIR@/xenstored.log
  # xenstored-log-level = null
  # xenstored-log-nb-files = 10
 +xenstored-log-file = syslog:daemon
  
  # Xenstored access logs
- # access-log-file = /var/log/xenstored-access.log
+ # access-log-file = @XEN_LOG_DIR@/xenstored-access.log
  # access-log-nb-lines = 13215
  # acesss-log-nb-chars = 180
  # access-log-special-ops = false

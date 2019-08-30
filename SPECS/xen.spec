@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.11.1
-Release: 7.5%{?dist}
+Release: 7.5.1%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -1049,6 +1049,13 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+* Fri Aug 30 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.1
+- Fix a possible memory corruption when forcibly shutting down a VM with AMD MxGPU attached
+- Fix a possible host crash when forcibly shutting a Windows VMs that is in an unclean state
+- After a live migration, a Windows VM could hang for more than a minute
+- Windows VMs with the viridian_reference_tsc flag enabled could crash during migration
+- Patches imported from XS 8.0 hotfix XS80E004
+
 * Thu May 16 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.3
 - Security update
 - Fix XSA-297

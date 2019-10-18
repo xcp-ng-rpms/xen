@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.11.1
-Release: 7.5.1%{?dist}
+Release: 7.5.2%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -1049,6 +1049,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+* Fri Oct 18 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.2
+- Make max_grant_frames and max_maptrack_frames configurable
+- Default value of max_grant_frames is not sufficient in some cases
+- VM params platform/max_grant_frames and max_maptrack_frames are now used
+- Refs https://github.com/xcp-ng/xcp/issues/289
+
 * Fri Aug 30 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.1
 - Fix a possible memory corruption when forcibly shutting down a VM with AMD MxGPU attached
 - Fix a possible host crash when forcibly shutting a Windows VMs that is in an unclean state

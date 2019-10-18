@@ -1071,7 +1071,7 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 * Mon Apr 29 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.2
 - Update for XCP-ng 8.0
 
-* Tue Mar 07 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.4.1
+* Thu Mar 07 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.4.1
 - Security update
 - Fix XSA-283, XSA-284, XSA-285, XSA-287, XSA-288, XSA-290, XSA-292, XSA-293 and XSA-294
 - See http://xenbits.xen.org/xsa/

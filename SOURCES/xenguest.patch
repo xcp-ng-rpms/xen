@@ -796,7 +796,7 @@ new file mode 100644
 index 0000000..811b315
 --- /dev/null
 +++ b/tools/xenguest/xenguest_stubs.c
-@@ -0,0 +1,1469 @@
+@@ -0,0 +1,1489 @@
 +/*
 + * Copyright (C) 2006-2009 Citrix Systems Inc.
 + *
@@ -894,6 +894,8 @@ index 0000000..811b315
 +    unsigned cores_per_socket;
 +    unsigned x87_fip_width;
 +    int64_t timeoffset;
++    uint32_t max_grant_frames;
++    uint32_t max_maptrack_frames;
 +};
 +
 +char *xenstore_getsv(const char *fmt, va_list ap)
@@ -1225,6 +1227,21 @@ index 0000000..811b315
 +        free(tmp);
 +    }
 +
++    f->max_grant_frames = 64;
++    if ((tmp = xenstore_gets("platform/max_grant_frames")))
++    {
++        sscanf(tmp, "%" PRIu32, &f->max_grant_frames);
++        free(tmp);
++    }
++    f->max_maptrack_frames = 1024;
++    if ((tmp = xenstore_gets("platform/max_maptrack_frames")))
++    {
++        sscanf(tmp, "%" PRIu32, &f->max_maptrack_frames);
++        free(tmp);
++    }
++    xg_info("max_grant_frames %" PRIu32", max_maptrack_frames %" PRIu32 "\n",
++            f->max_grant_frames, f->max_maptrack_frames);
++
 +    xg_info("Domain Properties: Type %s, hap %u\n",
 +            f->dominfo.hvm ? "HVM" : "PV", f->dominfo.hap);
 +
@@ -1380,7 +1397,8 @@ index 0000000..811b315
 +    struct flags f = {};
 +    get_flags(&f);
 +
-+    if ( xc_domain_set_gnttab_limits(xch, domid, 32, 1024) )
++    if (xc_domain_set_gnttab_limits(xch, domid, f.max_grant_frames,
++                                     f.max_maptrack_frames))
 +        failwith_oss_xc("xc_domain_set_gnttab_limits");
 +
 +    dom = xc_dom_allocate(xch, cmdline, features);
@@ -1980,7 +1998,8 @@ index 0000000..811b315
 +
 +    hvm_safety_check(&f, mem_start_mib < mem_max_mib);
 +
-+    r = xc_domain_set_gnttab_limits(xch, domid, 32, 1024);
++    r = xc_domain_set_gnttab_limits(xch, domid, f.max_grant_frames,
++                                    f.max_maptrack_frames);
 +    if ( r )
 +        failwith_oss_xc("xc_domain_set_gnttab_limits");
 +
@@ -2190,7 +2209,8 @@ index 0000000..811b315
 +
 +    get_flags(&f);
 +
-+    r = xc_domain_set_gnttab_limits(xch, domid, 32, 1024);
++    r = xc_domain_set_gnttab_limits(xch, domid, f.max_grant_frames,
++                                    f.max_maptrack_frames);
 +    if ( r )
 +        failwith_oss_xc("xc_domain_set_gnttab_limits");
 +

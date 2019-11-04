@@ -28,11 +28,11 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.7.6
-Release: 6.6
+Release: 6.7
 License: Portions GPLv2 (See COPYING)
 URL:     http://www.xenproject.org
 
-Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz
+Source0: xen.tar.gz
 Source1: SOURCES/xen/sysconfig_kernel-xen
 Source2: SOURCES/xen/xl.conf
 Source3: SOURCES/xen/logrotate-xen-tools
@@ -464,8 +464,28 @@ Patch422: xsa297-4.7-4.patch
 Patch423: 0001-xen-Introduce-vcpu_sleep_nosync_locked.patch
 Patch424: 0002-xen-schedule-Fix-races-in-vcpu-migration.patch
 Patch425: backport-56ad626532eb.patch
+Patch426: backport-63d71138a4d3.patch
+Patch427: 0001-IOMMU-add-missing-HVM-check.patch
+Patch428: 0002-passthrough-quarantine-PCI-devices.patch
+Patch429: xsa296-4.8.patch
+Patch430: xsa298-4.9.patch
+Patch431: xsa299-4.80001-x86-mm-Clean-up-trailing-whitespace.patch
+Patch432: xsa299-4.80002-x86-mm-L1TF-checks-don-t-leave-a-partial-entry.patch
+Patch433: xsa299-4.80003-x86-mm-Don-t-re-set-PGT_pinned-on-a-partially-de-val.patch
+Patch434: xsa299-4.80004-x86-mm-Separate-out-partial_pte-tristate-into-indivi.patch
+Patch435: xsa299-4.80005-x86-mm-Use-flags-for-_put_page_type-rather-than-a-bo.patch
+Patch436: xsa299-4.80006-x86-mm-Rework-get_page_and_type_from_mfn-conditional.patch
+Patch437: xsa299-4.80007-x86-mm-Have-alloc_l-23-_table-clear-partial_flags-wh.patch
+Patch438: xsa299-4.80008-x86-mm-Always-retain-a-general-ref-on-partial.patch
+Patch439: xsa299-4.80009-x86-mm-Collapse-PTF_partial_set-and-PTF_partial_gene.patch
+Patch440: xsa299-4.80010-x86-mm-Properly-handle-linear-pagetable-promotion-fa.patch
+Patch441: xsa299-4.80011-x86-mm-Fix-nested-de-validation-on-error.patch
+Patch442: xsa299-4.80012-x86-mm-Don-t-drop-a-type-ref-unless-you-held-a-ref-t.patch
+Patch443: backport-b68c4f1ebe4f.patch
+Patch444: backport-b144cf45d50b.patch
 
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 
 #Patch0:  xen-development.patch
 
@@ -530,7 +550,8 @@ BuildRequires: gettext-devel glib2-devel curl-devel gnutls-devel
 Xen Hypervisor.
 
 %package hypervisor
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: The Xen Hypervisor
 License: Various (See description)
 Group: System/Hypervisor
@@ -543,14 +564,16 @@ Citrix, the Citrix logo, Xen, XenServer, and certain other marks appearing herei
 Portions of this package are © 2018 Citrix Systems, Inc. For other copyright and licensing information see the relevant source RPM.
 
 %package hypervisor-debuginfo
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: The Xen Hypervisor debug information
 Group: Development/Debug
 %description hypervisor-debuginfo
 This package contains the Xen Hypervisor debug information.
 
 %package tools
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor general tools
 Requires: xen-libs = %{version}
 Group: System/Base
@@ -558,21 +581,24 @@ Group: System/Base
 This package contains the Xen Hypervisor general tools for all domains.
 
 %package devel
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: The Xen Hypervisor public headers
 Group: Development/Libraries
 %description devel
 This package contains the Xen Hypervisor public header files.
 
 %package libs
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor general libraries
 Group: System/Libraries
 %description libs
 This package contains the Xen Hypervisor general libraries for all domains.
 
 %package libs-devel
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor general development libraries
 Requires: xen-libs = %{version}
 Requires: xen-devel = %{version}
@@ -581,7 +607,8 @@ Group: Development/Libraries
 This package contains the Xen Hypervisor general development for all domains.
 
 %package dom0-tools
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor Domain 0 tools
 Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
@@ -596,7 +623,8 @@ Group: System/Base
 This package contains the Xen Hypervisor control domain tools.
 
 %package dom0-libs
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor Domain 0 libraries
 Requires: xen-hypervisor = %{version}
 Group: System/Libraries
@@ -604,7 +632,8 @@ Group: System/Libraries
 This package contains the Xen Hypervisor control domain libraries.
 
 %package dom0-libs-devel
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor Domain 0 headers
 Requires: xen-devel = %{version}
 Requires: xen-dom0-libs = %{version}
@@ -616,7 +645,8 @@ Group: Development/Libraries
 This package contains the Xen Hypervisor control domain headers.
 
 %package ocaml-libs
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor ocaml libraries
 Requires: xen-dom0-libs = %{version}
 Group: System/Libraries
@@ -624,7 +654,8 @@ Group: System/Libraries
 This package contains the Xen Hypervisor ocaml libraries.
 
 %package ocaml-devel
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen Hypervisor ocaml headers
 Requires: xen-ocaml-libs = %{version}
 Requires: xen-dom0-libs-devel = %{version}
@@ -633,7 +664,8 @@ Group: Development/Libraries
 This package contains the Xen Hypervisor ocaml headers.
 
 %package installer-files
-Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.7.6&prefix=xen-4.7.6&format=tar.gz#/xen-4.7.6.tar.gz) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 280a5568939c4a5832be787c8e0c23a19f30935a
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 5e20287b6e37f61f3fb220d04ab0c5807a3314dd
 Summary: Xen files for the XenServer installer
 Group: System Environment/Base
 %description installer-files

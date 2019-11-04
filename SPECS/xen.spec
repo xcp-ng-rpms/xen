@@ -1078,6 +1078,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+* Mon Nov 04 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.6
+- Security update
+- Fix XSA-296, XSA-298, XSA-299, XSA-302
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Fri Oct 18 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.2
 - Make max_grant_frames and max_maptrack_frames configurable
 - Default value of max_grant_frames is not sufficient in some cases

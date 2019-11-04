@@ -1263,6 +1263,12 @@ fi
 %endif
 
 %changelog
+* Mon Nov 04 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.7
+- Security update
+- Fix XSA-296, XSA-298, XSA-299, XSA-302
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Fri Aug 30 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.6
 - Fix a memory corruption that can happen when forcibly shutting down a VM with AMD MxGPU attached
 - Patch imported from XS 7.6 hotfix XS76E007

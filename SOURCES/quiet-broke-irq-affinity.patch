@@ -10,10 +10,10 @@ Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 Suggested-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/xen/arch/x86/irq.c b/xen/arch/x86/irq.c
-index 57e6c18..42d7ac2 100644
+index d96cf43..6032184 100644
 --- a/xen/arch/x86/irq.c
 +++ b/xen/arch/x86/irq.c
-@@ -2328,7 +2328,7 @@ static int __init setup_dump_irqs(void)
+@@ -2451,7 +2451,7 @@ static int __init setup_dump_irqs(void)
  __initcall(setup_dump_irqs);
  
  /* Reset irq affinities to match the given CPU mask. */
@@ -22,7 +22,7 @@ index 57e6c18..42d7ac2 100644
  {
      unsigned int irq;
      static int warned;
-@@ -2381,7 +2381,8 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
+@@ -2555,7 +2555,8 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
  
          spin_unlock(&desc->lock);
  
@@ -31,12 +31,12 @@ index 57e6c18..42d7ac2 100644
 +             system_state == SYS_STATE_suspend )
              continue;
  
-         if ( break_affinity && set_affinity )
+         if ( !set_affinity )
 diff --git a/xen/arch/x86/shutdown.c b/xen/arch/x86/shutdown.c
-index f63b8a6..92bb75d 100644
+index 005c0bf..50621f7 100644
 --- a/xen/arch/x86/shutdown.c
 +++ b/xen/arch/x86/shutdown.c
-@@ -519,6 +519,7 @@ void machine_restart(unsigned int delay_millisecs)
+@@ -571,6 +571,7 @@ void machine_restart(unsigned int delay_millisecs)
  
      if ( system_state >= SYS_STATE_smp_boot )
      {
@@ -45,37 +45,37 @@ index f63b8a6..92bb75d 100644
  
          /* Ensure we are the boot CPU. */
 diff --git a/xen/arch/x86/smp.c b/xen/arch/x86/smp.c
-index fd6d254..4d12543 100644
+index 6fb39a0..aed1a2b 100644
 --- a/xen/arch/x86/smp.c
 +++ b/xen/arch/x86/smp.c
-@@ -303,7 +303,7 @@ void smp_send_stop(void)
-     int timeout = 10;
+@@ -309,7 +309,7 @@ void smp_send_stop(void)
+         int timeout = 10;
  
-     local_irq_disable();
--    fixup_irqs(cpumask_of(smp_processor_id()), 0);
-+    fixup_irqs(cpumask_of(smp_processor_id()));
-     local_irq_enable();
+         local_irq_disable();
+-        fixup_irqs(cpumask_of(cpu), 0);
++        fixup_irqs(cpumask_of(cpu));
+         local_irq_enable();
  
-     smp_call_function(stop_this_cpu, NULL, 0);
+         smp_call_function(stop_this_cpu, NULL, 0);
 diff --git a/xen/arch/x86/smpboot.c b/xen/arch/x86/smpboot.c
-index f375eb6..7a3a291 100644
+index 179f6b6..2d0fa2d 100644
 --- a/xen/arch/x86/smpboot.c
 +++ b/xen/arch/x86/smpboot.c
-@@ -897,7 +897,7 @@ void __cpu_disable(void)
+@@ -1215,7 +1215,7 @@ void __cpu_disable(void)
  
      /* It's now safe to remove this processor from the online map */
      cpumask_clear_cpu(cpu, &cpu_online_map);
 -    fixup_irqs(&cpu_online_map, 1);
 +    fixup_irqs(&cpu_online_map);
      fixup_eoi();
+ }
  
-     if ( cpu_disable_scheduler(cpu) )
 diff --git a/xen/include/asm-x86/irq.h b/xen/include/asm-x86/irq.h
-index 240c3e8..8bdcb38 100644
+index d3124f7..c41a685 100644
 --- a/xen/include/asm-x86/irq.h
 +++ b/xen/include/asm-x86/irq.h
-@@ -148,7 +148,7 @@ int unmap_domain_pirq_emuirq(struct domain *d, int pirq);
- bool hvm_domain_use_pirq(const struct domain *, const struct pirq *);
+@@ -153,7 +153,7 @@ int map_domain_emuirq_pirq(struct domain *d, int pirq, int irq);
+ int unmap_domain_pirq_emuirq(struct domain *d, int pirq);
  
  /* Reset irq affinities to match the given CPU mask. */
 -void fixup_irqs(const cpumask_t *mask, bool verbose);

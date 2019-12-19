@@ -28,15 +28,21 @@ XenServer changes to Xen command line default options.
 
 * Disallow PV linear pagetables by default.
 
-* Set SILO as default XSM module
+* Don't load ucode in the NMI context. There are still unresolved
+  concerns about the safety of keeping NMIs "disabled" during loading of
+  a new ucode: can this process reset the NMI latch or not? (needs
+  a confirmation from Intel). Additionally, loading a ucode with NMIs
+  enabled preserves the current behavior that we ship to customers.
+
+* XSA-304: fast by default, allow executable superpages.
 
 * Prefer ACPI reboot by default on EFI systems - Linux default
 
 diff --git a/xen/arch/x86/e820.c b/xen/arch/x86/e820.c
-index 590ea985ef..c442e507a6 100644
+index dbbe6ca..9ca82f2 100644
 --- a/xen/arch/x86/e820.c
 +++ b/xen/arch/x86/e820.c
-@@ -15,7 +15,7 @@
+@@ -16,7 +16,7 @@
   * opt_mem: Limit maximum address of physical RAM.
   *          Any RAM beyond this address limit is ignored.
   */
@@ -46,7 +52,7 @@ index 590ea985ef..c442e507a6 100644
  
  /*
 diff --git a/xen/arch/x86/hvm/vmx/vmcs.c b/xen/arch/x86/hvm/vmx/vmcs.c
-index 5de3e16777..bbd68da02c 100644
+index 477c968..db82ee2 100644
 --- a/xen/arch/x86/hvm/vmx/vmcs.c
 +++ b/xen/arch/x86/hvm/vmx/vmcs.c
 @@ -48,7 +48,7 @@ boolean_param("vpid", opt_vpid_enabled);
@@ -58,11 +64,33 @@ index 5de3e16777..bbd68da02c 100644
  boolean_param("apicv", opt_apicv_enabled);
  
  /*
+@@ -67,7 +67,7 @@ integer_param("ple_window", ple_window);
+ 
+ static bool __read_mostly opt_ept_pml = true;
+ static s8 __read_mostly opt_ept_ad = -1;
+-int8_t __read_mostly opt_ept_exec_sp = -1;
++int8_t __read_mostly opt_ept_exec_sp = 1; /* Default to fast. */
+ 
+ static int __init parse_ept_param(const char *s)
+ {
+diff --git a/xen/arch/x86/microcode.c b/xen/arch/x86/microcode.c
+index 5e62a48..d779762 100644
+--- a/xen/arch/x86/microcode.c
++++ b/xen/arch/x86/microcode.c
+@@ -104,7 +104,7 @@ static struct ucode_mod_blob __initdata ucode_blob;
+ static bool_t __initdata ucode_scan;
+ 
+ /* By default, ucode loading is done in NMI handler */
+-static bool ucode_in_nmi = true;
++static bool ucode_in_nmi = false;
+ 
+ /* Protected by microcode_mutex */
+ static struct microcode_patch *microcode_cache;
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
-index ad285b6fea..b3572b826d 100644
+index 4b50f09..13c5c34 100644
 --- a/xen/arch/x86/mm.c
 +++ b/xen/arch/x86/mm.c
-@@ -188,7 +188,7 @@ static uint32_t base_disallow_mask;
+@@ -187,7 +187,7 @@ static uint32_t base_disallow_mask;
        is_pv_domain(d)) ?                                        \
       L1_DISALLOW_MASK : (L1_DISALLOW_MASK & ~PAGE_CACHE_ATTRS))
  
@@ -71,7 +99,7 @@ index ad285b6fea..b3572b826d 100644
  
  static int __init parse_mmio_relax(const char *s)
  {
-@@ -708,7 +708,7 @@ static void dec_linear_uses(struct page_info *pg)
+@@ -675,7 +675,7 @@ static void dec_linear_uses(struct page_info *pg)
   *     frame if it is mapped by a different root table. This is sufficient and
   *     also necessary to allow validation of a root table mapping itself.
   */
@@ -81,7 +109,7 @@ index ad285b6fea..b3572b826d 100644
  
  #define define_get_linear_pagetable(level)                                  \
 diff --git a/xen/arch/x86/nmi.c b/xen/arch/x86/nmi.c
-index e26121a737..3bf2bbf66f 100644
+index e26121a..3bf2bbf 100644
 --- a/xen/arch/x86/nmi.c
 +++ b/xen/arch/x86/nmi.c
 @@ -45,7 +45,7 @@ static DEFINE_PER_CPU(unsigned int, nmi_timer_ticks);
@@ -94,7 +122,7 @@ index e26121a737..3bf2bbf66f 100644
  static int __init parse_watchdog(const char *s)
  {
 diff --git a/xen/arch/x86/shutdown.c b/xen/arch/x86/shutdown.c
-index b32a22786c..0a2067947a 100644
+index 1e55513..e4a9ef0 100644
 --- a/xen/arch/x86/shutdown.c
 +++ b/xen/arch/x86/shutdown.c
 @@ -150,7 +150,7 @@ static void default_reboot_type(void)
@@ -107,10 +135,10 @@ index b32a22786c..0a2067947a 100644
          reboot_type = BOOT_KBD;
      else
 diff --git a/xen/arch/x86/time.c b/xen/arch/x86/time.c
-index df504ecbd1..4896f65bae 100644
+index b1dea37..c3c6135 100644
 --- a/xen/arch/x86/time.c
 +++ b/xen/arch/x86/time.c
-@@ -900,7 +900,7 @@ static unsigned long get_cmos_time(void)
+@@ -903,7 +903,7 @@ static unsigned long get_cmos_time(void)
      unsigned long flags;
      struct rtc_time rtc;
      unsigned int seconds = 60;
@@ -120,7 +148,7 @@ index df504ecbd1..4896f65bae 100644
  
      if ( likely(!(acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC)) )
 diff --git a/xen/arch/x86/traps.c b/xen/arch/x86/traps.c
-index ddff346a2f..91e21d249b 100644
+index 8705ec8..6122c92 100644
 --- a/xen/arch/x86/traps.c
 +++ b/xen/arch/x86/traps.c
 @@ -86,11 +86,7 @@
@@ -136,7 +164,7 @@ index ddff346a2f..91e21d249b 100644
  
  DEFINE_PER_CPU(uint64_t, efer);
 diff --git a/xen/common/domain.c b/xen/common/domain.c
-index df7cd5be85..0c1b700522 100644
+index 611116c..70502dd 100644
 --- a/xen/common/domain.c
 +++ b/xen/common/domain.c
 @@ -247,7 +247,7 @@ static int late_hwdom_init(struct domain *d)
@@ -149,10 +177,10 @@ index df7cd5be85..0c1b700522 100644
  static int __init parse_extra_guest_irqs(const char *s)
  {
 diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
-index 98531afae5..05b1cc4660 100644
+index b8e3a11..bd647ab 100644
 --- a/xen/common/efi/boot.c
 +++ b/xen/common/efi/boot.c
-@@ -1308,7 +1308,7 @@ efi_start(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+@@ -1411,7 +1411,7 @@ efi_start(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
  
  #include <asm/spec_ctrl.h>
  
@@ -162,11 +190,11 @@ index 98531afae5..05b1cc4660 100644
  static int __init parse_efi_param(const char *s)
  {
 diff --git a/xen/drivers/char/console.c b/xen/drivers/char/console.c
-index c8cef2e274..bb303999d1 100644
+index b4413ec..e0bc187 100644
 --- a/xen/drivers/char/console.c
 +++ b/xen/drivers/char/console.c
-@@ -71,16 +71,16 @@ enum con_timestamp_mode
-     TSM_BOOT           /* [SSSSSS.uuuuuu] */
+@@ -76,16 +76,16 @@ enum con_timestamp_mode
+     TSM_RAW,           /* [XXXXXXXXXXXXXXXX] */
  };
  
 -static enum con_timestamp_mode __read_mostly opt_con_timestamp_mode = TSM_NONE;
@@ -185,16 +213,3 @@ index c8cef2e274..bb303999d1 100644
  #define CONRING_IDX_MASK(i) ((i)&(conring_size-1))
  static char __initdata _conring[_CONRING_SIZE];
  static char *__read_mostly conring = _conring;
-diff --git a/xen/xsm/xsm_core.c b/xen/xsm/xsm_core.c
-index 58409eb0c7..509ba29310 100644
---- a/xen/xsm/xsm_core.c
-+++ b/xen/xsm/xsm_core.c
-@@ -37,7 +37,7 @@ enum xsm_bootparam {
-     XSM_BOOTPARAM_SILO,
- };
- 
--static enum xsm_bootparam __initdata xsm_bootparam = XSM_BOOTPARAM_DUMMY;
-+static enum xsm_bootparam __initdata xsm_bootparam = XSM_BOOTPARAM_SILO;
- 
- static int __init parse_xsm_param(const char *s)
- {

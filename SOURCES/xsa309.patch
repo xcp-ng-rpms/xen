@@ -34,12 +34,8 @@ This is XSA-309.
 
 Signed-off-by: George Dunlap <george.dunlap@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
----
- xen/arch/x86/mm.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
-index 7d4dd80a85..01393fb0da 100644
+index 792567bb0d..e32998a296 100644
 --- a/xen/arch/x86/mm.c
 +++ b/xen/arch/x86/mm.c
 @@ -3059,8 +3059,8 @@ static int _get_page_type(struct page_info *page, unsigned long type,
@@ -52,6 +48,3 @@ index 7d4dd80a85..01393fb0da 100644
          rc = alloc_page_type(page, type, preemptible);
      }
  
--- 
-2.24.0
-

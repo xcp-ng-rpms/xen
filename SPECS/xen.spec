@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.0
-Release: 8.5%{?dist}
+Release: 8.5.1%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -932,6 +932,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+* Fri Jun 12 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.5.1
+- Update for new microcode related to SRBDS Intel issues
+- Related to XSA-320
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Tue Apr 14 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.4
 - Security update
 - Related to XSA-307, XSA-313, XSA-316, XSA-318

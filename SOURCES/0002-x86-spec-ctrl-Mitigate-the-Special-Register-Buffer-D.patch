@@ -12,10 +12,10 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/docs/misc/xen-command-line.pandoc b/docs/misc/xen-command-line.pandoc
-index da0b52d716..bf4eee030c 100644
+index 7a25f40..25d4412 100644
 --- a/docs/misc/xen-command-line.pandoc
 +++ b/docs/misc/xen-command-line.pandoc
-@@ -1968,7 +1968,7 @@ By default SSBD will be mitigated at runtime (i.e `ssbd=runtime`).
+@@ -1991,7 +1991,7 @@ By default SSBD will be mitigated at runtime (i.e `ssbd=runtime`).
  ### spec-ctrl (x86)
  > `= List of [ <bool>, xen=<bool>, {pv,hvm,msr-sc,rsb,md-clear}=<bool>,
  >              bti-thunk=retpoline|lfence|jmp, {ibrs,ibpb,ssbd,eager-fpu,
@@ -24,7 +24,7 @@ index da0b52d716..bf4eee030c 100644
  
  Controls for speculative execution sidechannel mitigations.  By default, Xen
  will pick the most appropriate mitigations based on compiled in support,
-@@ -2045,6 +2045,12 @@ If Xen is compiled with `CONFIG_SPECULATIVE_HARDEN_BRANCH`, the
+@@ -2068,6 +2068,12 @@ If Xen is compiled with `CONFIG_SPECULATIVE_HARDEN_BRANCH`, the
  speculation barriers to protect selected conditional branches.  By default,
  Xen will enable this mitigation.
  
@@ -38,7 +38,7 @@ index da0b52d716..bf4eee030c 100644
  > `= <boolean>`
  
 diff --git a/xen/arch/x86/acpi/power.c b/xen/arch/x86/acpi/power.c
-index feb0f6ce20..75c6e34164 100644
+index 98f5bab..0a7fd4f 100644
 --- a/xen/arch/x86/acpi/power.c
 +++ b/xen/arch/x86/acpi/power.c
 @@ -295,6 +295,9 @@ static int enter_state(u32 state)
@@ -52,7 +52,7 @@ index feb0f6ce20..75c6e34164 100644
      spin_debug_enable();
      local_irq_restore(flags);
 diff --git a/xen/arch/x86/smpboot.c b/xen/arch/x86/smpboot.c
-index ae5c7317da..6a645d6576 100644
+index dc593db..9a737c3 100644
 --- a/xen/arch/x86/smpboot.c
 +++ b/xen/arch/x86/smpboot.c
 @@ -361,12 +361,14 @@ void start_secondary(void *unused)
@@ -74,10 +74,10 @@ index ae5c7317da..6a645d6576 100644
      tsx_init(); /* Needs microcode.  May change HLE/RTM feature bits. */
  
 diff --git a/xen/arch/x86/spec_ctrl.c b/xen/arch/x86/spec_ctrl.c
-index 2d63de75bb..0b3058cd65 100644
+index 5fc1c68..3334306 100644
 --- a/xen/arch/x86/spec_ctrl.c
 +++ b/xen/arch/x86/spec_ctrl.c
-@@ -70,6 +70,9 @@ static unsigned int __initdata l1d_maxphysaddr;
+@@ -65,6 +65,9 @@ static unsigned int __initdata l1d_maxphysaddr;
  static bool __initdata cpu_has_bug_msbds_only; /* => minimal HT impact. */
  static bool __initdata cpu_has_bug_mds; /* Any other M{LP,SB,FB}DS combination. */
  
@@ -87,15 +87,15 @@ index 2d63de75bb..0b3058cd65 100644
  static int __init parse_spec_ctrl(const char *s)
  {
      const char *ss;
-@@ -118,6 +121,7 @@ static int __init parse_spec_ctrl(const char *s)
-             opt_ibpb = false;
+@@ -112,6 +115,7 @@ static int __init parse_spec_ctrl(const char *s)
              opt_ssbd = false;
              opt_l1d_flush = 0;
+             opt_branch_harden = false;
 +            opt_srb_lock = 0;
          }
          else if ( val > 0 )
              rc = -EINVAL;
-@@ -184,6 +188,8 @@ static int __init parse_spec_ctrl(const char *s)
+@@ -178,6 +182,8 @@ static int __init parse_spec_ctrl(const char *s)
              opt_l1d_flush = val;
          else if ( (val = parse_boolean("branch-harden", s, ss)) >= 0 )
              opt_branch_harden = val;
@@ -104,7 +104,7 @@ index 2d63de75bb..0b3058cd65 100644
          else
              rc = -EINVAL;
  
-@@ -347,7 +353,7 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+@@ -341,7 +347,7 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
                 "\n");
  
      /* Settings for Xen's protection, irrespective of guests. */
@@ -113,7 +113,7 @@ index 2d63de75bb..0b3058cd65 100644
             thunk == THUNK_NONE      ? "N/A" :
             thunk == THUNK_RETPOLINE ? "RETPOLINE" :
             thunk == THUNK_LFENCE    ? "LFENCE" :
-@@ -358,6 +364,8 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
+@@ -352,6 +358,8 @@ static void __init print_details(enum ind_thunk thunk, uint64_t caps)
             (default_xen_spec_ctrl & SPEC_CTRL_SSBD)  ? " SSBD+" : " SSBD-",
             !(caps & ARCH_CAPS_TSX_CTRL)              ? "" :
             (opt_tsx & 1)                             ? " TSX+" : " TSX-",
@@ -122,7 +122,7 @@ index 2d63de75bb..0b3058cd65 100644
             opt_ibpb                                  ? " IBPB"  : "",
             opt_l1d_flush                             ? " L1D_FLUSH" : "",
             opt_md_clear_pv || opt_md_clear_hvm       ? " VERW"  : "",
-@@ -1155,6 +1163,34 @@ void __init init_speculation_mitigations(void)
+@@ -1149,6 +1157,34 @@ void __init init_speculation_mitigations(void)
          tsx_init();
      }
  
@@ -157,7 +157,7 @@ index 2d63de75bb..0b3058cd65 100644
      print_details(thunk, caps);
  
      /*
-@@ -1186,6 +1222,9 @@ void __init init_speculation_mitigations(void)
+@@ -1180,6 +1216,9 @@ void __init init_speculation_mitigations(void)
  
          wrmsrl(MSR_SPEC_CTRL, bsp_delay_spec_ctrl ? 0 : default_xen_spec_ctrl);
      }
@@ -166,9 +166,9 @@ index 2d63de75bb..0b3058cd65 100644
 +        wrmsrl(MSR_MCU_OPT_CTRL, default_xen_mcu_opt_ctrl);
  }
  
- #define MICROCODE_CALLIN_TIMEOUT_US 30000
+ static void __init __maybe_unused build_assertions(void)
 diff --git a/xen/include/asm-x86/spec_ctrl.h b/xen/include/asm-x86/spec_ctrl.h
-index 5c50353cfe..2ceefec7c6 100644
+index 9caecdd..b252bb8 100644
 --- a/xen/include/asm-x86/spec_ctrl.h
 +++ b/xen/include/asm-x86/spec_ctrl.h
 @@ -54,6 +54,8 @@ extern int8_t opt_pv_l1tf_hwdom, opt_pv_l1tf_domu;

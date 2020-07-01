@@ -13,8 +13,6 @@ XenServer changes to Xen command line default options.
 
 * Console ring size bumped up to 64k
 
-* Limit host ram to 5TB
-
 * Assume UC mappings for unknown EFI cacheability (firmware workarounds)
 
 * Always probe for RTC if the the ACPI tables claim it isn't present.  HP Gen9
@@ -38,24 +36,15 @@ XenServer changes to Xen command line default options.
 
 * Prefer ACPI reboot by default on EFI systems - Linux default
 
-diff --git a/xen/arch/x86/e820.c b/xen/arch/x86/e820.c
-index dbbe6ca..9ca82f2 100644
---- a/xen/arch/x86/e820.c
-+++ b/xen/arch/x86/e820.c
-@@ -16,7 +16,7 @@
-  * opt_mem: Limit maximum address of physical RAM.
-  *          Any RAM beyond this address limit is ignored.
-  */
--static unsigned long long __initdata opt_mem;
-+static unsigned long long __initdata opt_mem = GB(5 * 1024);
- size_param("mem", opt_mem);
- 
- /*
+* Set automatic quarantining to false - XAPI is in control of this
+
+* Always scrub domheap pages.  Don't rely on guests getting this right.
+
 diff --git a/xen/arch/x86/hvm/vmx/vmcs.c b/xen/arch/x86/hvm/vmx/vmcs.c
-index 477c968..db82ee2 100644
+index d53eceb..82c72c3 100644
 --- a/xen/arch/x86/hvm/vmx/vmcs.c
 +++ b/xen/arch/x86/hvm/vmx/vmcs.c
-@@ -48,7 +48,7 @@ boolean_param("vpid", opt_vpid_enabled);
+@@ -49,7 +49,7 @@ boolean_param("vpid", opt_vpid_enabled);
  static bool_t __read_mostly opt_unrestricted_guest_enabled = 1;
  boolean_param("unrestricted_guest", opt_unrestricted_guest_enabled);
  
@@ -64,7 +53,7 @@ index 477c968..db82ee2 100644
  boolean_param("apicv", opt_apicv_enabled);
  
  /*
-@@ -67,7 +67,7 @@ integer_param("ple_window", ple_window);
+@@ -68,7 +68,7 @@ integer_param("ple_window", ple_window);
  
  static bool __read_mostly opt_ept_pml = true;
  static s8 __read_mostly opt_ept_ad = -1;
@@ -74,7 +63,7 @@ index 477c968..db82ee2 100644
  static int __init parse_ept_param(const char *s)
  {
 diff --git a/xen/arch/x86/microcode.c b/xen/arch/x86/microcode.c
-index 5e62a48..d779762 100644
+index d377511..ba5eade 100644
 --- a/xen/arch/x86/microcode.c
 +++ b/xen/arch/x86/microcode.c
 @@ -104,7 +104,7 @@ static struct ucode_mod_blob __initdata ucode_blob;
@@ -87,7 +76,7 @@ index 5e62a48..d779762 100644
  /* Protected by microcode_mutex */
  static struct microcode_patch *microcode_cache;
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
-index 4b50f09..13c5c34 100644
+index 6dcbac6..b82e866 100644
 --- a/xen/arch/x86/mm.c
 +++ b/xen/arch/x86/mm.c
 @@ -187,7 +187,7 @@ static uint32_t base_disallow_mask;
@@ -122,7 +111,7 @@ index e26121a..3bf2bbf 100644
  static int __init parse_watchdog(const char *s)
  {
 diff --git a/xen/arch/x86/shutdown.c b/xen/arch/x86/shutdown.c
-index 1e55513..e4a9ef0 100644
+index 50621f7..4e879b4 100644
 --- a/xen/arch/x86/shutdown.c
 +++ b/xen/arch/x86/shutdown.c
 @@ -150,7 +150,7 @@ static void default_reboot_type(void)
@@ -135,10 +124,10 @@ index 1e55513..e4a9ef0 100644
          reboot_type = BOOT_KBD;
      else
 diff --git a/xen/arch/x86/time.c b/xen/arch/x86/time.c
-index b1dea37..c3c6135 100644
+index b46ec8a..9f8c403 100644
 --- a/xen/arch/x86/time.c
 +++ b/xen/arch/x86/time.c
-@@ -903,7 +903,7 @@ static unsigned long get_cmos_time(void)
+@@ -944,7 +944,7 @@ static unsigned long get_cmos_time(void)
      unsigned long flags;
      struct rtc_time rtc;
      unsigned int seconds = 60;
@@ -177,10 +166,10 @@ index 611116c..70502dd 100644
  static int __init parse_extra_guest_irqs(const char *s)
  {
 diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
-index b8e3a11..bd647ab 100644
+index 80e33ad..675d40f 100644
 --- a/xen/common/efi/boot.c
 +++ b/xen/common/efi/boot.c
-@@ -1411,7 +1411,7 @@ efi_start(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+@@ -1401,7 +1401,7 @@ efi_start(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
  
  #include <asm/spec_ctrl.h>
  
@@ -189,8 +178,21 @@ index b8e3a11..bd647ab 100644
  
  static int __init parse_efi_param(const char *s)
  {
+diff --git a/xen/common/page_alloc.c b/xen/common/page_alloc.c
+index dfbddf0..f62fa68 100644
+--- a/xen/common/page_alloc.c
++++ b/xen/common/page_alloc.c
+@@ -213,7 +213,7 @@ static unsigned long __initdata opt_bootscrub_chunk = MB(128);
+ size_param("bootscrub_chunk", opt_bootscrub_chunk);
+ 
+  /* scrub-domheap -> Domheap pages are scrubbed when freed */
+-static bool __read_mostly opt_scrub_domheap;
++static bool __read_mostly opt_scrub_domheap = true;
+ boolean_param("scrub-domheap", opt_scrub_domheap);
+ 
+ #ifdef CONFIG_SCRUB_DEBUG
 diff --git a/xen/drivers/char/console.c b/xen/drivers/char/console.c
-index b4413ec..e0bc187 100644
+index 948a926..3b00dfb 100644
 --- a/xen/drivers/char/console.c
 +++ b/xen/drivers/char/console.c
 @@ -76,16 +76,16 @@ enum con_timestamp_mode
@@ -213,3 +215,16 @@ index b4413ec..e0bc187 100644
  #define CONRING_IDX_MASK(i) ((i)&(conring_size-1))
  static char __initdata _conring[_CONRING_SIZE];
  static char *__read_mostly conring = _conring;
+diff --git a/xen/drivers/passthrough/iommu.c b/xen/drivers/passthrough/iommu.c
+index 05e7407..f1a168a 100644
+--- a/xen/drivers/passthrough/iommu.c
++++ b/xen/drivers/passthrough/iommu.c
+@@ -30,7 +30,7 @@ bool_t __initdata iommu_enable = 1;
+ bool_t __read_mostly iommu_enabled;
+ bool_t __read_mostly force_iommu;
+ bool_t __read_mostly iommu_verbose;
+-bool __read_mostly iommu_quarantine = true;
++bool __read_mostly iommu_quarantine = false;
+ bool_t __read_mostly iommu_igfx = 1;
+ bool_t __read_mostly iommu_snoop = 1;
+ bool_t __read_mostly iommu_qinval = 1;

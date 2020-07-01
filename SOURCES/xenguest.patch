@@ -1,8 +1,8 @@
 diff --git a/.gitignore b/.gitignore
-index 26bc583f74..1a7782726a 100644
+index 3ada0c4..d522fa4 100644
 --- a/.gitignore
 +++ b/.gitignore
-@@ -264,6 +264,9 @@ tools/xcutils/lsevtchn
+@@ -251,6 +251,9 @@ tools/xcutils/lsevtchn
  tools/xcutils/readnotes
  tools/xenbackendd/_paths.h
  tools/xenbackendd/xenbackendd
@@ -13,10 +13,10 @@ index 26bc583f74..1a7782726a 100644
  tools/xenmon/xenbaked
  tools/xenpaging/xenpaging
 diff --git a/tools/Makefile b/tools/Makefile
-index c903d6a63e..8bf10a9eeb 100644
+index 7b1f6c4..2a477c9 100644
 --- a/tools/Makefile
 +++ b/tools/Makefile
-@@ -24,6 +24,7 @@ SUBDIRS-$(CONFIG_BLKTAP2) += blktap2
+@@ -23,6 +23,7 @@ SUBDIRS-$(CONFIG_Linux) += memshr
  SUBDIRS-$(CONFIG_NetBSD) += xenbackendd
  SUBDIRS-y += libfsimage
  SUBDIRS-$(CONFIG_Linux) += libvchan
@@ -26,7 +26,7 @@ index c903d6a63e..8bf10a9eeb 100644
  ifneq "$(MAKECMDGOALS)" "distclean"
 diff --git a/tools/xenguest/Makefile b/tools/xenguest/Makefile
 new file mode 100644
-index 0000000000..a3e4ce15a0
+index 0000000..a3e4ce1
 --- /dev/null
 +++ b/tools/xenguest/Makefile
 @@ -0,0 +1,45 @@
@@ -77,10 +77,10 @@ index 0000000000..a3e4ce15a0
 +-include $(DEPS)
 diff --git a/tools/xenguest/xenguest.c b/tools/xenguest/xenguest.c
 new file mode 100644
-index 0000000000..84361f5e4c
+index 0000000..835d05e
 --- /dev/null
 +++ b/tools/xenguest/xenguest.c
-@@ -0,0 +1,767 @@
+@@ -0,0 +1,751 @@
 +#include <getopt.h>
 +#include <errno.h>
 +#include <syslog.h>
@@ -269,8 +269,8 @@ index 0000000000..84361f5e4c
 +
 +    send_emu_progress(done, total);
 +
-+    if ( (( done == 0 || done == total ) && (time_delta > 1UL * 500 * 1000 ))
-+         || (time_delta > 5UL * 1000 * 1000) )
++    if ( (time_delta > SEC(5)) ||
++         ((done == 0 || done == total) && (time_delta > MSEC(500))) )
 +    {
 +        if ( done == 0 && total == 0 )
 +            xg_info("progress: %s\n", doing_what);
@@ -452,23 +452,10 @@ index 0000000000..84361f5e4c
 +
 +        case XG_OPT_SUPPORTS:
 +            if ( !strcmp("migration-v2", optarg) )
-+            {
-+                if ( getenv("XG_MIGRATION_V2") )
-+                {
-+                    printf("true\n");
-+                    exit(0);
-+                }
-+                else
-+                {
-+                    printf("false\n");
-+                    exit(0);
-+                }
-+            }
++                printf("true\n");
 +            else
-+            {
 +                printf("false\n");
-+                exit(0);
-+            }
++            exit(0);
 +            break;
 +
 +        case XG_OPT_PCI_PASSTHROUGH:
@@ -534,14 +521,14 @@ index 0000000000..84361f5e4c
 +        xg_err("No control fd to write success to\n");
 +}
 +
-+static void do_save(bool is_hvm)
++static void do_save(void)
 +{
 +    if (domid == -1 || opt_fd == -1) {
 +        xg_err("xenguest: missing command line options\n");
 +        exit(1);
 +    }
 +
-+    stub_xc_domain_save(opt_fd, opt_flags, is_hvm);
++    stub_xc_domain_save(opt_fd, opt_flags);
 +    write_status(0, 0, NULL);
 +}
 +
@@ -686,9 +673,6 @@ index 0000000000..84361f5e4c
 +    char *cmdline = NULL;
 +    static xentoollog_logger logger = { logfn, progressfn, NULL };
 +
-+    /* Force migration v2 all the time. */
-+    setenv("XG_MIGRATION_V2", "", 1);
-+
 +    {   /* Conjoin the command line into a single string for logging */
 +        size_t sum, s;
 +        int i;
@@ -796,7 +780,7 @@ index 0000000000..84361f5e4c
 +
 +    case XG_MODE_SAVE:
 +    case XG_MODE_HVM_SAVE:
-+        do_save(opt_mode == XG_MODE_HVM_SAVE);
++        do_save();
 +        break;
 +
 +    case XG_MODE_RESTORE:
@@ -850,10 +834,10 @@ index 0000000000..84361f5e4c
 + */
 diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
 new file mode 100644
-index 0000000000..09edecf653
+index 0000000..e2a95d1
 --- /dev/null
 +++ b/tools/xenguest/xenguest_stubs.c
-@@ -0,0 +1,1820 @@
+@@ -0,0 +1,1783 @@
 +/*
 + * Copyright (C) 2006-2009 Citrix Systems Inc.
 + *
@@ -877,7 +861,6 @@ index 0000000000..09edecf653
 +#include <sys/mman.h>
 +#include <sys/types.h>
 +#include <sys/stat.h>
-+#include <fcntl.h>
 +#include <unistd.h>
 +
 +#include <xenctrl.h>
@@ -1166,7 +1149,8 @@ index 0000000000..09edecf653
 +    if ( f->nomigrate && test_bit(X86_FEATURE_ITSC, host_featureset) )
 +        set_bit(X86_FEATURE_ITSC, featureset);
 +
-+    rc = xc_cpuid_apply_policy(xch, domid, featureset, nr_features);
++    rc = xc_cpuid_apply_policy(xch, domid, featureset, nr_features,
++                               f->pae, f->cores_per_socket);
 +
 + out:
 +    free(featureset);
@@ -1259,9 +1243,26 @@ index 0000000000..09edecf653
 +    f->apic     = xenstore_get("platform/apic");
 +    f->pae      = xenstore_get("platform/pae");
 +    f->tsc_mode = xenstore_get("platform/tsc_mode");
-+    f->cores_per_socket = xenstore_get("platform/cores-per-socket");
 +    f->x87_fip_width = xenstore_get("platform/x87-fip-width");
 +    f->nomigrate = xenstore_get("platform/nomigrate");
++
++    if ( f->dominfo.hvm )
++    {
++        unsigned int cps = xenstore_get("platform/cores-per-socket");
++
++        if ( cps && (f->vcpus % cps) != 0 )
++        {
++            xg_err("Bad cores/socket setting: %u (nr vcpus %u)\n",
++                   cps, f->vcpus);
++            exit(1);
++        }
++
++        /*
++         * Must remain 0 for compatiblity with PV guests, which previously
++         * ignores their cores-per-socket setting.
++         */
++        f->cores_per_socket = cps;
++    }
 +
 +    /*
 +     * Follow 'nested-virt' if present.  Fall back to checking
@@ -1332,45 +1333,6 @@ index 0000000000..09edecf653
 +    for ( n = 0; n < f->vcpus; ++n )
 +        free(f->vcpu_affinity[n]);
 +    free(f->vcpu_affinity);
-+}
-+
-+/* Wait for IOMMU setup to complete */
-+static void wait_for_pv_iommu(void)
-+{
-+    int fd;
-+
-+    fd = open("/sys/kernel/pv_iommu_ready", O_RDONLY);
-+    if ( fd < 0 )
-+    {
-+        xg_err("Error: unable to check PV-IOMMU state\n");
-+        exit(1);
-+    }
-+
-+    /*
-+     * The node does not have poll support, so we need to keep
-+     * reading it.
-+     */
-+    for (;;)
-+    {
-+        char buf;
-+        int rc = pread(fd, &buf, sizeof(buf), 0);
-+
-+        if ( rc <= 0 )
-+        {
-+            xg_err("Error: failed to get PV-IOMMU state\n");
-+            exit(1);
-+        }
-+
-+        if ( buf == '1' )
-+            break;
-+
-+        xg_info("Waiting for PV-IOMMU...\n");
-+        sleep(1);
-+    }
-+
-+    xg_info("PV-IOMMU is ready\n");
-+
-+    close(fd);
 +}
 +
 +static void configure_vcpus(struct flags *f){
@@ -1809,20 +1771,6 @@ index 0000000000..09edecf653
 +            xc_hvm_param_set(xch, domid, HVM_PARAM_X87_FIP_WIDTH, f->x87_fip_width);
 +    }
 +
-+    if ( f->cores_per_socket > 0 )
-+        rc = xc_domain_set_cores_per_socket(xch, domid, f->cores_per_socket);
-+
-+    if ( rc )
-+    {
-+        if ( errno == ENOSYS )
-+        {
-+            rc = 0;
-+            xg_info("XEN_DOMCTL_set_cores_per_socket not implemented - skipping");
-+        }
-+        else
-+            failwith_oss_xc("xc_domain_set_cores_per_socket");
-+    }
-+
 +    rc = xc_domain_set_time_offset(xch, domid, f->timeoffset);
 +
 +    return rc;
@@ -2022,6 +1970,8 @@ index 0000000000..09edecf653
 +
 +#define MAX_RMRR_DEVICES E820MAX
 +#define ALLOW_MEMORY_RELOCATE 1
++#define VRAM_RESERVED_ADDR_INIT 0xfb000000lu
++#define VRAM_RESERVED_SIZE 0x1000000lu
 +
 +int hvm_build_setup_mem(struct xc_dom_image *dom, uint64_t max_mem_mib,
 +                        uint64_t max_start_mib)
@@ -2143,7 +2093,7 @@ index 0000000000..09edecf653
 +    /* RDM mapping */
 +    for (i = 0; i < nr_rmrr_devs; i++)
 +    {
-+        for (j = 0; j < nr_rdm_entries[i] && nr < E820MAX; j++)
++        for (j = 0; j < nr_rdm_entries[i] && nr < E820MAX - 2; j++)
 +        {
 +            e820[nr].addr = xrdm[i][j].start_pfn << XC_PAGE_SHIFT;
 +            e820[nr].size = xrdm[i][j].nr_pages << XC_PAGE_SHIFT;
@@ -2157,7 +2107,7 @@ index 0000000000..09edecf653
 +        }
 +        free(xrdm[i]);
 +    }
-+    if ( nr == E820MAX )
++    if ( nr == E820MAX - 2 )
 +    {
 +        xg_err("Error: too many E820 reserved entries for domain\n");
 +        exit(1);
@@ -2174,6 +2124,40 @@ index 0000000000..09edecf653
 +        e820[nr].size = highmem_end - e820[nr].addr;
 +        e820[nr].type = E820_RAM;
 +        nr++;
++    }
++
++    /* Select VRAM reserved region for vGPU within MMIO hole */
++    if ( opt_vgpu )
++    {
++        uint64_t vram_reserved_addr = VRAM_RESERVED_ADDR_INIT;
++
++        while ( vram_reserved_addr >= mmio_start )
++        {
++            for ( i = 0; i < nr; i++ )
++                if ( (vram_reserved_addr + VRAM_RESERVED_SIZE > e820[i].addr) &&
++                     (vram_reserved_addr < e820[i].addr + e820[i].size) )
++                    break;
++            if ( i == nr )
++                break;
++            vram_reserved_addr -= VRAM_RESERVED_SIZE;
++        }
++        if ( vram_reserved_addr < mmio_start )
++        {
++            xg_err("Error: failed to allocate VRAM reserved region\n");
++            exit(1);
++        }
++
++        e820[nr].addr = vram_reserved_addr;
++        e820[nr].size = VRAM_RESERVED_SIZE;
++        e820[nr].type = E820_RESERVED;
++        nr++;
++
++        xg_info("Reserve VRAM region at 0x%lx size 0x%lx for vGPU\n",
++                vram_reserved_addr, VRAM_RESERVED_SIZE);
++        /* Put VRAM reserved region address and size to Xenstore so we could
++         * read it later from DEMU */
++        xenstore_putsv("vm-data/vram-reserved-addr", "%lx", vram_reserved_addr);
++        xenstore_putsv("vm-data/vram-reserved-size", "%lu", VRAM_RESERVED_SIZE);
 +    }
 +
 +    dom->lowmem_end = lowmem_end;
@@ -2342,9 +2326,6 @@ index 0000000000..09edecf653
 +    struct flags f = {};
 +    struct xc_dom_image *dom;
 +
-+    if ( !is_pvh && opt_vgpu )
-+        wait_for_pv_iommu();
-+
 +    get_flags(&f);
 +
 +    hvm_safety_check(&f, mem_start_mib < mem_max_mib);
@@ -2445,30 +2426,15 @@ index 0000000000..09edecf653
 +    return 0;
 +}
 +
-+void migration_safety_checks(void)
++static void migration_safety_checks(void)
 +{
-+    bool migration_disabled;
-+    int ret;
-+
 +    if ( force )
 +    {
 +        xg_info("--force in effect - skipping safety checks\n");
 +        return;
 +    }
 +
-+    ret = xc_domain_query_disable_migrate(xch, domid, &migration_disabled);
-+    if ( ret )
-+    {
-+        if ( errno == ENOSYS )
-+        {
-+            migration_disabled = false;
-+            xg_info("XEN_DOMCTL_query_disable_migrate not implemented - skipping");
-+        }
-+        else
-+            failwith_oss_xc("xc_domain_query_disable_migrate");
-+    }
-+
-+    if ( migration_disabled )
++    if ( xenstore_get("platform/nomigrate") )
 +    {
 +        xg_err("d%d is flagged as not being mobile\n", domid);
 +        exit(1);
@@ -2477,8 +2443,7 @@ index 0000000000..09edecf653
 +
 +#define GENERATION_ID_ADDRESS "hvmloader/generation-id-address"
 +
-+int emu_stub_xc_domain_save(int fd, void* data,
-+                        int flags, int hvm)
++int emu_stub_xc_domain_save(int fd, void *data, int flags)
 +{
 +    int r;
 +    struct save_callbacks callbacks =
@@ -2491,15 +2456,14 @@ index 0000000000..09edecf653
 +
 +    migration_safety_checks();
 +
-+    r = xc_domain_save(xch, fd, domid,
-+                       flags, &callbacks, hvm, 0, -1);
++    r = xc_domain_save(xch, fd, domid, flags, &callbacks, XC_STREAM_PLAIN, -1);
 +    if (r)
 +        failwith_oss_xc("xc_domain_save");
 +
 +    return 0;
 +}
 +
-+int stub_xc_domain_save(int fd, int flags, int hvm)
++int stub_xc_domain_save(int fd, int flags)
 +{
 +    int r;
 +    struct save_callbacks callbacks =
@@ -2511,8 +2475,7 @@ index 0000000000..09edecf653
 +
 +    migration_safety_checks();
 +
-+    r = xc_domain_save(xch, fd, domid,
-+                       flags, &callbacks, hvm, 0, -1);
++    r = xc_domain_save(xch, fd, domid, flags, &callbacks, XC_STREAM_PLAIN, -1);
 +    if (r)
 +        failwith_oss_xc("xc_domain_save");
 +
@@ -2596,27 +2559,11 @@ index 0000000000..09edecf653
 +    int r = 0;
 +    struct flags f = {};
 +
-+    if (opt_vgpu)
-+        wait_for_pv_iommu();
-+
 +    get_flags(&f);
 +
 +    if ( hvm )
 +    {
 +        xc_set_hvm_param(xch, domid, HVM_PARAM_HPET_ENABLED, f.hpet);
-+        if ( f.cores_per_socket > 0 )
-+            r = xc_domain_set_cores_per_socket(xch, domid, f.cores_per_socket);
-+
-+        if ( r )
-+        {
-+            if ( errno == ENOSYS )
-+            {
-+                r = 0;
-+                xg_info("XEN_DOMCTL_set_cores_per_socket not implemented - skipping");
-+            }
-+            else
-+                failwith_oss_xc("xc_domain_set_cores_per_socket");
-+        }
 +
 +        r = xc_domain_set_time_offset(xch, domid, f.timeoffset);
 +
@@ -2629,7 +2576,7 @@ index 0000000000..09edecf653
 +    r = xc_domain_restore(xch, fd, domid,
 +                          store_evtchn, store_mfn, 0,
 +                          console_evtchn, console_mfn, 0,
-+                          hvm, f.pae, 0, NULL, -1);
++                          XC_STREAM_PLAIN, NULL, -1);
 +    if ( r )
 +        failwith_oss_xc("xc_domain_restore");
 +    /*
@@ -2676,10 +2623,10 @@ index 0000000000..09edecf653
 + */
 diff --git a/tools/xenguest/xg_emu.c b/tools/xenguest/xg_emu.c
 new file mode 100644
-index 0000000000..76cd08107b
+index 0000000..a85d56d
 --- /dev/null
 +++ b/tools/xenguest/xg_emu.c
-@@ -0,0 +1,444 @@
+@@ -0,0 +1,425 @@
 +#include <xenctrl.h>
 +#include <xenguest.h>
 +#include <xenstore.h>
@@ -2721,9 +2668,9 @@ index 0000000000..76cd08107b
 +        {
 +            lastprog = curtime;
 +        }
-+        else if ( ts_delta_us(&curtime, &lastprog) > 1UL * 500 * 1000 )
++        else if ( ts_delta_us(&curtime, &lastprog) > MSEC(500) )
 +        {
-+            /* Don't send dirty_conut, is out of date */
++            /* Don't send dirty_count, is out of date */
 +            emp_send_event_migrate_progress(progress_cli, last_sent + done, -1, last_iter);
 +            lastprog = curtime;
 +        }
@@ -2824,7 +2771,7 @@ index 0000000000..76cd08107b
 +
 +    emp_send_return(args->cli, NULL);
 +
-+    emu_stub_xc_domain_save(stream_fd, (void*) &args->cli, XCFLAGS_LIVE, !pv_mode);
++    emu_stub_xc_domain_save(stream_fd, &args->cli, XCFLAGS_LIVE);
 +    xg_info("Finished, send complete");
 +    if ( progress_cli.num >= 0 )
 +        emp_send_event_migrate_completed(progress_cli, migration_success);
@@ -2840,7 +2787,7 @@ index 0000000000..76cd08107b
 +
 +    emp_send_return(args->cli, NULL);
 +
-+    emu_stub_xc_domain_save(stream_fd, (void*) &args->cli, 0, !pv_mode);
++    emu_stub_xc_domain_save(stream_fd, &args->cli, 0);
 +    xg_info("Finished, send complete");
 +    emp_send_event_migrate_completed(args->cli, migration_success);
 +
@@ -3018,53 +2965,32 @@ index 0000000000..76cd08107b
 +        xg_info("libempserver:debug: %s", msg);
 +}
 +
-+#define EMU_HOME     "/var/xen/xenguest"
-+#define CONTROL_PATH "%s/%d/control"
++#define EMU_NAME     "xenguest"
 +
 +void emp_do_listen(void)
 +{
 +    struct emp_sock_inf *cs_inf;
 +    int rc;
-+    char *fname;
-+    char *path;
++    char fname[PATH_MAX];
 +    int r;
 +    struct timespec act_time;
 +
 +    emp_set_log_cb(emp_log);
 +
-+    r = mkdir(EMU_HOME, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-+    if ( r != 0 && errno != EEXIST )
-+    {
-+        xg_err("Couldn't create directory, %d", errno);
-+        return;
-+    }
-+
-+    r = asprintf(&fname, CONTROL_PATH, EMU_HOME, domid);
++    r = emp_get_default_path(fname, sizeof(fname), EMU_NAME, domid);
 +    if ( r < 0 )
 +    {
-+        xg_err("no memory (fname)");
++        xg_err("Failed to get control path. err=%d", errno);
 +        return;
 +    }
 +
-+    path = strdup(fname);
-+    if ( path == NULL )
++    if (r > (int) sizeof(fname))
 +    {
-+        xg_err("no memory (path)");
-+        free(fname);
-+        return;
-+    }
-+
-+    r = mkdir(dirname(path), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-+    free(path);
-+    if ( r != 0 && errno != EEXIST )
-+    {
-+        xg_err("could not make directory, %d", errno);
-+        free(fname);
++        xg_err("Control path too long.");
 +        return;
 +    }
 +
 +    r = emp_sock_init(fname, &cs_inf, actions);
-+    free(fname);
 +    if ( r )
 +    {
 +        xg_err("control socket failed");
@@ -3098,10 +3024,11 @@ index 0000000000..76cd08107b
 +        {
 +           struct timespec cur_time;
 +           uint64_t timediff;
-+           clock_gettime(CLOCK_MONOTONIC, &cur_time);
 +
++           clock_gettime(CLOCK_MONOTONIC, &cur_time);
 +           timediff = ts_delta_us(&cur_time, &act_time);
-+           if ( timediff > (COMMAND_TIMEOUT * 1000000) )
++
++           if ( timediff > SEC(COMMAND_TIMEOUT) )
 +           {
 +               xg_err("Control timeout");
 +               abort_all();
@@ -3123,13 +3050,14 @@ index 0000000000..76cd08107b
 +    }
 +    /* wait for any threads to finish */
 +    emp_sock_close(&cs_inf);
++    unlink(fname);
 +}
 diff --git a/tools/xenguest/xg_internal.h b/tools/xenguest/xg_internal.h
 new file mode 100644
-index 0000000000..3e815d4045
+index 0000000..2564729
 --- /dev/null
 +++ b/tools/xenguest/xg_internal.h
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,124 @@
 +#ifndef __XG_INTERNAL_H__
 +#define __XG_INTERNAL_H__
 +
@@ -3202,9 +3130,8 @@ index 0000000000..3e815d4045
 +                      int console_evtchn, int console_domid,
 +                      unsigned long *store_mfn, unsigned long *console_mfn,
 +                      bool is_pvh);
-+int stub_xc_domain_save(int fd, int flags, int hvm);
-+int emu_stub_xc_domain_save(int fd, void *data,
-+                            int flags, int hvm);
++int stub_xc_domain_save(int fd, int flags);
++int emu_stub_xc_domain_save(int fd, void *data, int flags);
 +
 +int stub_xc_domain_restore(int fd, int store_evtchn, int console_evtchn,
 +                           int hvm,
@@ -3228,13 +3155,17 @@ index 0000000000..3e815d4045
 +            (new->tv_usec - old->tv_usec));
 +}
 +
-+/* Calcluate the difference between two timevals, in microseconds. */
++/* Calcluate the difference between two timespecs, in microseconds. */
 +static inline uint64_t ts_delta_us(const struct timespec *new,
 +                                   const struct timespec *old)
 +{
 +    return (((new->tv_sec - old->tv_sec)*1000000) +
 +            ((new->tv_nsec - old->tv_nsec)/1000));
 +}
++
++/* Seconds and milliseconds expressed as microseconds. */
++#define SEC(s)  ((s) * 1000ull * 1000)
++#define MSEC(s) ((s) * 1000ull)
 +
 +int xenguest_precopy_policy(struct precopy_stats stats, void *user);
 +void emp_do_listen(void);

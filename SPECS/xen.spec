@@ -956,6 +956,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+* Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.6.1
+- Security update
+- Related to XSA-317, XSA-319, XSA-321, XSA-328
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Fri Jun 12 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.5.1
 - Update for new microcode related to SRBDS Intel issues
 - Related to XSA-320

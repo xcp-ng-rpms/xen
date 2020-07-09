@@ -1002,6 +1002,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.2.1
+- Security update
+- Related to XSA-317, XSA-319, XSA-321, XSA-328
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Wed Jul 01 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.1.1
 - Rebase on CH 8.2
 

@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.1
-Release: 9.2.1%{?dist}
+Release: 9.2.2%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -180,6 +180,9 @@ Patch139: xsa321-xsa321-4.13-4.patch
 Patch140: xsa321-xsa321-4.13-5.patch
 Patch141: xsa321-xsa321-4.13-6.patch
 Patch142: xsa321-xsa321-4.13-7.patch
+
+# XCP-ng patches
+Patch1000: xen-4.13.1-insert-Ice-Lake-and-Comet-Lake-model-numbers.backport.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.1&prefix=xen-4.13.1&format=tar.gz#/xen-4.13.1.tar.gz) = 6278553325a9f76d37811923221b21db3882e017
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 9bb71d5761e9454eb6562d69ec2069d47e3170a7
@@ -1002,6 +1005,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Sun Sep 06 2020 Rushikesh Jadhav <rushikesh7@gmail.com> - 4.13.1-9.2.2
+- Insert Ice Lake and Comet Lake model numbers
+
 * Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.2.1
 - Security update
 - Related to XSA-317, XSA-319, XSA-321, XSA-328

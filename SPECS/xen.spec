@@ -197,9 +197,6 @@ Patch156: xsa344xsa344-4.13-2.patch
 Patch157: backport-d112db32c622.patch
 Patch158: backport-780d3761f117.patch
 
-# XCP-ng patches
-Patch1000: xen-4.13.1-insert-Ice-Lake-and-Comet-Lake-model-numbers.backport.patch
-
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.1&prefix=xen-4.13.1&format=tar.gz#/xen-4.13.1.tar.gz) = 6278553325a9f76d37811923221b21db3882e017
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = c19b0599c288a453e510c1badb3c7b4463ad8aa6
 
@@ -1026,6 +1023,7 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 - Related to XSAs 333, 334, 336, 337, 338, 339, 340, 342, 343, 344
 - See http://xenbits.xen.org/xsa/
 - Reboot required
+- Also remove xen-4.13.1-insert-Ice-Lake-and-Comet-Lake-model-numbers.backport.patch, not needed anymore
 
 * Sun Sep 06 2020 Rushikesh Jadhav <rushikesh7@gmail.com> - 4.13.1-9.2.2
 - Insert Ice Lake and Comet Lake model numbers

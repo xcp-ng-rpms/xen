@@ -11,5 +11,5 @@ index 0000000..83e5b86
 --- /dev/null
 +++ b/.gitarchive-info-pq
 @@ -0,0 +1,2 @@
-+Changeset: a680986b805c28229fed895f424fa87df67506a6
-+Commit date: Tue, 30 Jun 2020 16:16:10 +0100
++Changeset: a680986b805c28229fed895f424fa87df67506a6 + XCP-ng patches
++Commit date: Thu, 24 Sep 2020 16:16:10 +0100

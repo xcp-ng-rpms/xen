@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.11.1
-Release: 7.11%{?dist}
+Release: 7.11.1%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -322,6 +322,22 @@ Patch281: xsa321-xsa321-4.11-4.patch
 Patch282: xsa321-xsa321-4.11-5.patch
 Patch283: xsa321-xsa321-4.11-6.patch
 Patch284: xsa321-xsa321-4.11-7.patch
+
+# XCP-ng Patches
+Patch1000: xsa333.patch
+Patch1001: xsa336-4.11.patch
+Patch1002: xsa337-4.12-1.patch
+Patch1003: xsa337-4.12-2.patch
+Patch1004: xsa338.patch
+Patch1005: xsa339.patch
+Patch1006: xsa340.patch
+Patch1007: xsa342-4.13.patch
+Patch1008: xsa343-4.11-1.patch
+Patch1009: xsa343-4.11-2.patch
+Patch1010: xsa343-4.11-3.patch
+Patch1011: xsa344-4.11-1.patch
+Patch1012: xsa344-4.11-2.patch
+
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.11.1&prefix=xen-4.11.1&format=tar.gz#/xen-4.11.1.tar.gz) = 96cbd0893f783997caaf117e897d5fa8f2dc7b5f
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = a680986b805c28229fed895f424fa87df67506a6
@@ -1110,7 +1126,13 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
-* Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.10
+* Thu Sep 24 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.1
+- Security update
+- Related to XSAs 333, 336, 337, 338, 339, 340, 342, 343, 344
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11
 - Security update
 - Related to XSA-317, XSA-319, XSA-321, XSA-328
 - See http://xenbits.xen.org/xsa/

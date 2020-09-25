@@ -1,3 +1,13 @@
+XCP-ng modification note:
+
+Hunks modified from original XSA patch, due to the presence in our
+patchqueue of backport-f99b99ed6381.patch that renamed occurrences
+of arch.hvm_xxx to arch.hvm
+
+Since backport-f99b99ed6381.patch brings no functional changes, the
+modification of this XSA 336 patch to apply cleanly is safe.
+
+------
 From: Roger Pau Monné <roger.pau@citrix.com>
 Subject: x86/vpt: fix race when migrating timers between vCPUs
 

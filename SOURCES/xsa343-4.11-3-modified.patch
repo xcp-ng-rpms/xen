@@ -1,3 +1,15 @@
+XCP-ng patch modification note:
+
+This patch was modified from the original XSA patch to allow it to
+apply cleanly. Occurrences of `guest_test_bit` were replaced by
+`test_bit`, because our patchqueue doesn't contain the following
+commit:
+6a5f01a57a xen/bitops: Provide helpers to safely modify guest memory atomically
+
+The XSA patch is made to apply on the tip of the 4.11-stable branch,
+hence the need for us to adapt it.
+
+------
 From: Jan Beulich <jbeulich@suse.com>
 Subject: evtchn: address races with evtchn_reset()
 

@@ -325,7 +325,7 @@ Patch284: xsa321-xsa321-4.11-7.patch
 
 # XCP-ng Patches
 Patch1000: xsa333.patch
-Patch1001: xsa336-4.11.patch
+Patch1001: xsa336-4.11-modified.patch
 Patch1002: xsa337-4.12-1.patch
 Patch1003: xsa337-4.12-2.patch
 Patch1004: xsa338.patch
@@ -334,7 +334,7 @@ Patch1006: xsa340.patch
 Patch1007: xsa342-4.13.patch
 Patch1008: xsa343-4.11-1.patch
 Patch1009: xsa343-4.11-2.patch
-Patch1010: xsa343-4.11-3.patch
+Patch1010: xsa343-4.11-3-modified.patch
 Patch1011: xsa344-4.11-1.patch
 Patch1012: xsa344-4.11-2.patch
 
@@ -1126,6 +1126,11 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
+#* Pending next build
+#- Rename xsa343-4.11-3.patch to xsa343-4.11-3-modified.patch
+#- Rename xsa336-4.11.patch to xsa336-4.11-modified.patch
+#- Add explanations to the modified patches regarding their modification
+
 * Thu Sep 24 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.1
 - Security update
 - Related to XSAs 333, 336, 337, 338, 339, 340, 342, 343, 344

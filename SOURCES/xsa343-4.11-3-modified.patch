@@ -99,7 +99,7 @@ Acked-by: Julien Grall <jgrall@amazon.com>
  
      ASSERT(port < max_ports);
 @@ -72,8 +74,10 @@ static bool evtchn_2l_is_pending(const s
-             guest_test_bit(d, port, &shared_info(d, evtchn_pending)));
+     return port < max_ports && test_bit(port, &shared_info(d, evtchn_pending));
  }
  
 -static bool evtchn_2l_is_masked(const struct domain *d, evtchn_port_t port)

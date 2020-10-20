@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.11.1
-Release: 7.11.1%{?dist}
+Release: 7.11.2%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -324,7 +324,7 @@ Patch283: xsa321-xsa321-4.11-6.patch
 Patch284: xsa321-xsa321-4.11-7.patch
 
 # XCP-ng Patches
-Patch1000: xsa333.patch
+Patch1000: xsa333-modified.patch
 Patch1001: xsa336-4.11-modified.patch
 Patch1002: xsa337-4.12-1.patch
 Patch1003: xsa337-4.12-2.patch
@@ -337,6 +337,14 @@ Patch1009: xsa343-4.11-2.patch
 Patch1010: xsa343-4.11-3-modified.patch
 Patch1011: xsa344-4.11-1.patch
 Patch1012: xsa344-4.11-2.patch
+# 2020-10-20 XSA advisories
+Patch1013: xsa345-4.11-0001-x86-mm-Refactor-map_pages_to_xen-to-have-only-a-sing.patch
+Patch1014: xsa345-4.11-0002-x86-mm-Refactor-modify_xen_mappings-to-have-one-exit.patch
+Patch1015: xsa345-4.11-0003-x86-mm-Prevent-some-races-in-hypervisor-mapping-upda.patch
+Patch1016: xsa346-xsa346-4.11-1.patch
+Patch1017: xsa346-xsa346-4.11-2-modified.patch
+Patch1018: xsa347-xsa347-4.11-1-modified.patch
+Patch1019: xsa347-xsa347-4.11-2.patch
 
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.11.1&prefix=xen-4.11.1&format=tar.gz#/xen-4.11.1.tar.gz) = 96cbd0893f783997caaf117e897d5fa8f2dc7b5f
@@ -520,6 +528,9 @@ Group: System Environment/Base
 %description installer-files
 This package contains the minimal subset of libraries and binaries required in
 the XenServer installer environment.
+
+# XCP-ng: don't accept fuzzy patches
+%global __patch patch --fuzz=0
 
 %prep
 %autosetup -p1
@@ -1126,10 +1137,17 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
-#* Pending next build
-#- Rename xsa343-4.11-3.patch to xsa343-4.11-3-modified.patch
-#- Rename xsa336-4.11.patch to xsa336-4.11-modified.patch
-#- Add explanations to the modified patches regarding their modification
+* Tue Oct 20 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.2
+- Security update
+- Related to XSAs 343, 345, 346 and 347
+- Patches manually applied and adapated from http://xenbits.xen.org/xsa/
+- Enforce --fuzz=0 for patch application
+- Fix xsa333.patch for clean application without fuzz and rename it to xsa333-modified.patch
+- Rename xsa343-4.11-3.patch to xsa343-4.11-3-modified.patch
+- Rename xsa336-4.11.patch to xsa336-4.11-modified.patch
+- Fix it for clean application without fuzz
+- Add explanations to the modified patches about their modification
+- Reboot required
 
 * Thu Sep 24 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.1
 - Security update

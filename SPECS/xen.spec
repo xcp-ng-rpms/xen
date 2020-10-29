@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.11.1
-Release: 7.11.2%{?dist}
+Release: 7.11.3%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -338,13 +338,15 @@ Patch1010: xsa343-4.11-3-modified.patch
 Patch1011: xsa344-4.11-1.patch
 Patch1012: xsa344-4.11-2.patch
 # 2020-10-20 XSA advisories
-Patch1013: xsa345-4.11-0001-x86-mm-Refactor-map_pages_to_xen-to-have-only-a-sing.patch
-Patch1014: xsa345-4.11-0002-x86-mm-Refactor-modify_xen_mappings-to-have-one-exit.patch
-Patch1015: xsa345-4.11-0003-x86-mm-Prevent-some-races-in-hypervisor-mapping-upda.patch
-Patch1016: xsa346-xsa346-4.11-1.patch
-Patch1017: xsa346-xsa346-4.11-2-modified.patch
-Patch1018: xsa347-xsa347-4.11-1-modified.patch
-Patch1019: xsa347-xsa347-4.11-2.patch
+Patch1013: 0001-x86-pv-Drop-FLUSH_TLB_GLOBAL-in-do_mmu_update-for-XP.patch
+Patch1014: 0002-x86-pv-Flush-TLB-in-response-to-paging-structure-cha.patch
+Patch1015: xsa345-4.11-0001-x86-mm-Refactor-map_pages_to_xen-to-have-only-a-sing.patch
+Patch1016: xsa345-4.11-0002-x86-mm-Refactor-modify_xen_mappings-to-have-one-exit.patch
+Patch1017: xsa345-4.11-0003-x86-mm-Prevent-some-races-in-hypervisor-mapping-upda.patch
+Patch1018: xsa346-xsa346-4.11-1.patch
+Patch1019: xsa346-xsa346-4.11-2-modified.patch
+Patch1020: xsa347-xsa347-4.11-1-modified.patch
+Patch1021: xsa347-xsa347-4.11-2.patch
 
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.11.1&prefix=xen-4.11.1&format=tar.gz#/xen-4.11.1.tar.gz) = 96cbd0893f783997caaf117e897d5fa8f2dc7b5f
@@ -1137,10 +1139,10 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %endif
 
 %changelog
-* Tue Oct 20 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.2
+* Thu Oct 29 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.11.3
 - Security update
-- Related to XSAs 343, 345, 346 and 347
-- Patches manually applied and adapated from http://xenbits.xen.org/xsa/
+- Related to XSAs 286, 343, 345, 346 and 347
+- Patches manually applied and adapated from http://xenbits.xen.org/xsa/, except XSA-286 backported from 8.1
 - Enforce --fuzz=0 for patch application
 - Fix xsa333.patch for clean application without fuzz and rename it to xsa333-modified.patch
 - Rename xsa343-4.11-3.patch to xsa343-4.11-3-modified.patch

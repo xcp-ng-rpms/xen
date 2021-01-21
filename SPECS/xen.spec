@@ -28,7 +28,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.1
-Release: 9.8.2%{?dist}
+Release: 9.8.3%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -250,6 +250,9 @@ Patch209: 0002-tools-ocaml-xenstored-Automatically-resume-when-poss.patch
 Patch210: 0003-tools-ocaml-xenstored-add-cooperative-live-update-co.patch
 Patch211: 0004-tools-ocaml-xenstored-start-live-update-process.patch
 Patch212: 0006-tools-ocaml-xenstored-implement-socket-live-update.patch
+
+# XCP-ng patches
+Patch1000: xsa360-4.14.patch
 
 Provides: gitsha(ssh://git@code.citrite.net/xsu/xen.git) = 6278553325a9f76d37811923221b21db3882e017
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = c9f65d58ccf70240b422b076e027b1f25d14b453
@@ -1072,6 +1075,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Thu Jan 21 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.3
+- Security update
+- Related to XSA 360
+- See http://xenbits.xen.org/xsa/advisory-360.html
+- Reboot required
+
 * Wed Dec 16 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.2
 - Security update
 - Related to XSAs 115, 322, 323, 324, 325, 330, 348, 352, 353, 358, 359

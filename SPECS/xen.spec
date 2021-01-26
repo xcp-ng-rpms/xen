@@ -29,7 +29,7 @@ Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.0
 # the xen_extra field can't hold more than 16 chars
-# so instead of using %release to define XEN_VENDORVERSION
+# so instead of using %%release to define XEN_VENDORVERSION
 # we create a base_release macro, that doesn't contain the dist suffix
 %define base_release 8.12.2
 Release: %{base_release}%{?dist}

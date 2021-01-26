@@ -28,7 +28,11 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.1
-Release: 9.8.3%{?dist}
+# the xen_extra field can't hold more than 16 chars
+# so instead of using %release to define XEN_VENDORVERSION
+# we create a base_release macro, that doesn't contain the dist suffix
+%define base_release 9.8.4
+Release: %{base_release}%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
 
@@ -467,31 +471,31 @@ mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs
 mkdir -p %{buildroot}/boot/
 
 # Regular build of Xen
-%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release} \
+%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release} \
     KCONFIG_CONFIG=../buildconfigs/config-release olddefconfig
-%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release} \
+%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release} \
     KCONFIG_CONFIG=../buildconfigs/config-release build
-%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release} \
+%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release} \
     KCONFIG_CONFIG=../buildconfigs/config-release MAP
 
-cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{release}.gz
-cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{release}.map
-cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{release}
-cp buildconfigs/config-release %{buildroot}/boot/%{name}-%{version}-%{release}.config
+cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{base_release}.gz
+cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{base_release}.map
+cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{base_release}
+cp buildconfigs/config-release %{buildroot}/boot/%{name}-%{version}-%{base_release}.config
 
 # Debug build of Xen
 %{__make} %{HVSOR_OPTIONS} -C xen clean
-%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release}-d \
+%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release}-d \
     KCONFIG_CONFIG=../buildconfigs/config-debug olddefconfig
-%{?_cov_wrap} %{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release}-d \
+%{?_cov_wrap} %{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release}-d \
     KCONFIG_CONFIG=../buildconfigs/config-debug build
-%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{release}-d \
+%{__make} %{HVSOR_OPTIONS} -C xen XEN_VENDORVERSION=-%{base_release}-d \
     KCONFIG_CONFIG=../buildconfigs/config-debug MAP
 
-cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{release}-d.gz
-cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{release}-d.map
-cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{release}-d
-cp buildconfigs/config-debug %{buildroot}/boot/%{name}-%{version}-%{release}-d.config
+cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{base_release}-d.gz
+cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{base_release}-d.map
+cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{base_release}-d
+cp buildconfigs/config-debug %{buildroot}/boot/%{name}-%{version}-%{base_release}-d.config
 
 # do not strip the hypervisor-debuginfo targerts
 chmod -x %{buildroot}/boot/xen-syms-*
@@ -531,18 +535,18 @@ ln -sf xen-shim-release %{buildroot}/%{_libexecdir}/%{name}/boot/xen-shim
 %{?_cov_install}
 
 %files hypervisor
-/boot/%{name}-%{version}-%{release}.gz
-/boot/%{name}-%{version}-%{release}.map
-/boot/%{name}-%{version}-%{release}.config
-/boot/%{name}-%{version}-%{release}-d.gz
-/boot/%{name}-%{version}-%{release}-d.map
-/boot/%{name}-%{version}-%{release}-d.config
+/boot/%{name}-%{version}-%{base_release}.gz
+/boot/%{name}-%{version}-%{base_release}.map
+/boot/%{name}-%{version}-%{base_release}.config
+/boot/%{name}-%{version}-%{base_release}-d.gz
+/boot/%{name}-%{version}-%{base_release}-d.map
+/boot/%{name}-%{version}-%{base_release}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
 %ghost %attr(0644,root,root) %{_sysconfdir}/sysconfig/kernel-xen-args
 
 %files hypervisor-debuginfo
-/boot/%{name}-syms-%{version}-%{release}
-/boot/%{name}-syms-%{version}-%{release}-d
+/boot/%{name}-syms-%{version}-%{base_release}
+/boot/%{name}-syms-%{version}-%{base_release}-d
 
 %files tools
 %{_bindir}/xenstore
@@ -1017,25 +1021,25 @@ ln -sf xen-shim-release %{buildroot}/%{_libexecdir}/%{name}/boot/xen-shim
 
 %post hypervisor
 # Update the debug and release symlinks
-ln -sf %{name}-%{version}-%{release}-d.gz /boot/xen-debug.gz
-ln -sf %{name}-%{version}-%{release}.gz /boot/xen-release.gz
+ln -sf %{name}-%{version}-%{base_release}-d.gz /boot/xen-debug.gz
+ln -sf %{name}-%{version}-%{base_release}.gz /boot/xen-release.gz
 
 # Point /boot/xen.gz appropriately
 if [ ! -e /boot/xen.gz ]; then
 %if %{default_debug_hypervisor}
     # Use a debug hypervisor by default
-    ln -sf %{name}-%{version}-%{release}-d.gz /boot/xen.gz
+    ln -sf %{name}-%{version}-%{base_release}-d.gz /boot/xen.gz
 %else
     # Use a production hypervisor by default
-    ln -sf %{name}-%{version}-%{release}.gz /boot/xen.gz
+    ln -sf %{name}-%{version}-%{base_release}.gz /boot/xen.gz
 %endif
 else
     # Else look at the current link, and whether it is debug
     path="`readlink -f /boot/xen.gz`"
     if [ ${path} != ${path%%-d.gz} ]; then
-        ln -sf %{name}-%{version}-%{release}-d.gz /boot/xen.gz
+        ln -sf %{name}-%{version}-%{base_release}-d.gz /boot/xen.gz
     else
-        ln -sf %{name}-%{version}-%{release}.gz /boot/xen.gz
+        ln -sf %{name}-%{version}-%{base_release}.gz /boot/xen.gz
     fi
 fi
 
@@ -1044,7 +1048,7 @@ if [ -e %{_sysconfdir}/sysconfig/kernel ] && ! grep -q '^HYPERVISOR' %{_sysconfd
 fi
 
 mkdir -p %{_rundir}/reboot-required.d/%{name}
-touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
+touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{base_release}
 
 %if %with_systemd
 %post dom0-tools
@@ -1075,6 +1079,11 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Mon Jan 25 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.4
+- Remove dist tag from XEN_VENDORVERSION
+- Avoids hitting the 16 char limit in xen_extra
+- Related to https://github.com/xcp-ng/xcp/issues/476
+
 * Thu Jan 21 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.3
 - Security update
 - Related to XSA 360

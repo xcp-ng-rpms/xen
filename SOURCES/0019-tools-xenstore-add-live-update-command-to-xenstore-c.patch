@@ -76,10 +76,10 @@ index 445e9911b2..d8d47a9bd2 100644
  xs_tdb_dump: xs_tdb_dump.o utils.o tdb.o talloc.o
  	$(CC) $^ $(LDFLAGS) -o $@ $(APPEND_LDFLAGS)
 diff --git a/tools/xenstore/xenstore_control.c b/tools/xenstore/xenstore_control.c
-index afa04495a7..738204e62c 100644
+index afa04495a7..49f22fd637 100644
 --- a/tools/xenstore/xenstore_control.c
 +++ b/tools/xenstore/xenstore_control.c
-@@ -1,9 +1,326 @@
+@@ -1,9 +1,328 @@
 +#define _GNU_SOURCE
 +#include <stdbool.h>
  #include <stdio.h>
@@ -137,8 +137,10 @@ index afa04495a7..738204e62c 100644
 +            break;
 +        /* TODO: use task ID for commands, avoid busy loop polling here
 +         * oxenstored checks BUSY condition internally on every main loop iteration anyway.
-+         * Avoid flooding xenstored with live-update requests */
-+        usleep(10000);
++         * Avoid flooding xenstored with live-update requests.
++         * The flooding can also cause the evtchn to overflow in xenstored which makes
++         * xenstored enter an infinite loop */
++        sleep(1);
 +    }
 +
 +    if (strcmp(ret, "OK"))
@@ -406,7 +408,7 @@ index afa04495a7..738204e62c 100644
  
  int main(int argc, char **argv)
  {
-@@ -20,22 +337,6 @@ int main(int argc, char **argv)
+@@ -20,22 +339,6 @@ int main(int argc, char **argv)
          goto out;
      }
  
@@ -429,7 +431,7 @@ index afa04495a7..738204e62c 100644
      xsh = xs_open(0);
      if (xsh == NULL) {
          fprintf(stderr, "Failed to contact Xenstored.\n");
-@@ -43,6 +344,19 @@ int main(int argc, char **argv)
+@@ -43,6 +346,19 @@ int main(int argc, char **argv)
          goto out;
      }
  
@@ -449,7 +451,7 @@ index afa04495a7..738204e62c 100644
      ret = xs_control_command(xsh, argv[1], par, len);
      if (!ret) {
          rc = 3;
-@@ -59,6 +373,7 @@ int main(int argc, char **argv)
+@@ -59,6 +375,7 @@ int main(int argc, char **argv)
      } else if (strlen(ret) > 0)
          printf("%s\n", ret);
  

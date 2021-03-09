@@ -259,6 +259,8 @@ Patch214: backport-758fae24d7b9.patch
 Patch215: backport-e373bc1bdc59.patch
 Patch216: backport-b7c333016e3d.patch
 Patch217: xsa360.patch
+Patch218: backport-83736c567d.patch
+Patch219: backport-e1de4c196a2eb4fd5063c30a2e115adf144bdeef.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.1&prefix=xen-4.13.1&format=tar.gz#/xen-4.13.1.tar.gz) = 6278553325a9f76d37811923221b21db3882e017
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 70d4b5941e4fa18d059d0f62cb3bbf5dab7a7946

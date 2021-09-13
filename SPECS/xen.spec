@@ -1127,7 +1127,7 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{base_release}
 
 %changelog
 * Thu Sep 09 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.12.1
-- Security update, synced from hotfix XS82E031
+- Security update, synced from hotfix XS82E032
 - Related to XSAs 378, 379, 380, 382, 384
 - See http://xenbits.xen.org/xsa/
 - Reboot required

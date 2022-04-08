@@ -19,7 +19,7 @@ Version: 4.13.4
 # the xen_extra field can't hold more than 16 chars
 # so instead of using %%release to define XEN_VENDORVERSION
 # we create a base_release macro, that doesn't contain the dist suffix
-%define base_release 9.21.1
+%define base_release 9.21.2
 Release: %{base_release}%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
@@ -264,6 +264,11 @@ Patch231: xen-introspection-pause.patch
 Patch232: xen-always-enable-altp2m-external-mode.patch
 Patch233: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
 Patch234: 0002-x86-add-xen-spec-ctrl-utility.patch
+
+# XCP-ng patches
+Patch1000: 0001-VT-d-don-t-needlessly-look-up-DID.patch
+Patch1001: 0001-VT-d-avoid-NULL-deref-on-domain_context_mapping_one-.patch
+Patch1002: 0001-VT-d-avoid-infinite-recursion-on-domain_context_mapp.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 63a9ddfe30f43e81901091445e9d969c9f06dce1
@@ -1101,13 +1106,13 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{base_release}
 
 %{?_cov_results_package}
 %changelog
-* Tue Apr 05 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.21.1
+* Tue Apr 05 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.21.2
 - Security update, synced from hotfix XS82ECU1007
 - Related to XSAs 397, 399 and 400
 - See http://xenbits.xen.org/xsa/
+- Additional patches added from upstream xen to fix fallouts of XSA-400 patches
 - Reboot required
 
-%changelog
 * Wed Mar 09 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.20.1
 - Security update, synced from hotfix XS82ECU1006
 - Related to XSA 398

@@ -1,8 +1,8 @@
 From fe97133b5deef58bd1422f4d87821131c66b1d0e Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
 Date: Fri, 8 Apr 2022 15:22:49 +0200
-Subject: [PATCH] VT-d: avoid infinite recursion on
- domain_context_mapping_one() error path
+Subject: VT-d: avoid infinite recursion on domain_context_mapping_one() error
+ path
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -22,13 +22,9 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 master commit: 99d829dba1390b98a3ca07b365713e62182ee7ca
 master date: 2022-04-07 12:31:16 +0200
----
- xen/drivers/passthrough/vtd/iommu.c | 7 ++++---
- xen/drivers/passthrough/vtd/vtd.h   | 3 ++-
- 2 files changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/xen/drivers/passthrough/vtd/iommu.c b/xen/drivers/passthrough/vtd/iommu.c
-index cb3ba3e409..f051a55764 100644
+index cb3ba3e409f5..f051a55764b9 100644
 --- a/xen/drivers/passthrough/vtd/iommu.c
 +++ b/xen/drivers/passthrough/vtd/iommu.c
 @@ -1593,7 +1593,7 @@ int domain_context_mapping_one(
@@ -56,7 +52,7 @@ index cb3ba3e409..f051a55764 100644
  
      if ( prev_dom )
 diff --git a/xen/drivers/passthrough/vtd/vtd.h b/xen/drivers/passthrough/vtd/vtd.h
-index e4ab242fee..cb2df76eed 100644
+index e4ab242fee5c..cb2df76eeddb 100644
 --- a/xen/drivers/passthrough/vtd/vtd.h
 +++ b/xen/drivers/passthrough/vtd/vtd.h
 @@ -29,7 +29,8 @@
@@ -69,6 +65,3 @@ index e4ab242fee..cb2df76eed 100644
  
  /* Allow for both IOAPIC and IOSAPIC. */
  #define IO_xAPIC_route_entry IO_APIC_route_entry
--- 
-2.25.1
-

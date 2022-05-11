@@ -1,7 +1,7 @@
 From a6902a65160aac72a1889a268fd5f3cebb159d8e Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
 Date: Fri, 8 Apr 2022 15:20:21 +0200
-Subject: [PATCH] VT-d: don't needlessly look up DID
+Subject: VT-d: don't needlessly look up DID
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -16,12 +16,9 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 master commit: 445ab9852d69d8957467f0036098ebec75fec092
 master date: 2022-04-07 12:29:03 +0200
----
- xen/drivers/passthrough/vtd/iommu.c | 10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
 
 diff --git a/xen/drivers/passthrough/vtd/iommu.c b/xen/drivers/passthrough/vtd/iommu.c
-index 6571b5dde4..4b0d6a873c 100644
+index 6571b5dde4c9..4b0d6a873c1e 100644
 --- a/xen/drivers/passthrough/vtd/iommu.c
 +++ b/xen/drivers/passthrough/vtd/iommu.c
 @@ -1821,18 +1821,12 @@ int domain_context_unmap_one(
@@ -45,6 +42,3 @@ index 6571b5dde4..4b0d6a873c 100644
      rc = iommu_flush_context_device(iommu, iommu_domid,
                                      PCI_BDF2(bus, devfn),
                                      DMA_CCMD_MASK_NOBIT, 0);
--- 
-2.25.1
-

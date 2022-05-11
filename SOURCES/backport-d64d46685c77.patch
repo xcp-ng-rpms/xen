@@ -1,8 +1,7 @@
 From d64d46685c776b39d5c640a0ad2727fa0938273c Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
 Date: Fri, 8 Apr 2022 15:21:33 +0200
-Subject: [PATCH] VT-d: avoid NULL deref on domain_context_mapping_one() error
- paths
+Subject: VT-d: avoid NULL deref on domain_context_mapping_one() error paths
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -32,14 +31,9 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 master commit: 608394b906e71587f02e6662597bc985bad33a5a
 master date: 2022-04-07 12:30:19 +0200
----
- xen/drivers/passthrough/vtd/extern.h |  2 +-
- xen/drivers/passthrough/vtd/iommu.c  | 34 ++++++++++++++++------------
- xen/drivers/passthrough/vtd/quirks.c |  2 +-
- 3 files changed, 21 insertions(+), 17 deletions(-)
 
 diff --git a/xen/drivers/passthrough/vtd/extern.h b/xen/drivers/passthrough/vtd/extern.h
-index 897dcff9ff..fbe951b2fa 100644
+index 897dcff9ff5a..fbe951b2fad0 100644
 --- a/xen/drivers/passthrough/vtd/extern.h
 +++ b/xen/drivers/passthrough/vtd/extern.h
 @@ -89,7 +89,7 @@ int domain_context_mapping_one(struct domain *domain, struct vtd_iommu *iommu,
@@ -52,7 +46,7 @@ index 897dcff9ff..fbe951b2fa 100644
  
  unsigned int io_apic_read_remap_rte(unsigned int apic, unsigned int reg);
 diff --git a/xen/drivers/passthrough/vtd/iommu.c b/xen/drivers/passthrough/vtd/iommu.c
-index 4b0d6a873c..cb3ba3e409 100644
+index 4b0d6a873c1e..cb3ba3e409f5 100644
 --- a/xen/drivers/passthrough/vtd/iommu.c
 +++ b/xen/drivers/passthrough/vtd/iommu.c
 @@ -1527,7 +1527,7 @@ int domain_context_mapping_one(
@@ -148,7 +142,7 @@ index 4b0d6a873c..cb3ba3e409 100644
          break;
  
 diff --git a/xen/drivers/passthrough/vtd/quirks.c b/xen/drivers/passthrough/vtd/quirks.c
-index 4d54c21136..2b8a2bd9c6 100644
+index 4d54c21136ea..2b8a2bd9c62a 100644
 --- a/xen/drivers/passthrough/vtd/quirks.c
 +++ b/xen/drivers/passthrough/vtd/quirks.c
 @@ -363,7 +363,7 @@ static int __must_check map_me_phantom_function(struct domain *domain,
@@ -160,6 +154,3 @@ index 4d54c21136..2b8a2bd9c6 100644
  
      return rc;
  }
--- 
-2.25.1
-

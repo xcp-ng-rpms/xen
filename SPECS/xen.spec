@@ -19,7 +19,7 @@ Version: 4.13.4
 # the xen_extra field can't hold more than 16 chars
 # so instead of using %%release to define XEN_VENDORVERSION
 # we create a base_release macro, that doesn't contain the dist suffix
-%define base_release 9.22.1
+%define base_release 9.22.2
 Release: %{base_release}%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
@@ -267,6 +267,14 @@ Patch234: xen-introspection-pause.patch
 Patch235: xen-always-enable-altp2m-external-mode.patch
 Patch236: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
 Patch237: 0002-x86-add-xen-spec-ctrl-utility.patch
+Patch1000: xsa401_xsa401-4.13-1.patch
+Patch1001: xsa401_xsa401-4.13-2.patch
+Patch1002: xsa402_xsa402-4.13-1.patch
+Patch1003: xsa402_xsa402-4.13-2.patch
+Patch1004: xsa402_xsa402-4.13-3.patch
+Patch1005: xsa402_xsa402-4.13-4.patch
+Patch1006: xsa402_xsa402-4.13-5.patch
+Patch1007: xsa402_xsa402-4.13-6.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
@@ -1104,6 +1112,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{base_release}
 
 %{?_cov_results_package}
 %changelog
+* Fri Jun 10 2022 Andrei Semenov <andrei.semenov@vates.fr> - 4.13.4-9.22.2
+- Security update
+- Related to XSA 401 and XSA 402
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
 * Wed May 11 2022 Gaël Duperrey <gduperrey@vates.fr> - 4.13.4-9.22.1
 - Sync with hotfix XS82ECU1010
 - Integrated upstream patches related to XSA 400 to replace our patches

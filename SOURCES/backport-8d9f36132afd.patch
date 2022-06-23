@@ -1,4 +1,6 @@
+From 8d9f36132afd7c95c47809ee0e8e5c678b31f828 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:15:11 +0200
 Subject: x86: Split cache_flush() out of cache_writeback()
 
 Subsequent changes will want a fully flushing version.
@@ -16,11 +18,8 @@ This is part of XSA-402.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
-
-Xen 4.16 and earlier:
- * Also backport half of c/s 3330013e67396 "VT-d / x86: re-arrange cache
-   syncing" to split cache_writeback() out of the IOMMU logic, but without the
-   associated hooks changes.
+master commit: 9a67ffee3371506e1cbfdfff5b90658d4828f6a2
+master date: 2022-06-09 14:22:38 +0200
 
 diff --git a/xen/arch/x86/flushtlb.c b/xen/arch/x86/flushtlb.c
 index 03f92c23dcaf..8568491c7ea9 100644

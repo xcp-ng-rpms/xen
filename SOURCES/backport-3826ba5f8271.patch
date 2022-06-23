@@ -1,4 +1,6 @@
+From 3826ba5f8271676c1569588abb32d960e5882e54 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:13:30 +0200
 Subject: x86/pv: Clean up _get_page_type()
 
 Various fixes for clarity, ahead of making complicated changes.
@@ -25,6 +27,8 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Signed-off-by: George Dunlap <george.dunlap@eu.citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: George Dunlap <george.dunlap@citrix.com>
+master commit: 9186e96b199e4f7e52e033b238f9fe869afb69c7
+master date: 2022-06-09 14:20:36 +0200
 
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
 index ad89bfb45fff..96738b027827 100644

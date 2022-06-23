@@ -1,8 +1,6 @@
-XCP-ng: 
-fixed conflicts with IOMMU paravirt patchset (adjusting masks and
-positions in pages count_info field (xen/include/asm-x86/mm.h)
-
+From fce392fa36c31f88be4f6b5f5821d244549cc825 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:14:39 +0200
 Subject: x86: Don't change the cacheability of the directmap
 
 Changeset 55f97f49b7ce ("x86: Change cache attributes of Xen 1:1 page mappings
@@ -60,6 +58,8 @@ This is CVE-2022-26363, part of XSA-402.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: George Dunlap <george.dunlap@citrix.com>
+master commit: ae09597da34aee6bc5b76475c5eea6994457e854
+master date: 2022-06-09 14:22:08 +0200
 
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
 index ee91c7fe5f69..859646b670a8 100644
@@ -172,9 +172,10 @@ index ee91c7fe5f69..859646b670a8 100644
       *
       * NB that writable xenheap pages have their type set and cleared by
 diff --git a/xen/include/asm-x86/mm.h b/xen/include/asm-x86/mm.h
+index 320c6cd19669..db09849f73f8 100644
 --- a/xen/include/asm-x86/mm.h
 +++ b/xen/include/asm-x86/mm.h
-@@ -68,26 +68,23 @@
+@@ -64,22 +64,19 @@
   /* Set when is using a page as a page table */
  #define _PGC_page_table   PG_shift(3)
  #define PGC_page_table    PG_mask(1, 3)
@@ -199,15 +200,9 @@ diff --git a/xen/include/asm-x86/mm.h b/xen/include/asm-x86/mm.h
 +#define PGC_state_free      PG_mask(3, 6)
  #define page_state_is(pg, st) (((pg)->count_info&PGC_state) == PGC_state_##st)
  
- /* Page has foreign mappings? */
--#define _PGC_foreign_map  PG_shift(10)
--#define PGC_foreign_map   PG_mask(1, 10)
-+#define _PGC_foreign_map  PG_shift(7)
-+#define PGC_foreign_map   PG_mask(1, 7)
- 
   /* Count of references to this frame. */
--#define PGC_count_width   PG_shift(10)
-+#define PGC_count_width   PG_shift(7)
+-#define PGC_count_width   PG_shift(9)
++#define PGC_count_width   PG_shift(6)
  #define PGC_count_mask    ((1UL<<PGC_count_width)-1)
  
  /*

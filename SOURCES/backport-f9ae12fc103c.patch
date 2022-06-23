@@ -1,7 +1,6 @@
-XCP-ng: minor changes to merge with TLB management patch
-(avoid-gnt-unmap-tlb-flush-if-not-accessed.patch) 
-
+From f9ae12fc103c7429d8ce6bc57b8cbcefdd71cd45 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:16:06 +0200
 Subject: x86/pv: Track and flush non-coherent mappings of RAM
 
 There are legitimate uses of WC mappings of RAM, e.g. for DMA buffers with
@@ -22,9 +21,12 @@ validation.  Also force a cache flush before the page is returned to the heap.
 
 This is CVE-2022-26364, part of XSA-402.
 
+Reported-by: Jann Horn <jannh@google.com>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: George Dunlap <george.dunlap@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+master commit: c1c9cae3a9633054b177c5de21ad7268162b2f2c
+master date: 2022-06-09 14:23:37 +0200
 
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
 index 859646b670a8..f5eeddce5867 100644
@@ -111,10 +113,11 @@ index 0325618c9883..81c72e61ed55 100644
  
   out_unlock:
      page_unlock(page);
-@@ -296,6 +306,15 @@ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+@@ -294,7 +304,18 @@ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+                  l1e_get_flags(ol1e), addr, grant_pte_flags);
  
-     if ( _update_intpte(&pl1e->l1, &ol1e.l1, nl1e.l1, gl1mfn, curr, 0, 1) )
-     {
+     if ( UPDATE_ENTRY(l1, pl1e, ol1e, nl1e, gl1mfn, curr, 0) )
++    {
 +        /*
 +         * Generally, replace_grant_pv_mapping() is used to destroy mappings
 +         * (n1le = l1e_empty()), but it can be a present mapping on the
@@ -125,8 +128,10 @@ index 0325618c9883..81c72e61ed55 100644
 +         * checking here.
 +         */
          rc = GNTST_okay;
++    }
  
-         /*
+  out_unlock:
+     page_unlock(page);
 diff --git a/xen/include/asm-x86/mm.h b/xen/include/asm-x86/mm.h
 index db09849f73f8..82d0fd6104a2 100644
 --- a/xen/include/asm-x86/mm.h

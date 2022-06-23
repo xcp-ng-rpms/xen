@@ -1,4 +1,6 @@
+From e8c04e468312713b5ad737e905494616f87f339f Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:15:39 +0200
 Subject: x86/amd: Work around CLFLUSH ordering on older parts
 
 On pre-CLFLUSHOPT AMD CPUs, CLFLUSH is weakely ordered with everything,
@@ -11,6 +13,8 @@ This is part of XSA-402.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+master commit: 062868a5a8b428b85db589fa9a6d6e43969ffeb9
+master date: 2022-06-09 14:23:07 +0200
 
 diff --git a/xen/arch/x86/cpu/amd.c b/xen/arch/x86/cpu/amd.c
 index b77fa1929733..aa1b9d0dda6b 100644

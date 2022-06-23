@@ -1,4 +1,6 @@
+From 7669737d7da5790e66ffb670576175c2465ab09c Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 9 Jun 2022 17:13:54 +0200
 Subject: x86/pv: Fix ABAC cmpxchg() race in _get_page_type()
 
 _get_page_type() suffers from a race condition where it incorrectly assumes
@@ -35,9 +37,12 @@ successfully before:
 
 This is part of XSA-401 / CVE-2022-26362.
 
+Reported-by: Jann Horn <jannh@google.com>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: George Dunlap <george.dunlap@citrix.com>
+master commit: 8cc5036bc385112a82f1faff27a0970e6440dfed
+master date: 2022-06-09 14:21:04 +0200
 
 diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
 index 96738b027827..ee91c7fe5f69 100644

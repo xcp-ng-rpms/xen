@@ -16,7 +16,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.4
-Release: 9.22
+Release: 9.23
 License: Portions GPLv2 (See COPYING)
 URL:     http://www.xenproject.org
 
@@ -57,216 +57,228 @@ Patch27: backport-169a2834ef5d.patch
 Patch28: backport-a6902a65160a.patch
 Patch29: backport-d64d46685c77.patch
 Patch30: backport-fe97133b5dee.patch
-Patch31: backport-cd7dedad8209.patch
-Patch32: backport-79cf0989175c.patch
-Patch33: backport-6dd95b02ea27.patch
-Patch34: backport-9356f9de4162.patch
-Patch35: backport-c08cbf7fb891.patch
-Patch36: backport-3d05407025ed.patch
-Patch37: backport-b1710040ca96.patch
-Patch38: backport-31bf4f26aa17.patch
-Patch39: backport-e9bd648015dd.patch
-Patch40: backport-da9290639eb5.patch
-Patch41: backport-7b3c5b70a323.patch
-Patch42: backport-1171a93b6ca7.patch
-Patch43: backport-2004db3ced18.patch
-Patch44: backport-59e1f6d89710.patch
-Patch45: backport-86cf92f50533.patch
-Patch46: backport-0a9c44486b90.patch
-Patch47: backport-270ff9a835fb.patch
-Patch48: backport-dacb80f9757c.patch
-Patch49: backport-1b3cec69bf30.patch
-Patch50: backport-8171e0796542.patch
-Patch51: backport-a798bac54fe8.patch
-Patch52: backport-920d5f31883c.patch
-Patch53: backport-c9495bd7dff5.patch
-Patch54: backport-53ddfc80a84a.patch
-Patch55: backport-a9b6dacf88fe.patch
-Patch56: backport-7ff66809ccd5.patch
-Patch57: backport-53594c7bd197.patch
-Patch58: backport-540d4d60378c.patch
-Patch59: backport-3174835ba825.patch
-Patch60: backport-c2b4e23fdda4.patch
-Patch61: backport-e9aca9470ed8.patch
-Patch62: backport-68d757df8dd2.patch
-Patch63: backport-17b997aa1edb.patch
-Patch64: backport-35b819c45c46.patch
-Patch65: backport-d8a6a8b36d86.patch
-Patch66: backport-4489ffdec331.patch
-Patch67: backport-ab5bfc049e8e.patch
-Patch68: backport-dc036ab9d506.patch
-Patch69: backport-b9e9ccbb11e4.patch
-Patch70: backport-b6641f28c593.patch
-Patch71: backport-a85f67b2658e.patch
-Patch72: backport-758fae24d7b9.patch
-Patch73: backport-e373bc1bdc59.patch
-Patch74: backport-b7c333016e3d.patch
-Patch75: backport-7e5cffcd1e93.patch
-Patch76: backport-81b2b328a26c.patch
-Patch77: backport-60390ccb8b9b.patch
-Patch78: backport-570da5423dbe.patch
-Patch79: backport-0eae016b6e3d.patch
-Patch80: backport-f40e1c52e4e0.patch
-Patch81: backport-368096b9c4a2.patch
-Patch82: backport-e21a6a4f966a.patch
-Patch83: backport-935d501ccbf5.patch
-Patch84: backport-fb23e8ba2304.patch
-Patch85: backport-08693c03e00e.patch
-Patch86: backport-95419adfd4b2.patch
-Patch87: backport-f17d848c4caa-fix.patch
-Patch88: backport-3670abcaf032.patch
-Patch89: backport-9fdcf851689c.patch
-Patch90: backport-3e09045991cd.patch
-Patch91: backport-b672695e7488.patch
-Patch92: backport-79ca512a1fa6.patch
-Patch93: backport-6a9f5477637a.patch
-Patch94: backport-93c9edbef51b.patch
-Patch95: backport-73c932d0ea43.patch
-Patch96: backport-1787cc167906.patch
-Patch97: backport-afab477fba3b.patch
-Patch98: backport-747424c664bb.patch
-Patch99: backport-565ebcda976c.patch
-Patch100: backport-2a4e6c4e4bea.patch
-Patch101: backport-3d189f16a11d.patch
-Patch102: backport-c76cfada1cfa.patch
-Patch103: backport-f26bb285949b.patch
-Patch104: backport-4624912c0b55.patch
-Patch105: backport-2928c1d250b1.patch
-Patch106: backport-6d45368a0a89.patch
-Patch107: backport-b17546d7f33e.patch
-Patch108: backport-164a0b9653f4.patch
-Patch109: backport-737190abb174.patch
-Patch110: backport-e083d753924b.patch
-Patch111: backport-91bac8ad7c06.patch
-Patch112: backport-dd6c062a7a4a.patch
-Patch113: backport-9c3b9800e201.patch
-Patch114: backport-b11380f6cd58.patch
-Patch115: backport-b6b672e8a925.patch
-Patch116: backport-834cb8761051.patch
-Patch117: backport-eb7518b89be6.patch
-Patch118: backport-31f3bc97f450.patch
-Patch119: backport-88d3ff7ab15d.patch
-Patch120: backport-6536688439db.patch
-Patch121: backport-95b13fa43e07.patch
-Patch122: backport-81f0eaadf84d.patch
-Patch123: backport-e3662437eb43.patch
-Patch124: x86-cpuid-Infrastructure-for-leaf-0x80000021.eax.patch
-Patch125: backport-e1828e3032eb.patch
-Patch126: backport-969a57f73f6b.patch
-Patch127: backport-15b7611efd49.patch
-Patch128: backport-ec083bf552c3.patch
-Patch129: backport-5d9eff3a3127.patch
-Patch130: backport-71fac402e05a.patch
-Patch131: backport-00f2992b6c7a.patch
-Patch132: backport-378f2e6df314.patch
-Patch133: backport-614cec7d79d7.patch
-Patch134: backport-22b9add22b4a.patch
-Patch135: backport-a7e7c7260cde.patch
-Patch136: backport-39a40f3835ef.patch
-Patch137: backport-4116139131e9.patch
-Patch138: backport-ad9f7c3b2e0d.patch
-Patch139: backport-f3709b15fc86.patch
-Patch140: backport-52ce1c97844d.patch
-Patch141: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
-Patch142: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
-Patch143: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch144: 0003-xen-microcode-add-information-about-currently-loaded.patch
-Patch145: 0004-microcode-add-sequential-application-policy.patch
-Patch146: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
-Patch147: 0001-microcode-remove-panic-calls.patch
-Patch148: detect-nehalem-c-state.patch
-Patch149: quirk-hp-gen8-rmrr.patch
-Patch150: quirk-pci-phantom-function-devices.patch
-Patch151: 0001-x86-hpet-Pre-cleanup.patch
-Patch152: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch153: 0003-x86-hpet-Post-cleanup.patch
-Patch154: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch155: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch156: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
-Patch157: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch158: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch159: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
-Patch160: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch161: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
-Patch162: livepatch-ignore-duplicate-new.patch
-Patch163: default-log-level-info.patch
-Patch164: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch165: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch166: pygrub-Ignore-GRUB2-if-statements.patch
-Patch167: libfsimage-Add-support-for-btrfs.patch
-Patch168: quiet-broke-irq-affinity.patch
-Patch169: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
-Patch170: 0001-Hide-AVX-512-from-guests-by-default.patch
-Patch171: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch172: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
-Patch173: xen-tweak-cmdline-defaults.patch
-Patch174: xen-tweak-debug-overhead.patch
-Patch175: tweak-iommu-policy.patch
-Patch176: disable-core-parking.patch
-Patch177: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch178: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch179: hitachi-driver-domain-ssid.patch
-Patch180: livepatch-payload-in-header.patch
-Patch181: xen-define-offsets-for-kdump.patch
-Patch182: xen-scheduler-auto-privdom-weight.patch
-Patch183: xen-hvm-disable-tsc-ramping.patch
-Patch184: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch185: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
-Patch186: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
-Patch187: i8259-timers-pick-online-vcpu.patch
-Patch188: revert-ca2eee92df44.patch
-Patch189: libxc-stubs-hvm_check_pvdriver.patch
-Patch190: libxc-cpuid-cores_per_socket.patch
-Patch191: pygrub-add-default-and-extra-args.patch
-Patch192: pygrub-always-boot-default.patch
-Patch193: pygrub-friendly-no-fs.patch
-Patch194: pygrub-image-max-size.patch
-Patch195: pygrub-default-xenmobile-kernel.patch
-Patch196: pygrub-blacklist-support.patch
-Patch197: oem-bios-xensource.patch
-Patch198: oem-bios-magic-from-xenstore.patch
-Patch199: misc-log-guest-consoles.patch
-Patch200: fix-ocaml-libs.patch
-Patch201: retrofit-max-featuresets.patch
-Patch202: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
-Patch203: ocaml-cpuid-helpers.patch
-Patch204: xentop-vbd3.patch
-Patch205: mixed-domain-runstates.patch
-Patch206: xenguest.patch
-Patch207: xen-vmdebug.patch
-Patch208: oxenstore-censor-sensitive-data.patch
-Patch209: oxenstore-large-packets.patch
-Patch210: 0019-tools-xenstore-add-live-update-command-to-xenstore-c.patch
-Patch211: 0001-tools-ocaml-xenstored-only-quit-on-SIGTERM-when-a-re.patch
-Patch212: 0002-tools-ocaml-xenstored-Automatically-resume-when-poss.patch
-Patch213: 0003-tools-ocaml-xenstored-add-cooperative-live-update-co.patch
-Patch214: 0004-tools-ocaml-xenstored-start-live-update-process.patch
-Patch215: 0006-tools-ocaml-xenstored-implement-socket-live-update.patch
-Patch216: pv-shim-compat-dmc.patch
-Patch217: nvidia-vga.patch
-Patch218: hvmloader-disable-pci-option-rom-loading.patch
-Patch219: xen-force-software-vmcs-shadow.patch
-Patch220: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch221: use-msr-ll-instead-of-vmcs-efer.patch
-Patch222: add-pv-iommu-headers.patch
-Patch223: add-pv-iommu-local-domain-ops.patch
-Patch224: add-pv-iommu-foreign-support.patch
-Patch225: upstream-pv-iommu-tools.patch
-Patch226: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch227: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
-Patch228: gvt-g-hvmloader+rombios.patch
-Patch229: xen-introduce-cmdline-to-control-introspection-extensions.patch
-Patch230: xen-domctl-set-privileged-domain.patch
-Patch231: xen-reexecute-instn-under-monitor-trap.patch
-Patch232: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
-Patch233: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
-Patch234: xen-introspection-pause.patch
-Patch235: xen-always-enable-altp2m-external-mode.patch
-Patch236: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
-Patch237: 0002-x86-add-xen-spec-ctrl-utility.patch
+Patch31: backport-3826ba5f8271.patch
+Patch32: backport-7669737d7da5.patch
+Patch33: backport-c7da430b21e0.patch
+Patch34: backport-fce392fa36c3.patch
+Patch35: backport-8d9f36132afd.patch
+Patch36: backport-e8c04e468312.patch
+Patch37: backport-f9ae12fc103c.patch
+Patch38: backport-1575075b2e3a.patch
+Patch39: backport-a84bc5bde583.patch
+Patch40: backport-413b08328a57.patch
+Patch41: backport-87ff11354f0d.patch
+Patch42: backport-cd7dedad8209.patch
+Patch43: backport-79cf0989175c.patch
+Patch44: backport-6dd95b02ea27.patch
+Patch45: backport-9356f9de4162.patch
+Patch46: backport-c08cbf7fb891.patch
+Patch47: backport-3d05407025ed.patch
+Patch48: backport-b1710040ca96.patch
+Patch49: backport-31bf4f26aa17.patch
+Patch50: backport-e9bd648015dd.patch
+Patch51: backport-da9290639eb5.patch
+Patch52: backport-7b3c5b70a323.patch
+Patch53: backport-1171a93b6ca7.patch
+Patch54: backport-2004db3ced18.patch
+Patch55: backport-59e1f6d89710.patch
+Patch56: backport-86cf92f50533.patch
+Patch57: backport-0a9c44486b90.patch
+Patch58: backport-270ff9a835fb.patch
+Patch59: backport-dacb80f9757c.patch
+Patch60: backport-1b3cec69bf30.patch
+Patch61: backport-8171e0796542.patch
+Patch62: backport-a798bac54fe8.patch
+Patch63: backport-920d5f31883c.patch
+Patch64: backport-c9495bd7dff5.patch
+Patch65: backport-53ddfc80a84a.patch
+Patch66: backport-a9b6dacf88fe.patch
+Patch67: backport-7ff66809ccd5.patch
+Patch68: backport-53594c7bd197.patch
+Patch69: backport-540d4d60378c.patch
+Patch70: backport-3174835ba825.patch
+Patch71: backport-c2b4e23fdda4.patch
+Patch72: backport-e9aca9470ed8.patch
+Patch73: backport-68d757df8dd2.patch
+Patch74: backport-17b997aa1edb.patch
+Patch75: backport-35b819c45c46.patch
+Patch76: backport-d8a6a8b36d86.patch
+Patch77: backport-4489ffdec331.patch
+Patch78: backport-ab5bfc049e8e.patch
+Patch79: backport-dc036ab9d506.patch
+Patch80: backport-b9e9ccbb11e4.patch
+Patch81: backport-b6641f28c593.patch
+Patch82: backport-a85f67b2658e.patch
+Patch83: backport-758fae24d7b9.patch
+Patch84: backport-e373bc1bdc59.patch
+Patch85: backport-b7c333016e3d.patch
+Patch86: backport-7e5cffcd1e93.patch
+Patch87: backport-81b2b328a26c.patch
+Patch88: backport-60390ccb8b9b.patch
+Patch89: backport-570da5423dbe.patch
+Patch90: backport-0eae016b6e3d.patch
+Patch91: backport-f40e1c52e4e0.patch
+Patch92: backport-368096b9c4a2.patch
+Patch93: backport-e21a6a4f966a.patch
+Patch94: backport-935d501ccbf5.patch
+Patch95: backport-fb23e8ba2304.patch
+Patch96: backport-08693c03e00e.patch
+Patch97: backport-95419adfd4b2.patch
+Patch98: backport-f17d848c4caa-fix.patch
+Patch99: backport-3670abcaf032.patch
+Patch100: backport-9fdcf851689c.patch
+Patch101: backport-3e09045991cd.patch
+Patch102: backport-b672695e7488.patch
+Patch103: backport-79ca512a1fa6.patch
+Patch104: backport-6a9f5477637a.patch
+Patch105: backport-93c9edbef51b.patch
+Patch106: backport-73c932d0ea43.patch
+Patch107: backport-1787cc167906.patch
+Patch108: backport-afab477fba3b.patch
+Patch109: backport-747424c664bb.patch
+Patch110: backport-565ebcda976c.patch
+Patch111: backport-2a4e6c4e4bea.patch
+Patch112: backport-3d189f16a11d.patch
+Patch113: backport-c76cfada1cfa.patch
+Patch114: backport-f26bb285949b.patch
+Patch115: backport-4624912c0b55.patch
+Patch116: backport-2928c1d250b1.patch
+Patch117: backport-6d45368a0a89.patch
+Patch118: backport-b17546d7f33e.patch
+Patch119: backport-164a0b9653f4.patch
+Patch120: backport-737190abb174.patch
+Patch121: backport-e083d753924b.patch
+Patch122: backport-91bac8ad7c06.patch
+Patch123: backport-dd6c062a7a4a.patch
+Patch124: backport-9c3b9800e201.patch
+Patch125: backport-b11380f6cd58.patch
+Patch126: backport-b6b672e8a925.patch
+Patch127: backport-834cb8761051.patch
+Patch128: backport-eb7518b89be6.patch
+Patch129: backport-31f3bc97f450.patch
+Patch130: backport-88d3ff7ab15d.patch
+Patch131: backport-6536688439db.patch
+Patch132: backport-95b13fa43e07.patch
+Patch133: backport-81f0eaadf84d.patch
+Patch134: backport-e3662437eb43.patch
+Patch135: x86-cpuid-Infrastructure-for-leaf-0x80000021.eax.patch
+Patch136: backport-e1828e3032eb.patch
+Patch137: backport-969a57f73f6b.patch
+Patch138: backport-15b7611efd49.patch
+Patch139: backport-ec083bf552c3.patch
+Patch140: backport-5d9eff3a3127.patch
+Patch141: backport-71fac402e05a.patch
+Patch142: backport-00f2992b6c7a.patch
+Patch143: backport-378f2e6df314.patch
+Patch144: backport-614cec7d79d7.patch
+Patch145: backport-22b9add22b4a.patch
+Patch146: backport-a7e7c7260cde.patch
+Patch147: backport-39a40f3835ef.patch
+Patch148: backport-4116139131e9.patch
+Patch149: backport-ad9f7c3b2e0d.patch
+Patch150: backport-f3709b15fc86.patch
+Patch151: backport-52ce1c97844d.patch
+Patch152: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
+Patch153: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
+Patch154: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch155: 0003-xen-microcode-add-information-about-currently-loaded.patch
+Patch156: 0004-microcode-add-sequential-application-policy.patch
+Patch157: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
+Patch158: 0001-microcode-remove-panic-calls.patch
+Patch159: detect-nehalem-c-state.patch
+Patch160: quirk-hp-gen8-rmrr.patch
+Patch161: quirk-pci-phantom-function-devices.patch
+Patch162: 0001-x86-hpet-Pre-cleanup.patch
+Patch163: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+Patch164: 0003-x86-hpet-Post-cleanup.patch
+Patch165: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch166: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch167: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
+Patch168: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch169: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch170: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+Patch171: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch172: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
+Patch173: livepatch-ignore-duplicate-new.patch
+Patch174: default-log-level-info.patch
+Patch175: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch176: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch177: pygrub-Ignore-GRUB2-if-statements.patch
+Patch178: libfsimage-Add-support-for-btrfs.patch
+Patch179: quiet-broke-irq-affinity.patch
+Patch180: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
+Patch181: 0001-Hide-AVX-512-from-guests-by-default.patch
+Patch182: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch183: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
+Patch184: xen-tweak-cmdline-defaults.patch
+Patch185: xen-tweak-debug-overhead.patch
+Patch186: tweak-iommu-policy.patch
+Patch187: tweak-sc-policy.patch
+Patch188: disable-core-parking.patch
+Patch189: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch190: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch191: hitachi-driver-domain-ssid.patch
+Patch192: livepatch-payload-in-header.patch
+Patch193: xen-define-offsets-for-kdump.patch
+Patch194: xen-scheduler-auto-privdom-weight.patch
+Patch195: xen-hvm-disable-tsc-ramping.patch
+Patch196: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch197: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
+Patch198: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
+Patch199: i8259-timers-pick-online-vcpu.patch
+Patch200: revert-ca2eee92df44.patch
+Patch201: libxc-stubs-hvm_check_pvdriver.patch
+Patch202: libxc-cpuid-cores_per_socket.patch
+Patch203: pygrub-add-default-and-extra-args.patch
+Patch204: pygrub-always-boot-default.patch
+Patch205: pygrub-friendly-no-fs.patch
+Patch206: pygrub-image-max-size.patch
+Patch207: pygrub-default-xenmobile-kernel.patch
+Patch208: pygrub-blacklist-support.patch
+Patch209: oem-bios-xensource.patch
+Patch210: oem-bios-magic-from-xenstore.patch
+Patch211: misc-log-guest-consoles.patch
+Patch212: fix-ocaml-libs.patch
+Patch213: retrofit-max-featuresets.patch
+Patch214: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
+Patch215: ocaml-cpuid-helpers.patch
+Patch216: xentop-vbd3.patch
+Patch217: mixed-domain-runstates.patch
+Patch218: xenguest.patch
+Patch219: xen-vmdebug.patch
+Patch220: oxenstore-censor-sensitive-data.patch
+Patch221: oxenstore-large-packets.patch
+Patch222: 0019-tools-xenstore-add-live-update-command-to-xenstore-c.patch
+Patch223: 0001-tools-ocaml-xenstored-only-quit-on-SIGTERM-when-a-re.patch
+Patch224: 0002-tools-ocaml-xenstored-Automatically-resume-when-poss.patch
+Patch225: 0003-tools-ocaml-xenstored-add-cooperative-live-update-co.patch
+Patch226: 0004-tools-ocaml-xenstored-start-live-update-process.patch
+Patch227: 0006-tools-ocaml-xenstored-implement-socket-live-update.patch
+Patch228: pv-shim-compat-dmc.patch
+Patch229: nvidia-vga.patch
+Patch230: hvmloader-disable-pci-option-rom-loading.patch
+Patch231: xen-force-software-vmcs-shadow.patch
+Patch232: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch233: use-msr-ll-instead-of-vmcs-efer.patch
+Patch234: add-pv-iommu-headers.patch
+Patch235: add-pv-iommu-local-domain-ops.patch
+Patch236: add-pv-iommu-foreign-support.patch
+Patch237: upstream-pv-iommu-tools.patch
+Patch238: allow-rombios-pci-config-on-any-host-bridge.patch
+Patch239: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
+Patch240: gvt-g-hvmloader+rombios.patch
+Patch241: xen-introduce-cmdline-to-control-introspection-extensions.patch
+Patch242: xen-domctl-set-privileged-domain.patch
+Patch243: xen-reexecute-instn-under-monitor-trap.patch
+Patch244: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
+Patch245: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
+Patch246: xen-introspection-pause.patch
+Patch247: xen-always-enable-altp2m-external-mode.patch
+Patch248: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
+Patch249: 0002-x86-add-xen-spec-ctrl-utility.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 
 
 ExclusiveArch: x86_64
@@ -330,7 +342,7 @@ Xen Hypervisor.
 
 %package hypervisor
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: The Xen Hypervisor
 License: Various (See description)
 Group: System/Hypervisor
@@ -344,7 +356,7 @@ Portions of this package are © 2018 Citrix Systems, Inc. For other copyright an
 
 %package hypervisor-debuginfo
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: The Xen Hypervisor debug information
 Group: Development/Debug
 %description hypervisor-debuginfo
@@ -352,7 +364,7 @@ This package contains the Xen Hypervisor debug information.
 
 %package tools
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor general tools
 Requires: xen-libs = %{version}
 Group: System/Base
@@ -361,7 +373,7 @@ This package contains the Xen Hypervisor general tools for all domains.
 
 %package devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: The Xen Hypervisor public headers
 Group: Development/Libraries
 %description devel
@@ -369,7 +381,7 @@ This package contains the Xen Hypervisor public header files.
 
 %package libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor general libraries
 Group: System/Libraries
 %description libs
@@ -377,7 +389,7 @@ This package contains the Xen Hypervisor general libraries for all domains.
 
 %package libs-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor general development libraries
 Requires: xen-libs = %{version}
 Requires: xen-devel = %{version}
@@ -387,7 +399,7 @@ This package contains the Xen Hypervisor general development for all domains.
 
 %package dom0-tools
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor Domain 0 tools
 Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
@@ -404,7 +416,7 @@ This package contains the Xen Hypervisor control domain tools.
 
 %package dom0-libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor Domain 0 libraries
 Requires: xen-hypervisor = %{version}
 Group: System/Libraries
@@ -413,7 +425,7 @@ This package contains the Xen Hypervisor control domain libraries.
 
 %package dom0-libs-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor Domain 0 headers
 Requires: xen-devel = %{version}
 Requires: xen-dom0-libs = %{version}
@@ -426,7 +438,7 @@ This package contains the Xen Hypervisor control domain headers.
 
 %package ocaml-libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor ocaml libraries
 Requires: xen-dom0-libs = %{version}
 Group: System/Libraries
@@ -435,7 +447,7 @@ This package contains the Xen Hypervisor ocaml libraries.
 
 %package ocaml-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor ocaml headers
 Requires: xen-ocaml-libs = %{version}
 Requires: xen-dom0-libs-devel = %{version}
@@ -445,7 +457,7 @@ This package contains the Xen Hypervisor ocaml headers.
 
 %package installer-files
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen files for the XenServer installer
 Group: System Environment/Base
 %description installer-files
@@ -454,7 +466,7 @@ the XenServer installer environment.
 
 %package dom0-tests
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 1dd91e033e992d290c99e9faf8beb42c10a69d53
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
 Summary: Xen Hypervisor tests
 Group: System/Libraries
 %description dom0-tests

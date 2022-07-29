@@ -19,7 +19,7 @@ Version: 4.13.4
 # the xen_extra field can't hold more than 16 chars
 # so instead of using %%release to define XEN_VENDORVERSION
 # we create a base_release macro, that doesn't contain the dist suffix
-%define base_release 9.24.1
+%define base_release 9.24.2
 Release: %{base_release}%{?dist}
 License: GPLv2 and LGPLv2+ and BSD
 URL:     http://www.xenproject.org
@@ -291,6 +291,9 @@ Patch258: xen-introspection-pause.patch
 Patch259: xen-always-enable-altp2m-external-mode.patch
 Patch260: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
 Patch261: 0002-x86-add-xen-spec-ctrl-utility.patch
+
+#XCP-ng patches
+Patch1000: amd-iommu-correct-xt-handling.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
 Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8330d9de0836a27a5ba0abfc8e4135e8542e0011
@@ -1128,6 +1131,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{base_release}
 
 %{?_cov_results_package}
 %changelog
+* Fri Jul 29 2022 Andrei Semenov <andrei.semenov@vates.fr> - 4.13.4-9.24.2
+- Add amd-iommu-correct-xt-handling.patch
+
 * Tue Jul 12 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.24.1
 - Security update, synced from hotfix XS82ECU1014
 - XSA 407

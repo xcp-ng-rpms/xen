@@ -1,10 +1,9 @@
 From 9649cef3b3a7eaca1347154ea7f274586d48bc29 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
 Date: Fri, 28 Feb 2020 16:25:43 +0100
-Subject: [PATCH] AMD/IOMMU: correct handling when XT's prereq features are
- unavailable
+Subject: AMD/IOMMU: correct handling when XT's prereq features are unavailable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 We should neither cause IOMMU initialization as a whole to fail in this
@@ -16,16 +15,13 @@ event. It is merely necessary for the function to indicate to the caller
 
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
-Reviewed-by: Roger Pau MonnÃ© <roger.pau@citrix.com>
----
- xen/drivers/passthrough/amd/iommu_init.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 
 diff --git a/xen/drivers/passthrough/amd/iommu_init.c b/xen/drivers/passthrough/amd/iommu_init.c
-index d9a4b0f802..147ce8ca87 100644
+index 7a41010d09e1..43c4eadcd71e 100644
 --- a/xen/drivers/passthrough/amd/iommu_init.c
 +++ b/xen/drivers/passthrough/amd/iommu_init.c
-@@ -1364,6 +1364,7 @@ static int __init amd_iommu_prepare_one(struct amd_iommu *iommu)
+@@ -1419,6 +1419,7 @@ static int __init amd_iommu_prepare_one(struct amd_iommu *iommu)
  int __init amd_iommu_prepare(bool xt)
  {
      struct amd_iommu *iommu;
@@ -33,7 +29,7 @@ index d9a4b0f802..147ce8ca87 100644
      int rc = -ENODEV;
  
      BUG_ON( !iommu_found() );
-@@ -1400,17 +1401,16 @@ int __init amd_iommu_prepare(bool xt)
+@@ -1455,17 +1456,16 @@ int __init amd_iommu_prepare(bool xt)
          if ( rc )
              goto error_out;
  
@@ -56,7 +52,7 @@ index d9a4b0f802..147ce8ca87 100644
      }
  
      rc = amd_iommu_update_ivrs_mapping_acpi();
-@@ -1422,7 +1422,7 @@ int __init amd_iommu_prepare(bool xt)
+@@ -1477,7 +1477,7 @@ int __init amd_iommu_prepare(bool xt)
          ivhd_type = 0;
      }
  
@@ -65,6 +61,3 @@ index d9a4b0f802..147ce8ca87 100644
  }
  
  int __init amd_iommu_init(bool xt)
--- 
-2.30.2
-

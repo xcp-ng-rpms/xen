@@ -128,10 +128,10 @@ index 03f92c23dcaf..8568491c7ea9 100644
 +    asm volatile ("sfence" ::: "memory");
 +}
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index cbb2ce17c001..709509e0fc9e 100644
+index e72c97cfbd3f..46468c86b363 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -3407,7 +3407,7 @@ gnttab_swap_grant_ref(XEN_GUEST_HANDLE_PARAM(gnttab_swap_grant_ref_t) uop,
+@@ -3406,7 +3406,7 @@ gnttab_swap_grant_ref(XEN_GUEST_HANDLE_PARAM(gnttab_swap_grant_ref_t) uop,
      return 0;
  }
  
@@ -140,7 +140,7 @@ index cbb2ce17c001..709509e0fc9e 100644
  {
      struct domain *d, *owner;
      struct page_info *page;
-@@ -3501,7 +3501,7 @@ gnttab_cache_flush(XEN_GUEST_HANDLE_PARAM(gnttab_cache_flush_t) uop,
+@@ -3500,7 +3500,7 @@ gnttab_cache_flush(XEN_GUEST_HANDLE_PARAM(gnttab_cache_flush_t) uop,
              return -EFAULT;
          for ( ; ; )
          {

@@ -25,7 +25,7 @@ master commit: 74a11c43fd7e074b1f77631b446dd2115eacb9e8
 master date: 2021-11-22 12:27:30 +0000
 
 diff --git a/xen/arch/x86/mm/p2m.c b/xen/arch/x86/mm/p2m.c
-index a68b4fe52603..a6bfda010a6f 100644
+index a68b4fe526..a6bfda010a 100644
 --- a/xen/arch/x86/mm/p2m.c
 +++ b/xen/arch/x86/mm/p2m.c
 @@ -781,6 +781,7 @@ p2m_remove_page(struct p2m_domain *p2m, unsigned long gfn_l, unsigned long mfn,

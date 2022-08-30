@@ -19,7 +19,7 @@ master commit: 8ec13f68e0b026863d23e7f44f252d06478bc809
 master date: 2021-11-22 12:27:30 +0000
 
 diff --git a/xen/arch/x86/mm/p2m-pod.c b/xen/arch/x86/mm/p2m-pod.c
-index c14801f5ff8e..c981200087f4 100644
+index c14801f5ff..c981200087 100644
 --- a/xen/arch/x86/mm/p2m-pod.c
 +++ b/xen/arch/x86/mm/p2m-pod.c
 @@ -111,15 +111,13 @@ p2m_pod_cache_add(struct p2m_domain *p2m,

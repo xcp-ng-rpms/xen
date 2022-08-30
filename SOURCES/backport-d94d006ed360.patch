@@ -41,7 +41,7 @@ master commit: 182c737b9ba540ebceb1433f3940fbed6eac4ea9
 master date: 2021-11-22 12:27:30 +0000
 
 diff --git a/xen/arch/x86/mm/p2m-pod.c b/xen/arch/x86/mm/p2m-pod.c
-index 007cdd87d07c..c14801f5ff8e 100644
+index 007cdd87d0..c14801f5ff 100644
 --- a/xen/arch/x86/mm/p2m-pod.c
 +++ b/xen/arch/x86/mm/p2m-pod.c
 @@ -495,7 +495,7 @@ p2m_pod_zero_check_superpage(struct p2m_domain *p2m, gfn_t gfn);
@@ -90,7 +90,7 @@ index 007cdd87d07c..c14801f5ff8e 100644
              goto out_unlock;
          }
          ret = 1UL << order;
-@@ -674,6 +681,22 @@ p2m_pod_decrease_reservation(struct domain *d, gfn_t gfn, unsigned int order)
+@@ -674,6 +681,22 @@ out_unlock:
      return ret;
  }
  
@@ -113,7 +113,7 @@ index 007cdd87d07c..c14801f5ff8e 100644
  void p2m_pod_dump_data(struct domain *d)
  {
      struct p2m_domain *p2m = p2m_get_hostp2m(d);
-@@ -1269,19 +1292,15 @@ p2m_pod_demand_populate(struct p2m_domain *p2m, gfn_t gfn,
+@@ -1269,19 +1292,15 @@ remap_and_retry:
      return true;
  }
  
@@ -154,7 +154,7 @@ index 007cdd87d07c..c14801f5ff8e 100644
  
  out:
      gfn_unlock(p2m, gfn, order);
-@@ -1326,6 +1356,27 @@ guest_physmap_mark_populate_on_demand(struct domain *d, unsigned long gfn_l,
+@@ -1326,6 +1356,27 @@ out:
      return rc;
  }
  

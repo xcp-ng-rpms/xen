@@ -16,7 +16,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.4
-Release: 9.25
+Release: 9.26
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     http://www.xenproject.org
 
@@ -200,107 +200,124 @@ Patch171: backport-7f7e55b85fce.patch
 Patch172: backport-ea140035d01a.patch
 Patch173: backport-60d1adfa1879.patch
 Patch174: backport-e570e8d520ab.patch
-Patch175: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
-Patch176: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
-Patch177: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch178: 0003-xen-microcode-add-information-about-currently-loaded.patch
-Patch179: 0004-microcode-add-sequential-application-policy.patch
-Patch180: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
-Patch181: 0001-microcode-remove-panic-calls.patch
-Patch182: detect-nehalem-c-state.patch
-Patch183: quirk-hp-gen8-rmrr.patch
-Patch184: quirk-pci-phantom-function-devices.patch
-Patch185: 0001-x86-hpet-Pre-cleanup.patch
-Patch186: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch187: 0003-x86-hpet-Post-cleanup.patch
-Patch188: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch189: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch190: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
-Patch191: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch192: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch193: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
-Patch194: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch195: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
-Patch196: livepatch-ignore-duplicate-new.patch
-Patch197: default-log-level-info.patch
-Patch198: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch199: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch200: pygrub-Ignore-GRUB2-if-statements.patch
-Patch201: libfsimage-Add-support-for-btrfs.patch
-Patch202: quiet-broke-irq-affinity.patch
-Patch203: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
-Patch204: 0001-Hide-AVX-512-from-guests-by-default.patch
-Patch205: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch206: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
-Patch207: xen-tweak-cmdline-defaults.patch
-Patch208: xen-tweak-debug-overhead.patch
-Patch209: tweak-iommu-policy.patch
-Patch210: tweak-sc-policy.patch
-Patch211: disable-core-parking.patch
-Patch212: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch213: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch214: hitachi-driver-domain-ssid.patch
-Patch215: livepatch-payload-in-header.patch
-Patch216: xen-define-offsets-for-kdump.patch
-Patch217: xen-scheduler-auto-privdom-weight.patch
-Patch218: xen-hvm-disable-tsc-ramping.patch
-Patch219: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch220: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
-Patch221: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
-Patch222: i8259-timers-pick-online-vcpu.patch
-Patch223: revert-ca2eee92df44.patch
-Patch224: libxc-stubs-hvm_check_pvdriver.patch
-Patch225: libxc-cpuid-cores_per_socket.patch
-Patch226: pygrub-add-default-and-extra-args.patch
-Patch227: pygrub-always-boot-default.patch
-Patch228: pygrub-friendly-no-fs.patch
-Patch229: pygrub-image-max-size.patch
-Patch230: pygrub-default-xenmobile-kernel.patch
-Patch231: pygrub-blacklist-support.patch
-Patch232: oem-bios-xensource.patch
-Patch233: oem-bios-magic-from-xenstore.patch
-Patch234: misc-log-guest-consoles.patch
-Patch235: fix-ocaml-libs.patch
-Patch236: retrofit-max-featuresets.patch
-Patch237: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
-Patch238: ocaml-cpuid-helpers.patch
-Patch239: xentop-vbd3.patch
-Patch240: mixed-domain-runstates.patch
-Patch241: xenguest.patch
-Patch242: xen-vmdebug.patch
-Patch243: oxenstore-censor-sensitive-data.patch
-Patch244: oxenstore-large-packets.patch
-Patch245: 0019-tools-xenstore-add-live-update-command-to-xenstore-c.patch
-Patch246: 0001-tools-ocaml-xenstored-only-quit-on-SIGTERM-when-a-re.patch
-Patch247: 0002-tools-ocaml-xenstored-Automatically-resume-when-poss.patch
-Patch248: 0003-tools-ocaml-xenstored-add-cooperative-live-update-co.patch
-Patch249: 0004-tools-ocaml-xenstored-start-live-update-process.patch
-Patch250: 0006-tools-ocaml-xenstored-implement-socket-live-update.patch
-Patch251: pv-shim-compat-dmc.patch
-Patch252: nvidia-vga.patch
-Patch253: hvmloader-disable-pci-option-rom-loading.patch
-Patch254: xen-force-software-vmcs-shadow.patch
-Patch255: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch256: use-msr-ll-instead-of-vmcs-efer.patch
-Patch257: add-pv-iommu-headers.patch
-Patch258: add-pv-iommu-local-domain-ops.patch
-Patch259: add-pv-iommu-foreign-support.patch
-Patch260: upstream-pv-iommu-tools.patch
-Patch261: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch262: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
-Patch263: gvt-g-hvmloader+rombios.patch
-Patch264: xen-introduce-cmdline-to-control-introspection-extensions.patch
-Patch265: xen-domctl-set-privileged-domain.patch
-Patch266: xen-reexecute-instn-under-monitor-trap.patch
-Patch267: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
-Patch268: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
-Patch269: xen-introspection-pause.patch
-Patch270: xen-always-enable-altp2m-external-mode.patch
-Patch271: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
-Patch272: 0002-x86-add-xen-spec-ctrl-utility.patch
+Patch175: backport-31b41ce858c8.patch
+Patch176: backport-0f2611c52438.patch
+Patch177: backport-c3bd0b83ea5b.patch
+Patch178: backport-c4e5cc2ccc5b.patch
+Patch179: xsa410-4.13-01.patch
+Patch180: xsa410-4.13-02.patch
+Patch181: xsa410-4.13-03.patch
+Patch182: xsa410-4.13-04.patch
+Patch183: xsa410-4.13-05.patch
+Patch184: xsa410-4.13-06.patch
+Patch185: xsa410-4.13-07.patch
+Patch186: xsa410-4.13-08.patch
+Patch187: xsa410-4.13-09.patch
+Patch188: xsa410-4.13-10.patch
+Patch189: xsa411-4.14.patch
+Patch190: 0001-x86-cpuid-Infrastructure-to-support-pseudo-feature-i.patch
+Patch191: 0002-x86-Activate-Data-Operand-Invariant-Timing-Mode-by-d.patch
+Patch192: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
+Patch193: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
+Patch194: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch195: 0003-xen-microcode-add-information-about-currently-loaded.patch
+Patch196: 0004-microcode-add-sequential-application-policy.patch
+Patch197: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
+Patch198: 0001-microcode-remove-panic-calls.patch
+Patch199: detect-nehalem-c-state.patch
+Patch200: quirk-hp-gen8-rmrr.patch
+Patch201: quirk-pci-phantom-function-devices.patch
+Patch202: 0001-x86-hpet-Pre-cleanup.patch
+Patch203: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+Patch204: 0003-x86-hpet-Post-cleanup.patch
+Patch205: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch206: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch207: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
+Patch208: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch209: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch210: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+Patch211: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch212: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
+Patch213: livepatch-ignore-duplicate-new.patch
+Patch214: default-log-level-info.patch
+Patch215: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch216: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch217: pygrub-Ignore-GRUB2-if-statements.patch
+Patch218: libfsimage-Add-support-for-btrfs.patch
+Patch219: quiet-broke-irq-affinity.patch
+Patch220: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
+Patch221: 0001-Hide-AVX-512-from-guests-by-default.patch
+Patch222: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch223: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
+Patch224: xen-tweak-cmdline-defaults.patch
+Patch225: xen-tweak-debug-overhead.patch
+Patch226: tweak-iommu-policy.patch
+Patch227: tweak-sc-policy.patch
+Patch228: disable-core-parking.patch
+Patch229: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch230: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch231: hitachi-driver-domain-ssid.patch
+Patch232: livepatch-payload-in-header.patch
+Patch233: xen-define-offsets-for-kdump.patch
+Patch234: xen-scheduler-auto-privdom-weight.patch
+Patch235: xen-hvm-disable-tsc-ramping.patch
+Patch236: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch237: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
+Patch238: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
+Patch239: i8259-timers-pick-online-vcpu.patch
+Patch240: revert-ca2eee92df44.patch
+Patch241: libxc-stubs-hvm_check_pvdriver.patch
+Patch242: libxc-cpuid-cores_per_socket.patch
+Patch243: pygrub-add-default-and-extra-args.patch
+Patch244: pygrub-always-boot-default.patch
+Patch245: pygrub-friendly-no-fs.patch
+Patch246: pygrub-image-max-size.patch
+Patch247: pygrub-default-xenmobile-kernel.patch
+Patch248: pygrub-blacklist-support.patch
+Patch249: oem-bios-xensource.patch
+Patch250: oem-bios-magic-from-xenstore.patch
+Patch251: misc-log-guest-consoles.patch
+Patch252: fix-ocaml-libs.patch
+Patch253: retrofit-max-featuresets.patch
+Patch254: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
+Patch255: ocaml-cpuid-helpers.patch
+Patch256: xentop-vbd3.patch
+Patch257: mixed-domain-runstates.patch
+Patch258: xenguest.patch
+Patch259: xen-vmdebug.patch
+Patch260: oxenstore-censor-sensitive-data.patch
+Patch261: oxenstore-large-packets.patch
+Patch262: 0019-tools-xenstore-add-live-update-command-to-xenstore-c.patch
+Patch263: 0001-tools-ocaml-xenstored-only-quit-on-SIGTERM-when-a-re.patch
+Patch264: 0002-tools-ocaml-xenstored-Automatically-resume-when-poss.patch
+Patch265: 0003-tools-ocaml-xenstored-add-cooperative-live-update-co.patch
+Patch266: 0004-tools-ocaml-xenstored-start-live-update-process.patch
+Patch267: 0006-tools-ocaml-xenstored-implement-socket-live-update.patch
+Patch268: pv-shim-compat-dmc.patch
+Patch269: nvidia-vga.patch
+Patch270: hvmloader-disable-pci-option-rom-loading.patch
+Patch271: xen-force-software-vmcs-shadow.patch
+Patch272: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch273: use-msr-ll-instead-of-vmcs-efer.patch
+Patch274: add-pv-iommu-headers.patch
+Patch275: add-pv-iommu-local-domain-ops.patch
+Patch276: add-pv-iommu-foreign-support.patch
+Patch277: upstream-pv-iommu-tools.patch
+Patch278: allow-rombios-pci-config-on-any-host-bridge.patch
+Patch279: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
+Patch280: gvt-g-hvmloader+rombios.patch
+Patch281: xen-introduce-cmdline-to-control-introspection-extensions.patch
+Patch282: xen-domctl-set-privileged-domain.patch
+Patch283: xen-reexecute-instn-under-monitor-trap.patch
+Patch284: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
+Patch285: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
+Patch286: xen-introspection-pause.patch
+Patch287: xen-always-enable-altp2m-external-mode.patch
+Patch288: 0001-x86-add-XEN_SYSCTL_spec_ctrl.patch
+Patch289: 0002-x86-add-xen-spec-ctrl-utility.patch
 
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 
 
 ExclusiveArch: x86_64
@@ -364,7 +381,7 @@ Xen Hypervisor.
 
 %package hypervisor
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: The Xen Hypervisor
 License: GPLv2
 Group: System/Hypervisor
@@ -374,7 +391,7 @@ This package contains the Xen Project Hypervisor with selected patches provided 
 
 %package hypervisor-debuginfo
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: The Xen Hypervisor debug information
 License: GPLv2
 Group: Development/Debug
@@ -383,7 +400,7 @@ This package contains the Xen Hypervisor debug information.
 
 %package tools
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor general tools
 License: GPLv2 and LGPLv2
 Requires: xen-libs = %{version}
@@ -393,7 +410,7 @@ This package contains the Xen Hypervisor general tools for all domains.
 
 %package devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: The Xen Hypervisor public headers
 License: MIT and Public Domain
 Group: Development/Libraries
@@ -402,7 +419,7 @@ This package contains the Xen Hypervisor public header files.
 
 %package libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor general libraries
 License: LGPLv2
 Group: System/Libraries
@@ -411,7 +428,7 @@ This package contains the Xen Hypervisor general libraries for all domains.
 
 %package libs-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor general development libraries
 License: LGPLv2
 Requires: xen-libs = %{version}
@@ -422,7 +439,7 @@ This package contains the Xen Hypervisor general development for all domains.
 
 %package dom0-tools
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor Domain 0 tools
 License: GPLv2 and LGPLv2 and MIT
 Requires: xen-dom0-libs = %{version}
@@ -440,7 +457,7 @@ This package contains the Xen Hypervisor control domain tools.
 
 %package dom0-libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor Domain 0 libraries
 License: GPLv2 and LGPLv2 and MIT
 Requires: xen-hypervisor = %{version}
@@ -450,7 +467,7 @@ This package contains the Xen Hypervisor control domain libraries.
 
 %package dom0-libs-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor Domain 0 headers
 License: GPLv2 and LGPLv2 and MIT
 Requires: xen-devel = %{version}
@@ -464,7 +481,7 @@ This package contains the Xen Hypervisor control domain headers.
 
 %package ocaml-libs
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor ocaml libraries
 License: LGPLv2
 Requires: xen-dom0-libs = %{version}
@@ -474,7 +491,7 @@ This package contains the Xen Hypervisor ocaml libraries.
 
 %package ocaml-devel
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor ocaml headers
 License: LGPLv2
 Requires: xen-ocaml-libs = %{version}
@@ -485,7 +502,7 @@ This package contains the Xen Hypervisor ocaml headers.
 
 %package installer-files
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen files for the XenServer installer
 License: LGPLv2
 Group: System Environment/Base
@@ -495,7 +512,7 @@ the XenServer installer environment.
 
 %package dom0-tests
 Provides: gitsha(https://code.citrite.net/rest/archive/latest/projects/XSU/repos/xen/archive?at=RELEASE-4.13.4&prefix=xen-4.13.4&format=tar.gz#/xen-4.13.4.tar.gz) = 6e2fc128eb1a7d8ff8c36123a0a03e4e60a4a44c
-Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 8f56b56afc6e15e142d90d92e0b7228900f1772c
+Provides: gitsha(ssh://git@code.citrite.net/xs/xen.pg.git) = 25ea34fd295aa5503282a2bd9dddda4542e3bfba
 Summary: Xen Hypervisor tests
 License: GPLv2
 Group: System/Libraries

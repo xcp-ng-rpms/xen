@@ -528,6 +528,7 @@ cp -r $(pwd) %{buildroot}%{lp_devel_dir}
     KCONFIG_CONFIG=../buildconfigs/config-release MAP
 
 cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{hv_rel}.gz
+cp xen/xen.efi %{buildroot}/boot/%{name}-%{version}-%{hv_rel}.efi
 cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{hv_rel}.map
 cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{hv_rel}
 cp buildconfigs/config-release %{buildroot}/boot/%{name}-%{version}-%{hv_rel}.config
@@ -543,6 +544,7 @@ install -m 644 xen/xen-syms %{buildroot}%{lp_devel_dir}
     KCONFIG_CONFIG=../buildconfigs/config-debug MAP
 
 cp xen/xen.gz %{buildroot}/boot/%{name}-%{version}-%{hv_rel}-d.gz
+cp xen/xen.efi %{buildroot}/boot/%{name}-%{version}-%{hv_rel}-d.efi
 cp xen/System.map %{buildroot}/boot/%{name}-%{version}-%{hv_rel}-d.map
 cp xen/xen-syms %{buildroot}/boot/%{name}-syms-%{version}-%{hv_rel}-d
 cp buildconfigs/config-debug %{buildroot}/boot/%{name}-%{version}-%{hv_rel}-d.config
@@ -585,9 +587,11 @@ ln -sf xen-shim-release %{buildroot}/%{_libexecdir}/%{name}/boot/xen-shim
 
 %files hypervisor
 /boot/%{name}-%{version}-%{hv_rel}.gz
+/boot/%{name}-%{version}-%{hv_rel}.efi
 /boot/%{name}-%{version}-%{hv_rel}.map
 /boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
 /boot/%{name}-%{version}-%{hv_rel}-d.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
@@ -1078,7 +1082,8 @@ ln -sf xen-shim-release %{buildroot}/%{_libexecdir}/%{name}/boot/xen-shim
 %post hypervisor
 # Update the debug and release symlinks
 ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen-debug.gz
-ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen-release.gz
+ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen-debug.efi
+ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen-release.efi
 
 # Point /boot/xen.gz appropriately
 if [ ! -e /boot/xen.gz ]; then
@@ -1096,6 +1101,25 @@ else
         ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen.gz
     else
         ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+    fi
+fi
+
+# Point /boot/xen.efi appropriately
+if [ ! -e /boot/xen.efi ]; then
+%if %{default_debug_hypervisor}
+    # Use a debug hypervisor by default
+    ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen.efi
+%else
+    # Use a production hypervisor by default
+    ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+%endif
+else
+    # Else look at the current link, and whether it is debug
+    path="`readlink -f /boot/xen.efi`"
+    if [ ${path} != ${path%%-d.efi} ]; then
+        ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen.efi
+    else
+        ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
     fi
 fi
 

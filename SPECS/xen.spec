@@ -1,6 +1,6 @@
 %global package_speccommit 04e7ac8e319b0714baf55678b9fb09a93d71190f
 %global usver 4.13.4
-%global xsver 10.35
+%global xsver 10.35+efi
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -654,6 +654,7 @@ cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
     %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
+    %{__install} -p -D -m 644 xen/$2/xen.efi    %{buildroot}/boot/xen-%{version}$1.efi
     %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
     %{__install} -p -D -m 644 xen/$2/xen-syms   %{buildroot}/boot/xen-syms-%{version}$1
@@ -686,9 +687,11 @@ ln -sf xen-shim-release %{buildroot}%{_libexecdir}/%{name}/boot/xen-shim
 
 %files hypervisor
 /boot/%{name}-%{version}-%{hv_rel}.gz
+/boot/%{name}-%{version}-%{hv_rel}.efi
 /boot/%{name}-%{version}-%{hv_rel}.map
 /boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
 /boot/%{name}-%{version}-%{hv_rel}-d.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
@@ -1238,6 +1241,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Fri Dec 23 2022 Yann Dirson <yann.dirson@vates.fr> - 4.13.4-10.35.efi
+- Ship xen.efi binaries
+
 * Fri Nov 4 2022  Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.35
 - Fix for XSA-422 CVE-2022-23824
 

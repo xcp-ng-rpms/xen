@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     http://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -454,6 +454,9 @@ Summary: Xen Hypervisor Domain 0 headers
 License: GPLv2 and LGPLv2 and MIT
 Requires: xen-devel = %{version}
 Requires: xen-dom0-libs = %{version}
+
+# XCP-ng: Provides kept for 8.2 for repo consistency, due to vhostmd requiring it
+Provides: xen-dom0-devel = %{version}
 %description dom0-libs-devel
 This package contains the Xen Hypervisor control domain headers.
 
@@ -1162,6 +1165,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Mon Mar 13 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.30.2
+- Restore xen-dom0-devel Provides for xen-dom0-libs-devel
+
 * Thu Feb 23 2023 Gael Duperrey <gduperrey@vates.fr> 4.13.5-9.30.1
 * Synced from hotfix XS82ECU1026
 - *** Upstream changelog ***

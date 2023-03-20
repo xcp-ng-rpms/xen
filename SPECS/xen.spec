@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     http://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -323,6 +323,12 @@ Patch277: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
 Patch278: xen-introspection-pause.patch
 Patch279: xen-always-enable-altp2m-external-mode.patch
 Patch280: xen-spec-ctrl-utility.patch
+
+# XCP-ng patches
+Patch1000: xsa427.patch
+Patch1001: xsa428-1.patch
+Patch1002: xsa428-2.patch
+Patch1003: xsa429.patch
 
 ExclusiveArch: x86_64
 
@@ -1165,6 +1171,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Thu Mar 16 2023 Andrei Semenov <andrei.semenov@vates.fr>  - 4.13.5-9.30.3
+- Fix for XSA-427 (applied as is from Xen Project).
+- Fix for XSA-428 (applied as is from Xen Project). part 1
+- Fix for XSA-428 (applied as is from Xen Project). part 2
+- Fix for XSA-429 (adapted from Xen Project)
+
 * Mon Mar 13 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.30.2
 - Restore xen-dom0-devel Provides for xen-dom0-libs-devel
 

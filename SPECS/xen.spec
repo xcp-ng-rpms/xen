@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.0.q35.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -42,293 +42,293 @@ Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
 Source5: gen_test_metadata.py
-Patch0: build-tweaks.patch
-Patch1: autoconf-libjson.patch
-Patch2: configure-build.patch
-Patch3: xenserver-configuration.patch
-Patch4: coverity-model.patch
-Patch5: backport-680d18763aef.patch
-Patch6: backport-cd7dedad8209.patch
-Patch7: backport-79cf0989175c.patch
-Patch8: backport-6dd95b02ea27.patch
-Patch9: backport-0cd791c499bd.patch
-Patch10: backport-9356f9de4162.patch
-Patch11: backport-c08cbf7fb891.patch
-Patch12: backport-3d05407025ed.patch
-Patch13: backport-b1710040ca96.patch
-Patch14: backport-31bf4f26aa17.patch
-Patch15: backport-e9bd648015dd.patch
-Patch16: backport-da9290639eb5.patch
-Patch17: backport-7b3c5b70a323.patch
-Patch18: backport-1171a93b6ca7.patch
-Patch19: backport-2004db3ced18.patch
-Patch20: backport-59e1f6d89710.patch
-Patch21: backport-86cf92f50533.patch
-Patch22: backport-0a9c44486b90.patch
-Patch23: backport-270ff9a835fb.patch
-Patch24: backport-dacb80f9757c.patch
-Patch25: backport-1b3cec69bf30.patch
-Patch26: backport-8171e0796542.patch
-Patch27: backport-9649cef3b3a7.patch
-Patch28: backport-a798bac54fe8.patch
-Patch29: backport-920d5f31883c.patch
-Patch30: backport-c9495bd7dff5.patch
-Patch31: backport-53ddfc80a84a.patch
-Patch32: backport-a9b6dacf88fe.patch
-Patch33: backport-7ff66809ccd5.patch
-Patch34: backport-53594c7bd197.patch
-Patch35: backport-540d4d60378c.patch
-Patch36: backport-3174835ba825.patch
-Patch37: backport-c2b4e23fdda4.patch
-Patch38: backport-e9aca9470ed8.patch
-Patch39: backport-68d757df8dd2.patch
-Patch40: backport-17b997aa1edb.patch
-Patch41: backport-35b819c45c46.patch
-Patch42: backport-d8a6a8b36d86.patch
-Patch43: backport-54463aa79dac.patch
-Patch44: backport-4489ffdec331.patch
-Patch45: backport-ab5bfc049e8e.patch
-Patch46: backport-dc036ab9d506.patch
-Patch47: backport-b9e9ccbb11e4.patch
-Patch48: backport-b6641f28c593.patch
-Patch49: backport-a85f67b2658e.patch
-Patch50: backport-80a868f0f6cc.patch
-Patch51: backport-a06d3feea3b7.patch
-Patch52: backport-758fae24d7b9.patch
-Patch53: backport-e373bc1bdc59.patch
-Patch54: backport-b7c333016e3d.patch
-Patch55: backport-1997d379dc64.patch
-Patch56: backport-f7918dc8f94c.patch
-Patch57: backport-935e5fb0d570.patch
-Patch58: backport-29a6082f21f2.patch
-Patch59: backport-7f97193e6aa8.patch
-Patch60: backport-e663158bca89.patch
-Patch61: backport-4387b4c771fe.patch
-Patch62: backport-401c67e9bc8b.patch
-Patch63: backport-00c48f57ab36.patch
-Patch64: backport-42f0581a91d4.patch
-Patch65: backport-5e115dcf76f6.patch
-Patch66: backport-faf02c345ec0.patch
-Patch67: backport-3068dfd6415a.patch
-Patch68: backport-b1278939db0b.patch
-Patch69: backport-7e5cffcd1e93.patch
-Patch70: backport-5d752df85f2c.patch
-Patch71: backport-e8af54084586.patch
-Patch72: backport-81b2b328a26c.patch
-Patch73: backport-60390ccb8b9b.patch
-Patch74: backport-c4441ab1f1d5.patch
-Patch75: backport-570da5423dbe.patch
-Patch76: backport-0eae016b6e3d.patch
-Patch77: backport-6b0ac9a4e239.patch
-Patch78: backport-f40e1c52e4e0.patch
-Patch79: backport-368096b9c4a2.patch
-Patch80: backport-e21a6a4f966a.patch
-Patch81: backport-935d501ccbf5.patch
-Patch82: backport-fb23e8ba2304.patch
-Patch83: backport-08693c03e00e.patch
-Patch84: backport-95419adfd4b2.patch
-Patch85: backport-f17d848c4caa-fix.patch
-Patch86: backport-3670abcaf032.patch
-Patch87: backport-9fdcf851689c.patch
-Patch88: backport-2d1a35f1e6c2.patch
-Patch89: backport-3e09045991cd.patch
-Patch90: backport-b672695e7488.patch
-Patch91: backport-79ca512a1fa6.patch
-Patch92: backport-6a9f5477637a.patch
-Patch93: backport-93c9edbef51b.patch
-Patch94: backport-73c932d0ea43.patch
-Patch95: backport-1787cc167906.patch
-Patch96: backport-afab477fba3b.patch
-Patch97: backport-c76cfada1cfa.patch
-Patch98: backport-f26bb285949b.patch
-Patch99: backport-4624912c0b55.patch
-Patch100: backport-2928c1d250b1.patch
-Patch101: backport-6d45368a0a89.patch
-Patch102: backport-b17546d7f33e.patch
-Patch103: backport-164a0b9653f4.patch
-Patch104: backport-737190abb174.patch
-Patch105: backport-e083d753924b.patch
-Patch106: backport-91bac8ad7c06.patch
-Patch107: backport-dd6c062a7a4a.patch
-Patch108: backport-9c3b9800e201.patch
-Patch109: backport-b11380f6cd58.patch
-Patch110: backport-b6b672e8a925.patch
-Patch111: backport-834cb8761051.patch
-Patch112: backport-eb7518b89be6.patch
-Patch113: backport-f282182af329.patch
-Patch114: backport-9cfeb83cbe23.patch
-Patch115: backport-6809998c5f8f.patch
-Patch116: backport-31f3bc97f450.patch
-Patch117: backport-b07050e1e8f7.patch
-Patch118: backport-88d3ff7ab15d.patch
-Patch119: backport-6536688439db.patch
-Patch120: backport-81f0eaadf84d.patch
-Patch121: backport-e3662437eb43.patch
-Patch122: x86-cpuid-Infrastructure-for-leaf-0x80000021.eax.patch
-Patch123: backport-e1828e3032eb.patch
-Patch124: backport-969a57f73f6b.patch
-Patch125: backport-15b7611efd49.patch
-Patch126: backport-00f2992b6c7a.patch
-Patch127: backport-614cec7d79d7.patch
-Patch128: backport-22b9add22b4a.patch
-Patch129: backport-a7e7c7260cde.patch
-Patch130: backport-f97c1abf2934.patch
-Patch131: backport-39a40f3835ef.patch
-Patch132: backport-4116139131e9.patch
-Patch133: backport-ad9f7c3b2e0d.patch
-Patch134: backport-f3709b15fc86.patch
-Patch135: backport-52ce1c97844d.patch
-Patch136: backport-81d195c6c0e2.patch
-Patch137: backport-f627a39c5e75.patch
-Patch138: backport-6ba701064227.patch
-Patch139: backport-7f7e55b85fce.patch
-Patch140: backport-ea140035d01a.patch
-Patch141: backport-e270af94280e.patch
-Patch142: backport-60d1adfa1879.patch
-Patch143: backport-e570e8d520ab.patch
-Patch144: backport-a0aeab27ee0e.patch
-Patch145: backport-0f2611c52438.patch
-Patch146: backport-c3bd0b83ea5b.patch
-Patch147: backport-c4e5cc2ccc5b.patch
-Patch148: backport-7110192b1df6.patch
-Patch149: backport-f838b956779f.patch
-Patch150: backport-9272225ca728.patch
-Patch151: backport-a0bfdd201ea1.patch
-Patch152: backport-1d7fbc535d1d.patch
-Patch153: backport-37f82facd62f.patch
-Patch154: backport-57f07cca8252.patch
-Patch155: backport-c3b6be714c64.patch
-Patch156: backport-95db09b1b154.patch
-Patch157: backport-ee36179371fd.patch
-Patch158: backport-22d5affdf0ce.patch
-Patch159: backport-7ba68a6c558e.patch
-Patch160: backport-9bafe4a53306.patch
-Patch161: backport-b45bfaf359e4.patch
-Patch162: backport-9804a5db435f.patch
-Patch163: backport-31fbee749a75.patch
-Patch164: backport-aecdc28d9538.patch
-Patch165: backport-df2db174b36e.patch
-Patch166: backport-9b224c25293a.patch
-Patch167: backport-3f02e0a70fe9.patch
-Patch168: backport-ee7815f49faf.patch
-Patch169: backport-acd3fb6d6590.patch
-Patch170: backport-f1d7aac1e3c3.patch
-Patch171: backport-e267d11969a4.patch
-Patch172: backport-831419f82913.patch
-Patch173: backport-d2162d884cba.patch
-Patch174: backport-ff95dae53e5e.patch
-Patch175: backport-10acd21795a9.patch
-Patch176: backport-f5d0279839b5.patch
-Patch177: backport-a44734df6c24.patch
-Patch178: backport-f7d07619d2ae.patch
-Patch179: backport-d329b37d1213.patch
-Patch180: backport-573279cde1c4.patch
-Patch181: backport-ad15a0a8ca25.patch
-Patch182: backport-e94af0d58f86.patch
-Patch183: backport-3edca52ce736.patch
-Patch184: backport-5f08bc9404c7.patch
-Patch185: backport-897257ba49d0.patch
-Patch186: backport-e6f07052ce4a.patch
-Patch187: backport-ff8b560be80b.patch
-Patch188: backport-36eb2de31b6e.patch
-Patch189: backport-2636d8ff7a67.patch
-Patch190: backport-425068384210.patch
-Patch191: backport-9e7c74e6f9fd.patch
-Patch192: backport-d69ccf52ad46.patch
-Patch193: backport-3a59443c1d5a.patch
-Patch194: backport-63305e5392ec.patch
-Patch195: backport-f4ef8a41b808.patch
-Patch196: backport-f1315e48a03a.patch
-Patch197: xsa427.patch
-Patch198: xsa428-1.patch
-Patch199: xsa428-2.patch
-Patch200: xsa429.patch
-Patch201: 0001-x86-cpuid-Infrastructure-to-support-pseudo-feature-i.patch
-Patch202: 0002-x86-Activate-Data-Operand-Invariant-Timing-Mode-by-d.patch
-Patch203: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
-Patch204: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
-Patch205: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch206: 0003-xen-microcode-add-information-about-currently-loaded.patch
-Patch207: 0004-microcode-add-sequential-application-policy.patch
-Patch208: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
-Patch209: 0001-microcode-remove-panic-calls.patch
-Patch210: detect-nehalem-c-state.patch
-Patch211: quirk-hp-gen8-rmrr.patch
-Patch212: quirk-pci-phantom-function-devices.patch
-Patch213: 0001-x86-hpet-Pre-cleanup.patch
-Patch214: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch215: 0003-x86-hpet-Post-cleanup.patch
-Patch216: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch217: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch218: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
-Patch219: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch220: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch221: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
-Patch222: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch223: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
-Patch224: livepatch-ignore-duplicate-new.patch
-Patch225: default-log-level-info.patch
-Patch226: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch227: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch228: pygrub-Ignore-GRUB2-if-statements.patch
-Patch229: libfsimage-Add-support-for-btrfs.patch
-Patch230: quiet-broke-irq-affinity.patch
-Patch231: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
-Patch232: 0001-Hide-AVX-512-from-guests-by-default.patch
-Patch233: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch234: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
-Patch235: xen-tweak-cmdline-defaults.patch
-Patch236: xen-tweak-debug-overhead.patch
-Patch237: tweak-iommu-policy.patch
-Patch238: tweak-sc-policy.patch
-Patch239: disable-core-parking.patch
-Patch240: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch241: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch242: hitachi-driver-domain-ssid.patch
-Patch243: livepatch-payload-in-header.patch
-Patch244: xen-define-offsets-for-kdump.patch
-Patch245: xen-scheduler-auto-privdom-weight.patch
-Patch246: xen-hvm-disable-tsc-ramping.patch
-Patch247: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch248: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
-Patch249: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
-Patch250: i8259-timers-pick-online-vcpu.patch
-Patch251: revert-ca2eee92df44.patch
-Patch252: libxc-cpuid-cores_per_socket.patch
-Patch253: pygrub-add-default-and-extra-args.patch
-Patch254: pygrub-always-boot-default.patch
-Patch255: pygrub-friendly-no-fs.patch
-Patch256: pygrub-image-max-size.patch
-Patch257: pygrub-default-xenmobile-kernel.patch
-Patch258: pygrub-blacklist-support.patch
-Patch259: oem-bios-xensource.patch
-Patch260: oem-bios-magic-from-xenstore.patch
-Patch261: misc-log-guest-consoles.patch
-Patch262: fix-ocaml-libs.patch
-Patch263: retrofit-max-featuresets.patch
-Patch264: xentop-vbd3.patch
-Patch265: mixed-domain-runstates.patch
-Patch266: xenguest.patch
-Patch267: xen-vmdebug.patch
-Patch268: oxenstore-extra-debug.patch
-Patch269: oxenstore-censor-sensitive-data.patch
-Patch270: oxenstore-large-packets.patch
-Patch271: nvidia-vga.patch
-Patch272: hvmloader-disable-pci-option-rom-loading.patch
-Patch273: xen-force-software-vmcs-shadow.patch
-Patch274: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch275: use-msr-ll-instead-of-vmcs-efer.patch
-Patch276: add-pv-iommu-headers.patch
-Patch277: add-pv-iommu-local-domain-ops.patch
-Patch278: add-pv-iommu-foreign-support.patch
-Patch279: upstream-pv-iommu-tools.patch
-Patch280: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch281: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
-Patch282: gvt-g-hvmloader+rombios.patch
-Patch283: xen-spec-ctrl-utility.patch
-Patch284: 0001-hvmloader-acpi-add-TPM-version-option.patch
-Patch285: 0002-hvmloader-acpi-add-TPM2.patch
-Patch286: vtpm-ppi-acpi-dsm.patch
+# Patch0: build-tweaks.patch
+# Patch1: autoconf-libjson.patch
+# Patch2: configure-build.patch
+# Patch3: xenserver-configuration.patch
+# Patch4: coverity-model.patch
+# Patch5: backport-680d18763aef.patch
+# Patch6: backport-cd7dedad8209.patch
+# Patch7: backport-79cf0989175c.patch
+# Patch8: backport-6dd95b02ea27.patch
+# Patch9: backport-0cd791c499bd.patch
+# Patch10: backport-9356f9de4162.patch
+# Patch11: backport-c08cbf7fb891.patch
+# Patch12: backport-3d05407025ed.patch
+# Patch13: backport-b1710040ca96.patch
+# Patch14: backport-31bf4f26aa17.patch
+# Patch15: backport-e9bd648015dd.patch
+# Patch16: backport-da9290639eb5.patch
+# Patch17: backport-7b3c5b70a323.patch
+# Patch18: backport-1171a93b6ca7.patch
+# Patch19: backport-2004db3ced18.patch
+# Patch20: backport-59e1f6d89710.patch
+# Patch21: backport-86cf92f50533.patch
+# Patch22: backport-0a9c44486b90.patch
+# Patch23: backport-270ff9a835fb.patch
+# Patch24: backport-dacb80f9757c.patch
+# Patch25: backport-1b3cec69bf30.patch
+# Patch26: backport-8171e0796542.patch
+# Patch27: backport-9649cef3b3a7.patch
+# Patch28: backport-a798bac54fe8.patch
+# Patch29: backport-920d5f31883c.patch
+# Patch30: backport-c9495bd7dff5.patch
+# Patch31: backport-53ddfc80a84a.patch
+# Patch32: backport-a9b6dacf88fe.patch
+# Patch33: backport-7ff66809ccd5.patch
+# Patch34: backport-53594c7bd197.patch
+# Patch35: backport-540d4d60378c.patch
+# Patch36: backport-3174835ba825.patch
+# Patch37: backport-c2b4e23fdda4.patch
+# Patch38: backport-e9aca9470ed8.patch
+# Patch39: backport-68d757df8dd2.patch
+# Patch40: backport-17b997aa1edb.patch
+# Patch41: backport-35b819c45c46.patch
+# Patch42: backport-d8a6a8b36d86.patch
+# Patch43: backport-54463aa79dac.patch
+# Patch44: backport-4489ffdec331.patch
+# Patch45: backport-ab5bfc049e8e.patch
+# Patch46: backport-dc036ab9d506.patch
+# Patch47: backport-b9e9ccbb11e4.patch
+# Patch48: backport-b6641f28c593.patch
+# Patch49: backport-a85f67b2658e.patch
+# Patch50: backport-80a868f0f6cc.patch
+# Patch51: backport-a06d3feea3b7.patch
+# Patch52: backport-758fae24d7b9.patch
+# Patch53: backport-e373bc1bdc59.patch
+# Patch54: backport-b7c333016e3d.patch
+# Patch55: backport-1997d379dc64.patch
+# Patch56: backport-f7918dc8f94c.patch
+# Patch57: backport-935e5fb0d570.patch
+# Patch58: backport-29a6082f21f2.patch
+# Patch59: backport-7f97193e6aa8.patch
+# Patch60: backport-e663158bca89.patch
+# Patch61: backport-4387b4c771fe.patch
+# Patch62: backport-401c67e9bc8b.patch
+# Patch63: backport-00c48f57ab36.patch
+# Patch64: backport-42f0581a91d4.patch
+# Patch65: backport-5e115dcf76f6.patch
+# Patch66: backport-faf02c345ec0.patch
+# Patch67: backport-3068dfd6415a.patch
+# Patch68: backport-b1278939db0b.patch
+# Patch69: backport-7e5cffcd1e93.patch
+# Patch70: backport-5d752df85f2c.patch
+# Patch71: backport-e8af54084586.patch
+# Patch72: backport-81b2b328a26c.patch
+# Patch73: backport-60390ccb8b9b.patch
+# Patch74: backport-c4441ab1f1d5.patch
+# Patch75: backport-570da5423dbe.patch
+# Patch76: backport-0eae016b6e3d.patch
+# Patch77: backport-6b0ac9a4e239.patch
+# Patch78: backport-f40e1c52e4e0.patch
+# Patch79: backport-368096b9c4a2.patch
+# Patch80: backport-e21a6a4f966a.patch
+# Patch81: backport-935d501ccbf5.patch
+# Patch82: backport-fb23e8ba2304.patch
+# Patch83: backport-08693c03e00e.patch
+# Patch84: backport-95419adfd4b2.patch
+# Patch85: backport-f17d848c4caa-fix.patch
+# Patch86: backport-3670abcaf032.patch
+# Patch87: backport-9fdcf851689c.patch
+# Patch88: backport-2d1a35f1e6c2.patch
+# Patch89: backport-3e09045991cd.patch
+# Patch90: backport-b672695e7488.patch
+# Patch91: backport-79ca512a1fa6.patch
+# Patch92: backport-6a9f5477637a.patch
+# Patch93: backport-93c9edbef51b.patch
+# Patch94: backport-73c932d0ea43.patch
+# Patch95: backport-1787cc167906.patch
+# Patch96: backport-afab477fba3b.patch
+# Patch97: backport-c76cfada1cfa.patch
+# Patch98: backport-f26bb285949b.patch
+# Patch99: backport-4624912c0b55.patch
+# Patch100: backport-2928c1d250b1.patch
+# Patch101: backport-6d45368a0a89.patch
+# Patch102: backport-b17546d7f33e.patch
+# Patch103: backport-164a0b9653f4.patch
+# Patch104: backport-737190abb174.patch
+# Patch105: backport-e083d753924b.patch
+# Patch106: backport-91bac8ad7c06.patch
+# Patch107: backport-dd6c062a7a4a.patch
+# Patch108: backport-9c3b9800e201.patch
+# Patch109: backport-b11380f6cd58.patch
+# Patch110: backport-b6b672e8a925.patch
+# Patch111: backport-834cb8761051.patch
+# Patch112: backport-eb7518b89be6.patch
+# Patch113: backport-f282182af329.patch
+# Patch114: backport-9cfeb83cbe23.patch
+# Patch115: backport-6809998c5f8f.patch
+# Patch116: backport-31f3bc97f450.patch
+# Patch117: backport-b07050e1e8f7.patch
+# Patch118: backport-88d3ff7ab15d.patch
+# Patch119: backport-6536688439db.patch
+# Patch120: backport-81f0eaadf84d.patch
+# Patch121: backport-e3662437eb43.patch
+# Patch122: x86-cpuid-Infrastructure-for-leaf-0x80000021.eax.patch
+# Patch123: backport-e1828e3032eb.patch
+# Patch124: backport-969a57f73f6b.patch
+# Patch125: backport-15b7611efd49.patch
+# Patch126: backport-00f2992b6c7a.patch
+# Patch127: backport-614cec7d79d7.patch
+# Patch128: backport-22b9add22b4a.patch
+# Patch129: backport-a7e7c7260cde.patch
+# Patch130: backport-f97c1abf2934.patch
+# Patch131: backport-39a40f3835ef.patch
+# Patch132: backport-4116139131e9.patch
+# Patch133: backport-ad9f7c3b2e0d.patch
+# Patch134: backport-f3709b15fc86.patch
+# Patch135: backport-52ce1c97844d.patch
+# Patch136: backport-81d195c6c0e2.patch
+# Patch137: backport-f627a39c5e75.patch
+# Patch138: backport-6ba701064227.patch
+# Patch139: backport-7f7e55b85fce.patch
+# Patch140: backport-ea140035d01a.patch
+# Patch141: backport-e270af94280e.patch
+# Patch142: backport-60d1adfa1879.patch
+# Patch143: backport-e570e8d520ab.patch
+# Patch144: backport-a0aeab27ee0e.patch
+# Patch145: backport-0f2611c52438.patch
+# Patch146: backport-c3bd0b83ea5b.patch
+# Patch147: backport-c4e5cc2ccc5b.patch
+# Patch148: backport-7110192b1df6.patch
+# Patch149: backport-f838b956779f.patch
+# Patch150: backport-9272225ca728.patch
+# Patch151: backport-a0bfdd201ea1.patch
+# Patch152: backport-1d7fbc535d1d.patch
+# Patch153: backport-37f82facd62f.patch
+# Patch154: backport-57f07cca8252.patch
+# Patch155: backport-c3b6be714c64.patch
+# Patch156: backport-95db09b1b154.patch
+# Patch157: backport-ee36179371fd.patch
+# Patch158: backport-22d5affdf0ce.patch
+# Patch159: backport-7ba68a6c558e.patch
+# Patch160: backport-9bafe4a53306.patch
+# Patch161: backport-b45bfaf359e4.patch
+# Patch162: backport-9804a5db435f.patch
+# Patch163: backport-31fbee749a75.patch
+# Patch164: backport-aecdc28d9538.patch
+# Patch165: backport-df2db174b36e.patch
+# Patch166: backport-9b224c25293a.patch
+# Patch167: backport-3f02e0a70fe9.patch
+# Patch168: backport-ee7815f49faf.patch
+# Patch169: backport-acd3fb6d6590.patch
+# Patch170: backport-f1d7aac1e3c3.patch
+# Patch171: backport-e267d11969a4.patch
+# Patch172: backport-831419f82913.patch
+# Patch173: backport-d2162d884cba.patch
+# Patch174: backport-ff95dae53e5e.patch
+# Patch175: backport-10acd21795a9.patch
+# Patch176: backport-f5d0279839b5.patch
+# Patch177: backport-a44734df6c24.patch
+# Patch178: backport-f7d07619d2ae.patch
+# Patch179: backport-d329b37d1213.patch
+# Patch180: backport-573279cde1c4.patch
+# Patch181: backport-ad15a0a8ca25.patch
+# Patch182: backport-e94af0d58f86.patch
+# Patch183: backport-3edca52ce736.patch
+# Patch184: backport-5f08bc9404c7.patch
+# Patch185: backport-897257ba49d0.patch
+# Patch186: backport-e6f07052ce4a.patch
+# Patch187: backport-ff8b560be80b.patch
+# Patch188: backport-36eb2de31b6e.patch
+# Patch189: backport-2636d8ff7a67.patch
+# Patch190: backport-425068384210.patch
+# Patch191: backport-9e7c74e6f9fd.patch
+# Patch192: backport-d69ccf52ad46.patch
+# Patch193: backport-3a59443c1d5a.patch
+# Patch194: backport-63305e5392ec.patch
+# Patch195: backport-f4ef8a41b808.patch
+# Patch196: backport-f1315e48a03a.patch
+# Patch197: xsa427.patch
+# Patch198: xsa428-1.patch
+# Patch199: xsa428-2.patch
+# Patch200: xsa429.patch
+# Patch201: 0001-x86-cpuid-Infrastructure-to-support-pseudo-feature-i.patch
+# Patch202: 0002-x86-Activate-Data-Operand-Invariant-Timing-Mode-by-d.patch
+# Patch203: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
+# Patch204: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
+# Patch205: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+# Patch206: 0003-xen-microcode-add-information-about-currently-loaded.patch
+# Patch207: 0004-microcode-add-sequential-application-policy.patch
+# Patch208: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
+# Patch209: 0001-microcode-remove-panic-calls.patch
+# Patch210: detect-nehalem-c-state.patch
+# Patch211: quirk-hp-gen8-rmrr.patch
+# Patch212: quirk-pci-phantom-function-devices.patch
+# Patch213: 0001-x86-hpet-Pre-cleanup.patch
+# Patch214: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+# Patch215: 0003-x86-hpet-Post-cleanup.patch
+# Patch216: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+# Patch217: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+# Patch218: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
+# Patch219: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+# Patch220: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+# Patch221: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+# Patch222: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+# Patch223: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
+# Patch224: livepatch-ignore-duplicate-new.patch
+# Patch225: default-log-level-info.patch
+# Patch226: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+# Patch227: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+# Patch228: pygrub-Ignore-GRUB2-if-statements.patch
+# Patch229: libfsimage-Add-support-for-btrfs.patch
+# Patch230: quiet-broke-irq-affinity.patch
+# Patch231: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
+# Patch232: 0001-Hide-AVX-512-from-guests-by-default.patch
+# Patch233: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+# Patch234: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
+# Patch235: xen-tweak-cmdline-defaults.patch
+# Patch236: xen-tweak-debug-overhead.patch
+# Patch237: tweak-iommu-policy.patch
+# Patch238: tweak-sc-policy.patch
+# Patch239: disable-core-parking.patch
+# Patch240: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+# Patch241: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+# Patch242: hitachi-driver-domain-ssid.patch
+# Patch243: livepatch-payload-in-header.patch
+# Patch244: xen-define-offsets-for-kdump.patch
+# Patch245: xen-scheduler-auto-privdom-weight.patch
+# Patch246: xen-hvm-disable-tsc-ramping.patch
+# Patch247: xen-default-cpufreq-governor-to-performance-on-intel.patch
+# Patch248: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
+# Patch249: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
+# Patch250: i8259-timers-pick-online-vcpu.patch
+# Patch251: revert-ca2eee92df44.patch
+# Patch252: libxc-cpuid-cores_per_socket.patch
+# Patch253: pygrub-add-default-and-extra-args.patch
+# Patch254: pygrub-always-boot-default.patch
+# Patch255: pygrub-friendly-no-fs.patch
+# Patch256: pygrub-image-max-size.patch
+# Patch257: pygrub-default-xenmobile-kernel.patch
+# Patch258: pygrub-blacklist-support.patch
+# Patch259: oem-bios-xensource.patch
+# Patch260: oem-bios-magic-from-xenstore.patch
+# Patch261: misc-log-guest-consoles.patch
+# Patch262: fix-ocaml-libs.patch
+# Patch263: retrofit-max-featuresets.patch
+# Patch264: xentop-vbd3.patch
+# Patch265: mixed-domain-runstates.patch
+# Patch266: xenguest.patch
+# Patch267: xen-vmdebug.patch
+# Patch268: oxenstore-extra-debug.patch
+# Patch269: oxenstore-censor-sensitive-data.patch
+# Patch270: oxenstore-large-packets.patch
+# Patch271: nvidia-vga.patch
+# Patch272: hvmloader-disable-pci-option-rom-loading.patch
+# Patch273: xen-force-software-vmcs-shadow.patch
+# Patch274: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+# Patch275: use-msr-ll-instead-of-vmcs-efer.patch
+# Patch276: add-pv-iommu-headers.patch
+# Patch277: add-pv-iommu-local-domain-ops.patch
+# Patch278: add-pv-iommu-foreign-support.patch
+# Patch279: upstream-pv-iommu-tools.patch
+# Patch280: allow-rombios-pci-config-on-any-host-bridge.patch
+# Patch281: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
+# Patch282: gvt-g-hvmloader+rombios.patch
+# Patch283: xen-spec-ctrl-utility.patch
+# Patch284: 0001-hvmloader-acpi-add-TPM-version-option.patch
+# Patch285: 0002-hvmloader-acpi-add-TPM2.patch
+# Patch286: vtpm-ppi-acpi-dsm.patch
 
 ExclusiveArch: x86_64
 
@@ -542,7 +542,7 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     [ -n "$1" ] && ver="XEN_VENDORVERSION=$1"
     [ -n "$4" ] && cov="%{?_cov_wrap}"
 
-    mk="$cov %{make_build} -C xen $ver"
+    mk="$cov %{make_build} %{?_smp_mflags} -C xen $ver"
 
     cp -a buildconfigs/$2 xen/.config
     $mk olddefconfig

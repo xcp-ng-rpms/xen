@@ -1,4 +1,6 @@
+From b0d6684ee58f7252940f5a62e4b85bdc56307eef Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 21 Mar 2023 11:59:44 +0000
 Subject: x86/shadow: account for log-dirty mode when pre-allocating
 
 Pre-allocation is intended to ensure that in the course of constructing
@@ -28,22 +30,11 @@ This is CVE-2022-42332 / XSA-427.
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Tim Deegan <tim@xen.org>
 
---- a/xen/include/asm-x86/paging.h
-+++ b/xen/include/asm-x86/paging.h
-@@ -190,6 +190,10 @@ int paging_mfn_is_dirty(struct domain *d
- #define L4_LOGDIRTY_IDX(pfn) ((pfn_x(pfn) >> (PAGE_SHIFT + 3 + PAGETABLE_ORDER * 2)) & \
-                               (LOGDIRTY_NODE_ENTRIES-1))
- 
-+#define paging_logdirty_levels() \
-+    (DIV_ROUND_UP(PADDR_BITS - PAGE_SHIFT - (PAGE_SHIFT + 3), \
-+                  PAGE_SHIFT - ilog2(sizeof(mfn_t))) + 1)
-+
- /* VRAM dirty tracking support */
- struct sh_dirty_vram {
-     unsigned long begin_pfn;
+diff --git a/xen/arch/x86/mm/paging.c b/xen/arch/x86/mm/paging.c
+index b2700e7108a2..e15fe87ec9e5 100644
 --- a/xen/arch/x86/mm/paging.c
 +++ b/xen/arch/x86/mm/paging.c
-@@ -278,6 +278,7 @@ void paging_mark_pfn_dirty(struct domain
+@@ -278,6 +278,7 @@ void paging_mark_pfn_dirty(struct domain *d, pfn_t pfn)
      if ( unlikely(!VALID_M2P(pfn_x(pfn))) )
          return;
  
@@ -51,9 +42,11 @@ Reviewed-by: Tim Deegan <tim@xen.org>
      i1 = L1_LOGDIRTY_IDX(pfn);
      i2 = L2_LOGDIRTY_IDX(pfn);
      i3 = L3_LOGDIRTY_IDX(pfn);
+diff --git a/xen/arch/x86/mm/shadow/common.c b/xen/arch/x86/mm/shadow/common.c
+index 57a1cf556bcd..52dafba7a82c 100644
 --- a/xen/arch/x86/mm/shadow/common.c
 +++ b/xen/arch/x86/mm/shadow/common.c
-@@ -1012,7 +1012,17 @@ bool shadow_prealloc(struct domain *d, u
+@@ -981,7 +981,17 @@ bool shadow_prealloc(struct domain *d, unsigned int type, unsigned int count)
      if ( unlikely(d->is_dying) )
         return false;
  
@@ -72,9 +65,11 @@ Reviewed-by: Tim Deegan <tim@xen.org>
      if ( !ret && (!d->is_shutting_down || d->shutdown_code != SHUTDOWN_crash) )
          /*
           * Failing to allocate memory required for shadow usage can only result in
+diff --git a/xen/arch/x86/mm/shadow/private.h b/xen/arch/x86/mm/shadow/private.h
+index 7132fb3e7480..ac7663d32238 100644
 --- a/xen/arch/x86/mm/shadow/private.h
 +++ b/xen/arch/x86/mm/shadow/private.h
-@@ -269,6 +269,7 @@ static inline void sh_terminate_list(str
+@@ -265,6 +265,7 @@ static inline void sh_terminate_list(struct page_list_head *tmp_list)
  #define SHF_64  (SHF_L1_64|SHF_FL1_64|SHF_L2_64|SHF_L2H_64|SHF_L3_64|SHF_L4_64)
  
  #define SHF_L1_ANY  (SHF_L1_32|SHF_L1_PAE|SHF_L1_64)
@@ -82,3 +77,18 @@ Reviewed-by: Tim Deegan <tim@xen.org>
  
  #if (SHADOW_OPTIMIZATIONS & SHOPT_OUT_OF_SYNC)
  /* Marks a guest L1 page table which is shadowed but not write-protected.
+diff --git a/xen/include/asm-x86/paging.h b/xen/include/asm-x86/paging.h
+index 162db98838ab..0b7728d7096b 100644
+--- a/xen/include/asm-x86/paging.h
++++ b/xen/include/asm-x86/paging.h
+@@ -189,6 +189,10 @@ int paging_mfn_is_dirty(struct domain *d, mfn_t gmfn);
+ #define L4_LOGDIRTY_IDX(pfn) ((pfn_x(pfn) >> (PAGE_SHIFT + 3 + PAGETABLE_ORDER * 2)) & \
+                               (LOGDIRTY_NODE_ENTRIES-1))
+ 
++#define paging_logdirty_levels() \
++    (DIV_ROUND_UP(PADDR_BITS - PAGE_SHIFT - (PAGE_SHIFT + 3), \
++                  PAGE_SHIFT - ilog2(sizeof(mfn_t))) + 1)
++
+ /* VRAM dirty tracking support */
+ struct sh_dirty_vram {
+     unsigned long begin_pfn;

@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -329,6 +329,10 @@ Patch283: xen-spec-ctrl-utility.patch
 Patch284: 0001-hvmloader-acpi-add-TPM-version-option.patch
 Patch285: 0002-hvmloader-acpi-add-TPM2.patch
 Patch286: vtpm-ppi-acpi-dsm.patch
+
+#XCP-ng patches
+Patch1000: backport-1ba66a870eba.patch
+Patch1001: backport-fc2e1f3aad60.patch
 
 ExclusiveArch: x86_64
 
@@ -1174,6 +1178,10 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Thu May 11 2023 Andrei Semenov <andrei.semenov@vates.fr> - 4.13.5-10.42.1
+- From XenServer: Cope booting in x2APIC mode on AMD systems without XT mode
+- From XenServer: Remove sequential microcode application support. Only parallel application
+
 * Mon Mar 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.42
 - Fixes for
   - XSA-427 CVE-2022-42332

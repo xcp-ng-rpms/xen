@@ -1,6 +1,6 @@
-%global package_speccommit 6d08bcb8d2dae8c08fdf7285038683283c5d9397
+%global package_speccommit 28a8169eb6abc58a728365320234d3a5d24dbbd6
 %global usver 4.13.5
-%global xsver 9.31
+%global xsver 9.32
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -9,7 +9,7 @@
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 9.31
+%global hv_rel 9.32
 
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
@@ -243,99 +243,103 @@ Patch197: backport-d484dcca7972.patch
 Patch198: backport-ab2d47eb1353.patch
 Patch199: backport-245d030f4aa7.patch
 Patch200: backport-fc2e1f3aad60.patch
-Patch201: 0001-x86-cpuid-Infrastructure-to-support-pseudo-feature-i.patch
-Patch202: 0002-x86-Activate-Data-Operand-Invariant-Timing-Mode-by-d.patch
-Patch203: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
-Patch204: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
-Patch205: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch206: 0003-xen-microcode-add-information-about-currently-loaded.patch
-Patch207: 0004-microcode-add-sequential-application-policy.patch
-Patch208: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
-Patch209: 0001-microcode-remove-panic-calls.patch
-Patch210: detect-nehalem-c-state.patch
-Patch211: quirk-hp-gen8-rmrr.patch
-Patch212: quirk-pci-phantom-function-devices.patch
-Patch213: 0001-x86-hpet-Pre-cleanup.patch
-Patch214: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch215: 0003-x86-hpet-Post-cleanup.patch
-Patch216: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch217: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch218: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
-Patch219: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch220: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch221: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
-Patch222: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch223: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
-Patch224: livepatch-ignore-duplicate-new.patch
-Patch225: default-log-level-info.patch
-Patch226: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch227: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch228: pygrub-Ignore-GRUB2-if-statements.patch
-Patch229: libfsimage-Add-support-for-btrfs.patch
-Patch230: quiet-broke-irq-affinity.patch
-Patch231: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
-Patch232: 0001-Hide-AVX-512-from-guests-by-default.patch
-Patch233: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch234: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
-Patch235: xen-tweak-cmdline-defaults.patch
-Patch236: xen-tweak-debug-overhead.patch
-Patch237: tweak-iommu-policy.patch
-Patch238: tweak-sc-policy.patch
-Patch239: disable-core-parking.patch
-Patch240: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch241: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch242: hitachi-driver-domain-ssid.patch
-Patch243: livepatch-payload-in-header.patch
-Patch244: xen-define-offsets-for-kdump.patch
-Patch245: xen-scheduler-auto-privdom-weight.patch
-Patch246: xen-hvm-disable-tsc-ramping.patch
-Patch247: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch248: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
-Patch249: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
-Patch250: i8259-timers-pick-online-vcpu.patch
-Patch251: revert-ca2eee92df44.patch
-Patch252: libxc-stubs-hvm_check_pvdriver.patch
-Patch253: libxc-cpuid-cores_per_socket.patch
-Patch254: pygrub-add-default-and-extra-args.patch
-Patch255: pygrub-always-boot-default.patch
-Patch256: pygrub-friendly-no-fs.patch
-Patch257: pygrub-image-max-size.patch
-Patch258: pygrub-default-xenmobile-kernel.patch
-Patch259: pygrub-blacklist-support.patch
-Patch260: oem-bios-xensource.patch
-Patch261: oem-bios-magic-from-xenstore.patch
-Patch262: misc-log-guest-consoles.patch
-Patch263: fix-ocaml-libs.patch
-Patch264: retrofit-max-featuresets.patch
-Patch265: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
-Patch266: ocaml-cpuid-helpers.patch
-Patch267: xentop-vbd3.patch
-Patch268: mixed-domain-runstates.patch
-Patch269: xenguest.patch
-Patch270: xen-vmdebug.patch
-Patch271: oxenstore-extra-debug.patch
-Patch272: oxenstore-censor-sensitive-data.patch
-Patch273: oxenstore-large-packets.patch
-Patch274: nvidia-vga.patch
-Patch275: hvmloader-disable-pci-option-rom-loading.patch
-Patch276: xen-force-software-vmcs-shadow.patch
-Patch277: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch278: use-msr-ll-instead-of-vmcs-efer.patch
-Patch279: add-pv-iommu-headers.patch
-Patch280: add-pv-iommu-local-domain-ops.patch
-Patch281: add-pv-iommu-foreign-support.patch
-Patch282: upstream-pv-iommu-tools.patch
-Patch283: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch284: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
-Patch285: gvt-g-hvmloader+rombios.patch
-Patch286: xen-introduce-cmdline-to-control-introspection-extensions.patch
-Patch287: xen-domctl-set-privileged-domain.patch
-Patch288: xen-reexecute-instn-under-monitor-trap.patch
-Patch289: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
-Patch290: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
-Patch291: xen-introspection-pause.patch
-Patch292: xen-always-enable-altp2m-external-mode.patch
-Patch293: xen-spec-ctrl-utility.patch
+Patch201: backport-19c6cbd90965.patch
+Patch202: backport-0946068e7fae.patch
+Patch203: backport-eaa324bfebcf.patch
+Patch204: backport-4c507d8a6b6e.patch
+Patch205: 0001-x86-cpuid-Infrastructure-to-support-pseudo-feature-i.patch
+Patch206: 0002-x86-Activate-Data-Operand-Invariant-Timing-Mode-by-d.patch
+Patch207: 0001-x86-AMD-make-HT-range-dynamic-for-Fam17-and-up.patch
+Patch208: 0001-tools-Fix-pkg-config-file-for-libxenstore.patch
+Patch209: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch210: 0003-xen-microcode-add-information-about-currently-loaded.patch
+Patch211: 0004-microcode-add-sequential-application-policy.patch
+Patch212: 0007-microcode-update-raw-cpuid-policy-after-a-successful.patch
+Patch213: 0001-microcode-remove-panic-calls.patch
+Patch214: detect-nehalem-c-state.patch
+Patch215: quirk-hp-gen8-rmrr.patch
+Patch216: quirk-pci-phantom-function-devices.patch
+Patch217: 0001-x86-hpet-Pre-cleanup.patch
+Patch218: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+Patch219: 0003-x86-hpet-Post-cleanup.patch
+Patch220: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch221: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch222: 0002-efi-Ensure-incorrectly-typed-runtime-services-get-ma.patch
+Patch223: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch224: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch225: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+Patch226: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch227: 0001-x86-PoD-Command-line-option-to-prohibit-any-PoD-oper.patch
+Patch228: livepatch-ignore-duplicate-new.patch
+Patch229: default-log-level-info.patch
+Patch230: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch231: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch232: pygrub-Ignore-GRUB2-if-statements.patch
+Patch233: libfsimage-Add-support-for-btrfs.patch
+Patch234: quiet-broke-irq-affinity.patch
+Patch235: 0001-x86-msr-Blacklist-various-MSRs-which-guests-definite.patch
+Patch236: 0001-Hide-AVX-512-from-guests-by-default.patch
+Patch237: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch238: 0001-xsm-hide-detailed-Xen-version-from-unprivileged-gues.patch
+Patch239: xen-tweak-cmdline-defaults.patch
+Patch240: xen-tweak-debug-overhead.patch
+Patch241: tweak-iommu-policy.patch
+Patch242: tweak-sc-policy.patch
+Patch243: disable-core-parking.patch
+Patch244: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch245: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch246: hitachi-driver-domain-ssid.patch
+Patch247: livepatch-payload-in-header.patch
+Patch248: xen-define-offsets-for-kdump.patch
+Patch249: xen-scheduler-auto-privdom-weight.patch
+Patch250: xen-hvm-disable-tsc-ramping.patch
+Patch251: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch252: 0001-Partially-revert-08754333892-hvmloader-limit-CPUs-ex.patch
+Patch253: 0001-x86-pv-silently-discard-writes-into-MSR_AMD64_LS_CFG.patch
+Patch254: i8259-timers-pick-online-vcpu.patch
+Patch255: revert-ca2eee92df44.patch
+Patch256: libxc-stubs-hvm_check_pvdriver.patch
+Patch257: libxc-cpuid-cores_per_socket.patch
+Patch258: pygrub-add-default-and-extra-args.patch
+Patch259: pygrub-always-boot-default.patch
+Patch260: pygrub-friendly-no-fs.patch
+Patch261: pygrub-image-max-size.patch
+Patch262: pygrub-default-xenmobile-kernel.patch
+Patch263: pygrub-blacklist-support.patch
+Patch264: oem-bios-xensource.patch
+Patch265: oem-bios-magic-from-xenstore.patch
+Patch266: misc-log-guest-consoles.patch
+Patch267: fix-ocaml-libs.patch
+Patch268: retrofit-max-featuresets.patch
+Patch269: 0005-x86-msr-Expose-cpu_has_tsx_ctrl-via-MSR_ARCH_CAPS.patch
+Patch270: ocaml-cpuid-helpers.patch
+Patch271: xentop-vbd3.patch
+Patch272: mixed-domain-runstates.patch
+Patch273: xenguest.patch
+Patch274: xen-vmdebug.patch
+Patch275: oxenstore-extra-debug.patch
+Patch276: oxenstore-censor-sensitive-data.patch
+Patch277: oxenstore-large-packets.patch
+Patch278: nvidia-vga.patch
+Patch279: hvmloader-disable-pci-option-rom-loading.patch
+Patch280: xen-force-software-vmcs-shadow.patch
+Patch281: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch282: use-msr-ll-instead-of-vmcs-efer.patch
+Patch283: add-pv-iommu-headers.patch
+Patch284: add-pv-iommu-local-domain-ops.patch
+Patch285: add-pv-iommu-foreign-support.patch
+Patch286: upstream-pv-iommu-tools.patch
+Patch287: allow-rombios-pci-config-on-any-host-bridge.patch
+Patch288: 0007-hypercall-XENMEM_get_mfn_from_pfn.patch
+Patch289: gvt-g-hvmloader+rombios.patch
+Patch290: xen-introduce-cmdline-to-control-introspection-extensions.patch
+Patch291: xen-domctl-set-privileged-domain.patch
+Patch292: xen-reexecute-instn-under-monitor-trap.patch
+Patch293: revert-x86-mm-suppress-vm_events-caused-by-page-walks.patch
+Patch294: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
+Patch295: xen-introspection-pause.patch
+Patch296: xen-always-enable-altp2m-external-mode.patch
+Patch297: xen-spec-ctrl-utility.patch
 
 ExclusiveArch: x86_64
 
@@ -1178,6 +1182,14 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Thu May 25 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.32.1
+- Synced from hotfix XS82ECU1034
+- *** Upstream changelog ***
+- * Tue May 16 2023 Roger Pau Monné <roger.pau@citrix.com> - 4.13.5-9.32
+- - Mitigate performance degradation with logdirty by disabling VCPU_SSHOTTMR_future.
+- - Adjust bogus assert in AMD-Vi code.
+- - Early boot improvements.
+
 * Thu May 11 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.31.1
 - Synced from hotfix XS82ECU1030
 - Dropped our XSA-427 to 429 patches, now applied upstream

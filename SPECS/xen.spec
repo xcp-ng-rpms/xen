@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -1187,6 +1187,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Thu Aug 03 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.34.2
+- Apply a patch for the XSA-433 patch
+
 * Mon Jul 24 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.34.1
 - Synced from hotfix XS82ECU1041 
 - *** Upstream changelog ***

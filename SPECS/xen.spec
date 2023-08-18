@@ -1246,29 +1246,30 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 
 %changelog
 * Tue Aug 08 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.36.1
-- Synced from hotfix XS82ECU1045 
+- Security update, synced from hotfix XS82ECU1045
 - *** Upstream changelog ***
 - * Thu Aug 3 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.36
 - - Fixes for
-- - XSA-434 CVE-2023-20569
-- - XSA-435 CVE-2022-40982
-- - Expose MSR_ARCH_CAPS to guests on all Intel hardware by default.  - - On Cascade: Lake and later hardware, guests now see the bits stating hardware immunity to various speculative vulnerabilities.
+-   - XSA-434 CVE-2023-20569
+-   - XSA-435 CVE-2022-40982
+- - Expose MSR_ARCH_CAPS to guests on all Intel hardware by default.  On Cascade
+-   Lake and later hardware, guests now see the bits stating hardware immunity
+-   to various speculative vulnerabilities.
 
 * Thu Aug 03 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.35.1
-- Synced from hotfix XS82ECU1044 
+- Synced from hotfix XS82ECU1044
 - *** Upstream changelog ***
 - * Tue Aug 1 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.35
 - - Fix bug in XSA-433 fix, which accidentally disabled a hardware errata workaround.
 
 * Mon Jul 24 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.34.1
-- Synced from hotfix XS82ECU1041 
+- Security update, synced from hotfix XS82ECU1041
 - *** Upstream changelog ***
 - * Sat Jul 22 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.34
 - - Fix for XSA-433 CVE-2023-20593.
 - * Tue Jul 4 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.33
 - - Hide MPX by default from guests.  This simplifies cross-pool upgrade scenarios.
 - - Limit scheduler loadbalancing to once per millisecond.  This improves performance on large systems.
-
 
 * Thu May 25 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.32.1
 - Synced from hotfix XS82ECU1034
@@ -1278,22 +1279,277 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 - - Adjust bogus assert in AMD-Vi code.
 - - Early boot improvements.
 
-* Mon Apr 17 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.31
-- Remove the NR_IOMMUs compile time limit.  This is necessary to boot on
-  4-socket Sapphire Rapids systems.
-- Cope booting in x2APIC mode on AMD systems without XT mode.
-- Load AMD microcode on all logical processors.
-- Fixes for
-  - XSA-427 CVE-2022-42332
-  - XSA-428 CVE-2022-42333 CVE-2022-42334
-  - XSA-429 CVE-2022-42331
-- Increase the size of the serial transmit buffer.
+* Thu May 11 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.31.1
+- Synced from hotfix XS82ECU1030
+- Dropped our XSA-427 to 429 patches, now applied upstream
+- *** Upstream changelog ***
+- * Mon Apr 17 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.31
+- - Remove the NR_IOMMUs compile time limit.  This is necessary to boot on
+-   4-socket Sapphire Rapids systems.
+- - Cope booting in x2APIC mode on AMD systems without XT mode.
+- - Load AMD microcode on all logical processors.
+- - Fixes for
+-   - XSA-427 CVE-2022-42332
+-   - XSA-428 CVE-2022-42333 CVE-2022-42334
+-   - XSA-429 CVE-2022-42331
+- - Increase the size of the serial transmit buffer.
 
-* Mon Feb 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.30
-- Fix for XSA-426 CVE-2022-27672.
-- Fix memory corruption issues in the Ocaml bindings.
-- On xenstored live update, validate the config file before launching
-  into the new xenstored.
+* Thu Mar 16 2023 Andrei Semenov <andrei.semenov@vates.fr>  - 4.13.5-9.30.3
+- Fix for XSA-427 (applied as is from Xen Project).
+- Fix for XSA-428 (applied as is from Xen Project). part 1
+- Fix for XSA-428 (applied as is from Xen Project). part 2
+- Fix for XSA-429 (adapted from Xen Project)
 
-* Mon Feb 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.29
-- Update to Xen 4.13.5
+* Mon Mar 13 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.30.2
+- Restore xen-dom0-devel Provides for xen-dom0-libs-devel
+
+* Thu Feb 23 2023 Gael Duperrey <gduperrey@vates.fr> 4.13.5-9.30.1
+* Synced from hotfix XS82ECU1026
+- *** Upstream changelog ***
+- * Mon Feb 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.30
+- - Fix for XSA-426 CVE-2022-27672.
+- - Fix memory corruption issues in the Ocaml bindings.
+- - On xenstored live update, validate the config file before launching into the new xenstored.
+- * Mon Feb 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.29
+- - Update to Xen 4.13.5
+- The upstream commit history before this point also mentions "Initial Sapphire Rapids support" and other changes
+
+* Thu Feb 16 2023 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.29.2
+- Fix XSA-426
+- Reboot required
+
+* Mon Jan 02 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.29.1
+- Synced from hotfix XS82ECU1023
+- Enable AVX-512 by default for EPYC Zen4 (Genoa)
+- Reboot required
+
+* Wed Nov 09 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.28.1
+- Synced from hotfix XS82ECU1021
+- Fix XSA-422 and other issues
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed Nov 02 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.27.1
+- Security update, synced from hotfix XS82ECU1020
+- Fix XSA-326 XSA-414 XSA-415 XSA-416 XSA-417 XSA-418 XSA-419 XSA-420 XSA-421
+- Reboot required
+
+* Tue Oct 11 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.26.1
+- Security update, synced from hotfix XS82ECU1016
+- Fix XSA-410, XSA-411, and other issues
+- Reboot required
+
+* Wed Aug 10 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.25.1
+- Synced from hotfix XS82ECU1015
+- Remove amd-iommu-correct-xt-handling.patch, it's already in XS82ECU1015
+- Reboot required
+
+* Fri Jul 29 2022 Andrei Semenov <andrei.semenov@vates.fr> - 4.13.4-9.24.2
+- Add amd-iommu-correct-xt-handling.patch
+
+* Tue Jul 12 2022 Gael Duperrey <gduperrey@vates.fr> - 4.13.4-9.24.1
+- Security update, synced from hotfix XS82ECU1014
+- XSA 407
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Thu Jun 23 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.23.1
+- Security update, synced from hotfix XS82ECU1012
+- Fix XSA 404
+- Replaced our XSA 401 and 402 patches with those from the XS hotfix
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Fri Jun 10 2022 Andrei Semenov <andrei.semenov@vates.fr> - 4.13.4-9.22.2
+- Security update
+- Related to XSA 401 and XSA 402
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed May 11 2022 Gaël Duperrey <gduperrey@vates.fr> - 4.13.4-9.22.1
+- Sync with hotfix XS82ECU1010
+- Integrated upstream patches related to XSA 400 to replace our patches
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Tue Apr 05 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.21.2
+- Security update, synced from hotfix XS82ECU1007
+- Related to XSAs 397, 399 and 400
+- See http://xenbits.xen.org/xsa/
+- Additional patches added from upstream xen to fix fallouts of XSA-400 patches
+- Reboot required
+
+* Wed Mar 09 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.20.1
+- Security update, synced from hotfix XS82ECU1006
+- Related to XSA 398
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed Feb 09 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.19.1
+- Security update, synced from hotfix XS82E037
+- Adapt to new microcode released to fix security vulnerabilities in Intel CPUs
+- Also fixes XSAs 394 and 395
+- Reboot required
+
+* Thu Jan 13 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.18.1
+- Security update, synced from hotfix XS82E035
+- Related to XSAs 388, 389
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Mon Jan 10 2022 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.4-9.17.1
+- Sync with CH 8.2.1
+- Keep using python-devel as build dependency until python is updated
+
+* Thu Sep 09 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.12.1
+- Security update, synced from hotfix XS82E032
+- Related to XSAs 378, 379, 380, 382, 384
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Thu Jun 10 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.11.1
+- Security update, synced from hotfix XS82E026
+- Related to XSAs 373, 375, 377
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Thu Feb 04 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.9.1
+- Sync with hotfix XS82E016
+- Bugfix update (we already had applied the security patch for XSA-360)
+- Reboot required
+
+* Mon Jan 25 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.4
+- Remove dist tag from XEN_VENDORVERSION
+- Avoids hitting the 16 char limit in xen_extra
+- Related to https://github.com/xcp-ng/xcp/issues/476
+
+* Thu Jan 21 2021 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.3
+- Security update
+- Related to XSA 360
+- See http://xenbits.xen.org/xsa/advisory-360.html
+- Reboot required
+
+* Wed Dec 16 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.8.2
+- Security update
+- Related to XSAs 115, 322, 323, 324, 325, 330, 348, 352, 353, 358, 359
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Tue Nov 24 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.7.1
+- Security update
+- Related to XSA-355
+- See http://xenbits.xen.org/xsa/advisory-355.html
+- Reboot required
+
+* Thu Nov 12 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.6.1
+- Security update
+- Related to XSA-351
+- See http://xenbits.xen.org/xsa/advisory-351.html
+- Patch for XSA-286 rewritten for better performance.
+- Reboot required
+
+* Tue Oct 27 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.5.1
+- Security update
+- Related to XSAs 286, 345, 346, 347
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed Sep 23 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.3.1
+- Security update
+- Related to XSAs 333, 334, 336, 337, 338, 339, 340, 342, 343, 344
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+- Also remove xen-4.13.1-insert-Ice-Lake-and-Comet-Lake-model-numbers.backport.patch, not needed anymore
+
+* Sun Sep 06 2020 Rushikesh Jadhav <rushikesh7@gmail.com> - 4.13.1-9.2.2
+- Insert Ice Lake and Comet Lake model numbers
+
+* Thu Jul 09 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.2.1
+- Security update
+- Related to XSA-317, XSA-319, XSA-321, XSA-328
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed Jul 01 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.1-9.1.1
+- Rebase on CH 8.2
+
+* Fri Jun 12 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.5.1
+- Update for new microcode related to SRBDS Intel issues
+- Related to XSA-320
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Tue Apr 14 2020 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.4
+- Security update
+- Related to XSA-307, XSA-313, XSA-316, XSA-318
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Thu Dec 19 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.0-8.3
+- Rebase on CH 8.1
+- Drop our changes to xenguest for max_grant_frames
+
+* Thu Dec 12 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.8
+- Security update
+- Related to XSA-308, XSA-309, XSA-310, XSA-311
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Wed Nov 13 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.7
+- Security update
+- Related to XSA-304 and XSA-305
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Mon Nov 04 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.6
+- Security update
+- Fix XSA-296, XSA-298, XSA-299, XSA-302
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Fri Oct 18 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.2
+- Make max_grant_frames and max_maptrack_frames configurable
+- Default value of max_grant_frames is not sufficient in some cases
+- VM params platform/max_grant_frames and max_maptrack_frames are now used
+- Refs https://github.com/xcp-ng/xcp/issues/289
+
+* Fri Aug 30 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.5.1
+- Fix a possible memory corruption when forcibly shutting down a VM with AMD MxGPU attached
+- Fix a possible host crash when forcibly shutting a Windows VMs that is in an unclean state
+- After a live migration, a Windows VM could hang for more than a minute
+- Windows VMs with the viridian_reference_tsc flag enabled could crash during migration
+- Patches imported from XS 8.0 hotfix XS80E004
+
+* Thu May 16 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.3
+- Security update
+- Fix XSA-297
+- See http://xenbits.xen.org/xsa/advisory-297.html
+- Reboot required
+
+* Mon Apr 29 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.11.1-7.2
+- Update for XCP-ng 8.0
+
+* Thu Mar 07 2019 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.4.1
+- Security update
+- Fix XSA-283, XSA-284, XSA-285, XSA-287, XSA-288, XSA-290, XSA-292, XSA-293 and XSA-294
+- See http://xenbits.xen.org/xsa/
+- Reboot required
+
+* Tue Nov 20 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.3.1.xcp
+- Security update
+- Fix XSA-275, XSA-279, XSA-280 and XSA-282
+
+* Fri Oct 26 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.2.1.xcp
+- Security update
+- Fix CVE-2018-TBA: Nested VT-x usable even when disabled
+
+* Thu Sep 13 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.6-6.1.1.xcp
+- Update for XCP-ng 7.6
+
+* Wed Aug 15 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-5.5.1xcp
+- Multiple security updates
+
+* Thu Aug 02 2018 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.7.5-5.4.1xcp
+- Security update
+- Fix CVE-2018-12893: x86: #DB exception safety check can be triggered by a guest
+- Fix CVE-2018-12891: preemption checks bypassed in x86 PV MM handling

@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -403,6 +403,19 @@ Patch357: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
 Patch358: xen-introspection-pause.patch
 Patch359: xen-always-enable-altp2m-external-mode.patch
 Patch360: xen-spec-ctrl-utility.patch
+
+#XCP-ng patches
+Patch1001: backport-f7065b24f4fb.patch
+Patch1002: backport-145a69c0944a.patch
+Patch1003: backport-1c18d7377453.patch
+Patch1004: backport-694bb0f280fd.patch
+Patch1005: backport-7125429aafb9.patch
+Patch1006: backport-45f00557350d.patch
+Patch1007: backport-7aa28849a115.patch
+Patch1008: backport-21bdc25b05a0.patch
+Patch1009: backport-3ee6066bcd73.patch
+Patch1010: backport-de1d26500139.patch
+Patch1011: backport-b5926c6ecf05.patch
 
 ExclusiveArch: x86_64
 
@@ -1245,6 +1258,11 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Tue Sep 26 2023 Andrei Semenov <andrei.semenov@vates.tech> - 4.13.5-9.36.2
+- More fixes to Zenbleed (XenServer backport from Xen Project)
+- Fix for AMD errata #1474 (XenServer backport from Xen Project)
+- Fix for XSA-429 (XenServer backport from Xen Project)
+
 * Tue Aug 08 2023 Gael Duperrey <gduperrey@vates.fr> - 4.13.5-9.36.1
 - Security update, synced from hotfix XS82ECU1045
 - *** Upstream changelog ***

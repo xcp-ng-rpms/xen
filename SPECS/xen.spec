@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -416,6 +416,14 @@ Patch1008: backport-21bdc25b05a0.patch
 Patch1009: backport-3ee6066bcd73.patch
 Patch1010: backport-de1d26500139.patch
 Patch1011: backport-b5926c6ecf05.patch
+Patch1012: xsa440-4.13.patch
+Patch1013: xsa442-4.13.patch
+Patch1014: xsa443_xsa443-4.13-01.patch
+Patch1015: xsa443_xsa443-4.13-02.patch
+Patch1016: xsa443_xsa443-4.13-03.patch
+Patch1017: xsa443_xsa443-4.13-04.patch
+Patch1018: xsa444-4.13-1.patch
+Patch1019: xsa444-4.13-2.patch
 
 ExclusiveArch: x86_64
 
@@ -1258,6 +1266,10 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Tue Oct 03 2023 Andrei Semenov <andrei.semenov@vates.tech> - 4.13.5-9.36.3
+- Security update
+- Fixes for XSA-440, XSA-442, XSA-443 and XSA-444
+
 * Tue Sep 26 2023 Andrei Semenov <andrei.semenov@vates.tech> - 4.13.5-9.36.2
 - More fixes to Zenbleed (XenServer backport from Xen Project)
 - Fix for AMD errata #1474 (XenServer backport from Xen Project)

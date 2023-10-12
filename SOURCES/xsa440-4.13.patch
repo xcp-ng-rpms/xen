@@ -1,4 +1,4 @@
-From 5d8b3d1ec98e56155d9650d7f4a70cd8ba9dc27d Mon Sep 17 00:00:00 2001
+From 67fe1cbfcd56cb8416df25e9aa16a3245b88705c Mon Sep 17 00:00:00 2001
 From: Julien Grall <jgrall@amazon.com>
 Date: Fri, 22 Sep 2023 11:32:16 +0100
 Subject: tools/xenstored: domain_entry_fix(): Handle conflicting transaction
@@ -29,10 +29,10 @@ Signed-off-by: Julien Grall <jgrall@amazon.com>
 Reviewed-by: Juergen Gross <jgross@suse.com>
 
 diff --git a/tools/xenstore/xenstored_domain.c b/tools/xenstore/xenstored_domain.c
-index aa86892fed9e..6074df210c6e 100644
+index 116b78c0f6eb..ad3baf4a8933 100644
 --- a/tools/xenstore/xenstored_domain.c
 +++ b/tools/xenstore/xenstored_domain.c
-@@ -1094,10 +1094,20 @@ int domain_entry_fix(unsigned int domid, int num, bool update)
+@@ -1030,10 +1030,20 @@ int domain_entry_fix(unsigned int domid, int num, bool update)
  	}
  
  	cnt = d->nbentry + num;

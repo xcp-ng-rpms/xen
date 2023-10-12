@@ -1,8 +1,7 @@
-From 25fae23b32ee4d990ae11368ee21e28e66dbfa25 Mon Sep 17 00:00:00 2001
+From 326e78ac0c415deeee066c4e60d195ae8bf956fb Mon Sep 17 00:00:00 2001
 From: Alejandro Vallejo <alejandro.vallejo@cloud.com>
 Date: Thu, 14 Sep 2023 13:22:52 +0100
-Subject: [PATCH 03/11] libfsimage/xfs: Sanity-check the superblock during
- mounts
+Subject: libfsimage/xfs: Sanity-check the superblock during mounts
 
 Sanity-check the XFS superblock for wellformedness at the mount handler.
 This forces pygrub to abort parsing a potentially malformed filesystem and
@@ -24,10 +23,6 @@ This is part of XSA-443 / CVE-2023-34325
 
 Signed-off-by: Alejandro Vallejo <alejandro.vallejo@cloud.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
----
- tools/libfsimage/xfs/fsys_xfs.c | 48 ++++++++++++++++++++++++++-------
- tools/libfsimage/xfs/xfs.h      | 12 +++++++++
- 2 files changed, 50 insertions(+), 10 deletions(-)
 
 diff --git a/tools/libfsimage/xfs/fsys_xfs.c b/tools/libfsimage/xfs/fsys_xfs.c
 index 4720bb4505c8..e4eb7e1ee26f 100644
@@ -131,6 +126,3 @@ index 40699281e44d..b87e37d3d7e9 100644
  
  /* those are from xfs_btree.h */
  
--- 
-2.42.0
-

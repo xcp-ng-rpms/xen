@@ -1,5 +1,39 @@
+From 563046f78dd5768f69ef125748f909677b56612c Mon Sep 17 00:00:00 2001
+From: Roger Pau Monne <roger.pau@citrix.com>
+Date: Tue, 13 Jun 2023 15:01:05 +0200
+Subject: [PATCH] iommu/amd-vi: flush IOMMU TLB when flushing the DTE
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The caching invalidation guidelines from the AMD-Vi specification (48882—Rev
+3.07-PUB—Oct 2022) seem to be misleading on some hardware, as devices will
+malfunction (see stale DMA mappings) if some fields of the DTE are updated but
+the IOMMU TLB is not flushed. This has been observed in practice on AMD
+systems.  Due to the lack of guidance from the currently published
+specification this patch aims to increase the flushing done in order to prevent
+device malfunction.
+
+In order to fix, issue an INVALIDATE_IOMMU_PAGES command from
+amd_iommu_flush_device(), flushing all the address space.  Note this requires
+callers to be adjusted in order to pass the DomID on the DTE previous to the
+modification.
+
+Some call sites don't provide a valid DomID to amd_iommu_flush_device() in
+order to avoid the flush.  That's because the device had address translations
+disabled and hence the previous DomID on the DTE is not valid.  Note the
+current logic relies on the entity disabling address translations to also flush
+the TLB of the in use DomID.
+
+Device I/O TLB flushing when ATS are enabled is not covered by the current
+change, as ATS usage is not security supported.
+
+This is XSA-442 / CVE-2023-34326
+
+Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
 diff --git a/xen/drivers/passthrough/amd/iommu_cmd.c b/xen/drivers/passthrough/amd/iommu_cmd.c
-index 801b27a..3d9a113 100644
+index 801b27af5857..3d9a1137672d 100644
 --- a/xen/drivers/passthrough/amd/iommu_cmd.c
 +++ b/xen/drivers/passthrough/amd/iommu_cmd.c
 @@ -365,12 +365,20 @@ void amd_iommu_flush_pages(struct domain *d,
@@ -25,7 +59,7 @@ index 801b27a..3d9a113 100644
  
  void amd_iommu_flush_intremap(struct amd_iommu *iommu, uint16_t bdf)
 diff --git a/xen/drivers/passthrough/amd/iommu_guest.c b/xen/drivers/passthrough/amd/iommu_guest.c
-index 1f2bcfb..6a47df3 100644
+index 1f2bcfbe1562..6a47df35e0e4 100644
 --- a/xen/drivers/passthrough/amd/iommu_guest.c
 +++ b/xen/drivers/passthrough/amd/iommu_guest.c
 @@ -365,7 +365,7 @@ static int do_completion_wait(struct domain *d, cmd_entry_t *cmd)
@@ -52,10 +86,10 @@ index 1f2bcfb..6a47df3 100644
  
      return 0;
 diff --git a/xen/drivers/passthrough/amd/iommu_init.c b/xen/drivers/passthrough/amd/iommu_init.c
-index c827132..d4e7cbb 100644
+index 01a5b3870e4d..ee316398fd7b 100644
 --- a/xen/drivers/passthrough/amd/iommu_init.c
 +++ b/xen/drivers/passthrough/amd/iommu_init.c
-@@ -1593,7 +1593,11 @@ static int _invalidate_all_devices(
+@@ -1591,7 +1591,11 @@ static int _invalidate_all_devices(
          if ( iommu )
          {
              spin_lock_irqsave(&iommu->lock, flags);
@@ -69,7 +103,7 @@ index c827132..d4e7cbb 100644
              spin_unlock_irqrestore(&iommu->lock, flags);
          }
 diff --git a/xen/drivers/passthrough/amd/pci_amd_iommu.c b/xen/drivers/passthrough/amd/pci_amd_iommu.c
-index 1d9fbd0..03025a8 100644
+index 1d9fbd0c654b..03025a823826 100644
 --- a/xen/drivers/passthrough/amd/pci_amd_iommu.c
 +++ b/xen/drivers/passthrough/amd/pci_amd_iommu.c
 @@ -186,10 +186,13 @@ static int __must_check amd_iommu_setup_domain_device(
@@ -125,7 +159,7 @@ index 1d9fbd0..03025a8 100644
          spin_unlock_irqrestore(&iommu->lock, flags);
      }
 diff --git a/xen/include/asm-x86/hvm/svm/amd-iommu-proto.h b/xen/include/asm-x86/hvm/svm/amd-iommu-proto.h
-index df08d38..9a0efbd 100644
+index a6cf4c72056a..da8a7ff3d6fa 100644
 --- a/xen/include/asm-x86/hvm/svm/amd-iommu-proto.h
 +++ b/xen/include/asm-x86/hvm/svm/amd-iommu-proto.h
 @@ -98,7 +98,8 @@ void amd_iommu_flush_pages(struct domain *d, unsigned long dfn,

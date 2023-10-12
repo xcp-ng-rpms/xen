@@ -1,4 +1,6 @@
+From 610330c202027361db7479a058bb74c6dc2a0f10 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Thu, 21 Sep 2023 17:26:23 +0100
 Subject: x86/svm: Fix asymmetry with AMD DR MASK context switching
 
 The handling of MSR_DR{0..3}_MASK is asymmetric between PV and HVM guests.
@@ -29,7 +31,7 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/xen/arch/x86/hvm/svm/svm.c b/xen/arch/x86/hvm/svm/svm.c
-index a019d196e071..ba4069f9100a 100644
+index 138459587624..9c69290254ef 100644
 --- a/xen/arch/x86/hvm/svm/svm.c
 +++ b/xen/arch/x86/hvm/svm/svm.c
 @@ -185,6 +185,10 @@ static void svm_save_dr(struct vcpu *v)
@@ -76,10 +78,10 @@ index a019d196e071..ba4069f9100a 100644
  
      write_debugreg(0, v->arch.dr[0]);
 diff --git a/xen/arch/x86/traps.c b/xen/arch/x86/traps.c
-index f7992ff230b5..a142a63dd869 100644
+index 06aee304a571..8f44e0f7a7f0 100644
 --- a/xen/arch/x86/traps.c
 +++ b/xen/arch/x86/traps.c
-@@ -2314,6 +2314,11 @@ void activate_debugregs(const struct vcpu *curr)
+@@ -2052,6 +2052,11 @@ void activate_debugregs(const struct vcpu *curr)
      if ( curr->arch.dr7 & DR7_ACTIVE_MASK )
          write_debugreg(7, curr->arch.dr7);
  

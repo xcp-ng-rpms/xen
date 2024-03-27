@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.1.xsa454backport.0%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -463,6 +463,10 @@ Patch417: xen-emulate-Bypass-the-emulator-if-emulation-fails.patch
 Patch418: xen-introspection-pause.patch
 Patch419: xen-always-enable-altp2m-external-mode.patch
 Patch420: xen-spec-ctrl-utility.patch
+
+# XCP-ng Backports
+Patch1000: xsa454-1.patch
+Patch1001: xsa454-2.patch
 
 ExclusiveArch: x86_64
 
@@ -1305,6 +1309,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Wed Mar 27 2024 David Morel <david.morel@vates.tech> - 4.13.5-9.39.1.xsa454backport.1
+- Backport XSA-454 V1 fixes from Xen 4.16 patches
+
 * Wed Mar 13 2024 David Morel <david.morel@vates.tech> - 4.13.5-9.39.1
 - Security update, synced from hotfix XS82ECU1061
 - Replace our fix for XSA-449

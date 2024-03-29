@@ -1,0 +1,59 @@
+From ee60b53aee398cc73bb11c0ec6af68a0cae5f81f Mon Sep 17 00:00:00 2001
+From: David Morel <david.morel@vates.tech>
+Date: Fri, 29 Mar 2024 15:06:54 +0100
+Subject: [PATCH] Backport: x86/spec-ctrl: Fix BTC/SRSO mitigations
+
+Backport notes:
+- taken from XSA-455 V2 announcement
+- using patches for Xen 4.16
+- applied with offsets
+
+From 909cdde9f126beac9888e6a1ff21f0414ef86fdb Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 26 Mar 2024 22:47:25 +0000
+Subject: x86/spec-ctrl: Fix BTC/SRSO mitigations
+
+We were looking for SCF_entry_ibpb in the wrong variable in the top-of-stack
+block, and xen_spec_ctrl won't have had bit 5 set because Xen doesn't
+understand SPEC_CTRL_RRSBA_DIS_U yet.
+
+This is XSA-455 / CVE-2024-31142.
+
+Fixes: 53a570b28569 ("x86/spec-ctrl: Support IBPB-on-entry")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+Backported-by: David Morel <david.morel@vates.tech>
+---
+ xen/arch/x86/hvm/svm/entry.S        | 2 +-
+ xen/include/asm-x86/spec_ctrl_asm.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/hvm/svm/entry.S b/xen/arch/x86/hvm/svm/entry.S
+index 98765f4..618fcf4 100644
+--- a/xen/arch/x86/hvm/svm/entry.S
++++ b/xen/arch/x86/hvm/svm/entry.S
+@@ -105,7 +105,7 @@ __UNLIKELY_END(nsvm_hap)
+         /* SPEC_CTRL_ENTRY_FROM_SVM    Req: %rsp=regs/cpuinfo, %rdx=0 Clob: acd */
+ 
+         .macro svm_vmexit_cond_ibpb
+-            testb  $SCF_entry_ibpb, CPUINFO_xen_spec_ctrl(%rsp)
++            testb  $SCF_entry_ibpb, CPUINFO_spec_ctrl_flags(%rsp)
+             jz     .L_skip_ibpb
+ 
+             mov    $MSR_PRED_CMD, %ecx
+diff --git a/xen/include/asm-x86/spec_ctrl_asm.h b/xen/include/asm-x86/spec_ctrl_asm.h
+index d333ec7..f477c17 100644
+--- a/xen/include/asm-x86/spec_ctrl_asm.h
++++ b/xen/include/asm-x86/spec_ctrl_asm.h
+@@ -102,7 +102,7 @@
+         jz     .L\@_skip
+         testb  $3, UREGS_cs(%rsp)
+     .else
+-        testb  $SCF_entry_ibpb, CPUINFO_xen_spec_ctrl(%rsp)
++        testb  $SCF_entry_ibpb, CPUINFO_spec_ctrl_flags(%rsp)
+     .endif
+     jz     .L\@_skip
+ 
+-- 
+2.43.2
+

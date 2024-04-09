@@ -27,10 +27,10 @@ Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/docs/misc/xen-command-line.pandoc b/docs/misc/xen-command-line.pandoc
-index effadc2e83fc..412d0e343b5e 100644
+index 05f613c71c5e..f34da5c42497 100644
 --- a/docs/misc/xen-command-line.pandoc
 +++ b/docs/misc/xen-command-line.pandoc
-@@ -1077,11 +1077,11 @@ The usage of gnttab v2 is not security supported on ARM platforms.
+@@ -1243,11 +1243,11 @@ The usage of gnttab v2 is not security supported on ARM platforms.
  
  > Can be modified at runtime
  
@@ -46,7 +46,7 @@ index effadc2e83fc..412d0e343b5e 100644
  
  ### gnttab_max_maptrack_frames
  > `= <integer>`
-@@ -1090,9 +1090,11 @@ Dom0 is using this value for sizing its grant table.
+@@ -1256,9 +1256,11 @@ Dom0 is using this value for sizing its grant table.
  
  > Can be modified at runtime
  
@@ -59,15 +59,15 @@ index effadc2e83fc..412d0e343b5e 100644
 +
 +Note this value is the effective upper bound for dom0.
  
- Dom0 is using this value for sizing its maptrack table.
- 
+ ### global-pages
+     = <boolean>
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index d242c0803802..0561df13ca9f 100644
+index ee7cc496b8cb..4cefd78f25b0 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -1895,15 +1895,13 @@ int grant_table_init(struct domain *d, int max_grant_frames,
-     struct grant_table *gt;
-     int ret = -ENOMEM;
+@@ -1956,18 +1956,15 @@ int grant_table_init(struct domain *d, int max_grant_frames,
+         return -EINVAL;
+     }
  
 -    /* Default to maximum value if no value was specified */
 +    /* Apply defaults if no value was specified */
@@ -80,6 +80,10 @@ index d242c0803802..0561df13ca9f 100644
 -         max_grant_frames > opt_max_grant_frames ||
 -         max_maptrack_frames > opt_max_maptrack_frames )
 +    if ( max_grant_frames < INITIAL_NR_GRANT_FRAMES )
+     {
+-        dprintk(XENLOG_INFO, "Bad grant table sizes: grant %u, maptrack %u\n",
+-                max_grant_frames, max_maptrack_frames);
++        dprintk(XENLOG_INFO, "Bad grant table size: %u frames\n", max_grant_frames);
          return -EINVAL;
+     }
  
-     if ( (gt = xzalloc(struct grant_table)) == NULL )

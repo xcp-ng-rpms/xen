@@ -1,0 +1,50 @@
+From 2add0bf51524ec1407c07df7c08cb0885c1b369b Mon Sep 17 00:00:00 2001
+From: David Morel <david.morel@vates.tech>
+Date: Wed, 14 Aug 2024 09:47:48 +0200
+Subject: [PATCH 2/2] x86/pass-through: documents as security-unsupported when
+ sharing resources
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Backport notes:
+- applied using patch with offset
+Backported-by: David Morel <david.morel@vates.tech>
+￼
+Original commitlog:
+When multiple devices share resources and one of them is to be passed
+through to a guest, security of the entire system and of respective
+guests individually cannot really be guaranteed without knowing
+internals of any of the involved guests.  Therefore such a configuration
+cannot really be security-supported, yet making that explicit was so far
+missing.
+
+This is XSA-461 / CVE-2024-31146.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Juergen Gross <jgross@suse.com>
+master commit: 9c94eda1e3790820699a6de3f6a7c959ecf30600
+master date: 2024-08-13 16:37:25 +0200
+---
+ SUPPORT.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/SUPPORT.md b/SUPPORT.md
+index 2db341c..928f60f 100644
+--- a/SUPPORT.md
++++ b/SUPPORT.md
+@@ -653,6 +653,11 @@ This feature is not security supported: see http://xenbits.xen.org/xsa/advisory-
+ 
+ Only systems using IOMMUs are supported.
+ 
++Passing through of devices sharing resources with another device is not
++security supported.  Such sharing could e.g. be the same line interrupt being
++used by multiple devices, one of which is to be passed through, or two such
++devices having memory BARs within the same 4k page.
++
+ Not compatible with migration, populate-on-demand, altp2m,
+ introspection, memory sharing, or memory paging.
+ 
+-- 
+2.46.0
+

@@ -1,16 +1,11 @@
-From 2c3fffefabe6eee1df814a0dcbdd2b5a8a841a5b Mon Sep 17 00:00:00 2001
-From: David Morel <david.morel@vates.tech>
-Date: Wed, 14 Aug 2024 09:42:35 +0200
-Subject: [PATCH 1/2] x86/IOMMU: move tracking in iommu_identity_mapping()
+From beadd68b5490ada053d72f8a9ce6fd696d626596 Mon Sep 17 00:00:00 2001
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 13 Aug 2024 16:36:40 +0200
+Subject: x86/IOMMU: move tracking in iommu_identity_mapping()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Backport notes:
-- applied with patch, with offsets
-Backported-by: David Morel <david.morel@vates.tech>
-
-Original commitlog:
 If for some reason xmalloc() fails after having mapped the reserved
 regions, an error is reported, but the regions remain mapped in the P2M.
 
@@ -35,18 +30,12 @@ Fixes: c0e19d7c6c42 ("IOMMU: generalize VT-d's tracking of mapped RMRR regions")
 Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
-master commit: beadd68b5490ada053d72f8a9ce6fd696d626596
-master date: 2024-08-13 16:36:40 +0200
----
- xen/arch/x86/mm/p2m.c               |  8 +++++---
- xen/drivers/passthrough/x86/iommu.c | 30 ++++++++++++++++++++---------
- 2 files changed, 26 insertions(+), 12 deletions(-)
 
 diff --git a/xen/arch/x86/mm/p2m.c b/xen/arch/x86/mm/p2m.c
-index 4791c4f..d9685b5 100644
+index e7e327d6a6..1739133fc2 100644
 --- a/xen/arch/x86/mm/p2m.c
 +++ b/xen/arch/x86/mm/p2m.c
-@@ -1586,9 +1586,11 @@ int clear_identity_p2m_entry(struct domain *d, unsigned long gfn_l)
+@@ -1267,9 +1267,11 @@ int p2m_remove_identity_entry(struct domain *d, unsigned long gfn_l)
      else
      {
          gfn_unlock(p2m, gfn, 0);
@@ -62,10 +51,10 @@ index 4791c4f..d9685b5 100644
      }
  
 diff --git a/xen/drivers/passthrough/x86/iommu.c b/xen/drivers/passthrough/x86/iommu.c
-index 77bb993..6109bb5 100644
+index cc0062b027..8b1e0596b8 100644
 --- a/xen/drivers/passthrough/x86/iommu.c
 +++ b/xen/drivers/passthrough/x86/iommu.c
-@@ -196,24 +196,36 @@ int iommu_identity_mapping(struct domain *d, p2m_access_t p2ma,
+@@ -267,24 +267,36 @@ int iommu_identity_mapping(struct domain *d, p2m_access_t p2ma,
      if ( p2ma == p2m_access_x )
          return -ENOENT;
  
@@ -111,6 +100,3 @@ index 77bb993..6109bb5 100644
      return 0;
  }
  
--- 
-2.46.0
-

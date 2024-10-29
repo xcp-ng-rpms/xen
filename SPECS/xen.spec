@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.0.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -422,10 +422,15 @@ export PYTHON="%{__python}"
            --disable-pvshim \
            --enable-rombios \
            --enable-systemd \
+           CFLAGS= LDFLAGS= \
            --with-xenstored=oxenstored \
            --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
            --with-system-ipxe=/usr/share/ipxe/ipxe.bin \
            --with-system-ovmf=/usr/share/edk2/OVMF-release.fd
+
+# The hypervisor build system can't cope with RPM's {C,LD}FLAGS
+unset CFLAGS
+unset LDFLAGS
 
 # Take a snapshot of the configured source tree for livepatches
 mkdir ../livepatch-src
@@ -441,10 +446,6 @@ echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
 %{make_build} DESTDIR=%{buildroot} PYTHON=python2 -C tools/python
 %{make_build} DESTDIR=%{buildroot} PYTHON=python2 -C tools/pygrub
 %endif
-
-# The hypervisor build system can't cope with RPM's {C,LD}FLAGS
-unset CFLAGS
-unset LDFLAGS
 
 build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     local mk ver cov
@@ -1050,6 +1051,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Tue Oct 29 2024 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-3.0.1
+- unset *FLAGS early
+
 * Wed Sep 11 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-3
 - Fix for XSA-462 CA-399169
 

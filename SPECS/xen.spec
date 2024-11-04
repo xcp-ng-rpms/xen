@@ -762,11 +762,11 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %files dom0-tools
 %{_sysconfdir}/bash_completion.d/xl
-%exclude %{_sysconfdir}/rc.d/init.d/xencommons
-%exclude %{_sysconfdir}/rc.d/init.d/xendomains
-%exclude %{_sysconfdir}/rc.d/init.d/xendriverdomain
+%exclude %{_sysconfdir}/init.d/xencommons
+%exclude %{_sysconfdir}/init.d/xendomains
+%exclude %{_sysconfdir}/init.d/xendriverdomain
 %exclude %{_sysconfdir}/sysconfig/xendomains
-%exclude %{_sysconfdir}/rc.d/init.d/xen-watchdog
+%exclude %{_sysconfdir}/init.d/xen-watchdog
 %config %{_sysconfdir}/logrotate.d/xen-tools
 %config %{_sysconfdir}/sysconfig/xencommons
 %config %{_sysconfdir}/xen/oxenstored.conf
@@ -1123,6 +1123,7 @@ fi
 %changelog
 * Thu Jun 26 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-13.1.0.ydi.1
 - Pull python3-setuptools when using python3
+- /etc/rc.d/init.d is dead, long live /etc/init.d
 
 * Mon May 12 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.17.5-13.1
 - Sync with 4.17.5-13

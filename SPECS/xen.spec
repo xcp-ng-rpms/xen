@@ -228,6 +228,10 @@ BuildRequires: python3-rpm-macros
 %global py_sitearch %{python3_sitearch}
 %global __python %{__python3}
 
+%if 0%{?xcpng}
+BuildRequires: python3-setuptools
+%endif
+
 # These build dependencies are needed for building the xen.gz as
 # well as live patches.
 %define core_builddeps() %{lua:
@@ -1109,6 +1113,7 @@ fi
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS
 - Remove livepatch certificate support depending on unpublished XS packages
+- Require needed python3-setuptools
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

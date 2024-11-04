@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.0.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -215,6 +215,8 @@ BuildRequires: python3-rpm-macros
 %global py2_compat 1
 BuildRequires: python2-devel
 BuildRequires: python2-rpm-macros
+%else
+BuildRequires: python3-setuptools
 %endif
 
 # These build dependencies are needed for building the xen.gz as
@@ -1050,6 +1052,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{hv_rel}
 %{?_cov_results_package}
 
 %changelog
+* Mon Nov 04 2024 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-3.0.2
+- Pull python3-setuptools when using python3
+
 * Wed Sep 11 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-3
 - Fix for XSA-462 CA-399169
 

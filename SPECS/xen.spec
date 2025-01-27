@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.0.perfglobalfixup.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -227,6 +227,8 @@ Patch182: allow-rombios-pci-config-on-any-host-bridge.patch
 Patch183: gvt-g-hvmloader+rombios.patch
 Patch184: xen-spec-ctrl-utility.patch
 Patch185: vtpm-ppi-acpi-dsm.patch
+
+Patch1000: x86-intel-fix-perf_global-fixup-when-virtualised.patch
 
 ExclusiveArch: x86_64
 

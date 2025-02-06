@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}%{?dist}
+Release: %{?xsrel}.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -227,6 +227,8 @@ Patch182: allow-rombios-pci-config-on-any-host-bridge.patch
 Patch183: gvt-g-hvmloader+rombios.patch
 Patch184: xen-spec-ctrl-utility.patch
 Patch185: vtpm-ppi-acpi-dsm.patch
+
+Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 
 ExclusiveArch: x86_64
 
@@ -1072,6 +1074,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Feb  6 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-4.1
+- xenguest: activate nested virt when requested
+
 * Tue Nov  5 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-4
 - Fixes for
   - XSA-463 CVE-2024-45818

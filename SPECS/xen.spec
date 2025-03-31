@@ -1,6 +1,6 @@
-%global package_speccommit 220691b16ba60bc55c3e6aa9d13bcabc617202b3
+%global package_speccommit 82fb0e6998b13eafe316780d38e781bbbdd71ed3
 %global usver 4.17.5
-%global xsver 6
+%global xsver 9
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -9,7 +9,7 @@
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 6
+%global hv_rel 9
 
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
@@ -136,106 +136,118 @@ Patch91: backport-08f539a7fbb2.patch
 Patch92: backport-5c05c4a2b261.patch
 Patch93: backport-8eed56995dc6.patch
 Patch94: backport-8974056f1f7a.patch
-Patch95: backport-94039d97e2e3.patch
-Patch96: backport-c27c8922f2c6.patch
-Patch97: backport-df2209f9b792.patch
-Patch98: backport-b3a9037550df.patch
-Patch99: backport-9de79317e844.patch
-Patch100: backport-98ae35cab0e4.patch
-Patch101: backport-72cad62abbaa.patch
-Patch102: backport-024e7131be5c.patch
-Patch103: backport-79fcc0e9d7df.patch
-Patch104: backport-0e1bd15a1d5d.patch
-Patch105: backport-4a7e71aa0851.patch
-Patch106: backport-c852ca5c05f3.patch
-Patch107: backport-66c8e9b76c61.patch
-Patch108: backport-03e484a4f6fb.patch
-Patch109: backport-6d5111b10e08.patch
-Patch110: backport-64b21662b1b1.patch
-Patch111: backport-9e30bd8f4a8c.patch
-Patch112: backport-754a29cacf8e.patch
-Patch113: backport-752ec9a9b195.patch
-Patch114: backport-9b7d79388943.patch
-Patch115: backport-b25b28ede1cb.patch
-Patch116: backport-cc47813c4a2c.patch
-Patch117: backport-5246924acf79.patch
-Patch118: backport-8d336fcb6ea6.patch
-Patch119: backport-3a28da8f4daf.patch
-Patch120: backport-a184ac74f5e0.patch
-Patch121: backport-dcbf8210f3f3.patch
-Patch122: backport-2f413e22fa5e.patch
-Patch123: backport-5c56361c618e.patch
-Patch124: backport-28301682f492.patch
-Patch125: x86-spec-ctrl-Support-for-SRSO_US_NO-and-SRSO_MSR_FI.patch
-Patch126: x86-spec-ctrl-Stuff-64-slots-on-Zen5-CPUs.patch
-Patch127: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch128: quirk-hp-gen8-rmrr.patch
-Patch129: quirk-pci-phantom-function-devices.patch
-Patch130: 0001-x86-hpet-Pre-cleanup.patch
-Patch131: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch132: 0003-x86-hpet-Post-cleanup.patch
-Patch133: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch134: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch135: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch136: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch137: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
-Patch138: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch139: livepatch-ignore-duplicate-new.patch
-Patch140: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch141: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch142: pygrub-Ignore-GRUB2-if-statements.patch
-Patch143: libfsimage-Add-support-for-btrfs.patch
-Patch144: quiet-broke-irq-affinity.patch
-Patch145: xen-hide-AVX512-on-SKX-by-default.patch
-Patch146: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch147: xen-tweak-cmdline-defaults.patch
-Patch148: xen-tweak-debug-overhead.patch
-Patch149: tweak-iommu-policy.patch
-Patch150: tweak-sc-policy.patch
-Patch151: disable-core-parking.patch
-Patch152: remove-info-leak.patch
-Patch153: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch154: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch155: hitachi-driver-domain-ssid.patch
-Patch156: install_targets_for_test_x86_emulator.patch
-Patch157: xen-define-offsets-for-kdump.patch
-Patch158: xen-scheduler-auto-privdom-weight.patch
-Patch159: xen-hvm-disable-tsc-ramping.patch
-Patch160: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch161: i8259-timers-pick-online-vcpu.patch
-Patch162: revert-ca2eee92df44.patch
-Patch163: libxc-cpuid-cores_per_socket.patch
-Patch164: libxc-cpu-clear-deps.patch
-Patch165: libxc-cpu-policies.patch
-Patch166: max-featureset-compat.patch
-Patch167: pygrub-add-disk-as-extra-group.patch
-Patch168: pygrub-add-default-and-extra-args.patch
-Patch169: pygrub-always-boot-default.patch
-Patch170: pygrub-friendly-no-fs.patch
-Patch171: pygrub-default-xenmobile-kernel.patch
-Patch172: pygrub-blacklist-support.patch
-Patch173: oem-bios-xensource.patch
-Patch174: misc-log-guest-consoles.patch
-Patch175: mixed-domain-runstates.patch
-Patch176: xenguest.patch
-Patch177: xen-vmdebug.patch
-Patch178: oxenstore-censor-sensitive-data.patch
-Patch179: oxenstore-large-packets.patch
-Patch180: nvidia-vga.patch
-Patch181: hvmloader-disable-pci-option-rom-loading.patch
-Patch182: xen-force-software-vmcs-shadow.patch
-Patch183: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch184: use-msr-ll-instead-of-vmcs-efer.patch
-Patch185: revert-4a7e71aa0851-partial.patch
-Patch186: add-pv-iommu-headers.patch
-Patch187: add-pv-iommu-local-domain-ops.patch
-Patch188: add-pv-iommu-foreign-support.patch
-Patch189: upstream-pv-iommu-tools.patch
-Patch190: Add-PV-IOMMU-elf-note.patch
-Patch191: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch192: gvt-g-hvmloader+rombios.patch
-Patch193: xen-spec-ctrl-utility.patch
-Patch194: vtpm-ppi-acpi-dsm.patch
+Patch95: backport-37b069fc3bb9.patch
+Patch96: backport-e5865e780463.patch
+Patch97: backport-1b7dfe88f5fb.patch
+Patch98: backport-94039d97e2e3.patch
+Patch99: backport-c27c8922f2c6.patch
+Patch100: backport-df2209f9b792.patch
+Patch101: backport-b3a9037550df.patch
+Patch102: backport-9de79317e844.patch
+Patch103: backport-98ae35cab0e4.patch
+Patch104: backport-72cad62abbaa.patch
+Patch105: backport-024e7131be5c.patch
+Patch106: backport-79fcc0e9d7df.patch
+Patch107: backport-0e1bd15a1d5d.patch
+Patch108: backport-4a7e71aa0851.patch
+Patch109: backport-c852ca5c05f3.patch
+Patch110: backport-66c8e9b76c61.patch
+Patch111: backport-03e484a4f6fb.patch
+Patch112: backport-6d5111b10e08.patch
+Patch113: backport-64b21662b1b1.patch
+Patch114: backport-9e30bd8f4a8c.patch
+Patch115: backport-754a29cacf8e.patch
+Patch116: backport-752ec9a9b195.patch
+Patch117: backport-9b7d79388943.patch
+Patch118: backport-b25b28ede1cb.patch
+Patch119: backport-cc47813c4a2c.patch
+Patch120: backport-5246924acf79.patch
+Patch121: backport-8d336fcb6ea6.patch
+Patch122: backport-3a28da8f4daf.patch
+Patch123: backport-a184ac74f5e0.patch
+Patch124: backport-dcbf8210f3f3.patch
+Patch125: backport-2f413e22fa5e.patch
+Patch126: backport-5c56361c618e.patch
+Patch127: backport-28301682f492.patch
+Patch128: backport-a1746cd4434d.patch
+Patch129: backport-555866cb5600.patch
+Patch130: backport-f29cc14de1d1.patch
+Patch131: backport-2636fcdc15c7.patch
+Patch132: backport-848b6bc8c9f3.patch
+Patch133: backport-3fc44151d83d.patch
+Patch134: backport-a2bbb140be9d.patch
+Patch135: backport-b953a99da98d.patch
+Patch136: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch137: quirk-hp-gen8-rmrr.patch
+Patch138: quirk-pci-phantom-function-devices.patch
+Patch139: 0001-x86-hpet-Pre-cleanup.patch
+Patch140: 0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+Patch141: 0003-x86-hpet-Post-cleanup.patch
+Patch142: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch143: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch144: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch145: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch146: 0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+Patch147: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch148: livepatch-ignore-duplicate-new.patch
+Patch149: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch150: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch151: pygrub-Ignore-GRUB2-if-statements.patch
+Patch152: libfsimage-Add-support-for-btrfs.patch
+Patch153: quiet-broke-irq-affinity.patch
+Patch154: xen-hide-AVX512-on-SKX-by-default.patch
+Patch155: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch156: vpci-drop-const.patch
+Patch157: pci-cache-memory-decode-bit.patch
+Patch158: pci-cache-msi-x-enabled-bit.patch
+Patch159: xen-tweak-cmdline-defaults.patch
+Patch160: xen-tweak-debug-overhead.patch
+Patch161: tweak-iommu-policy.patch
+Patch162: tweak-sc-policy.patch
+Patch163: disable-core-parking.patch
+Patch164: remove-info-leak.patch
+Patch165: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch166: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch167: hitachi-driver-domain-ssid.patch
+Patch168: install_targets_for_test_x86_emulator.patch
+Patch169: xen-define-offsets-for-kdump.patch
+Patch170: xen-scheduler-auto-privdom-weight.patch
+Patch171: xen-hvm-disable-tsc-ramping.patch
+Patch172: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch173: i8259-timers-pick-online-vcpu.patch
+Patch174: revert-ca2eee92df44.patch
+Patch175: libxc-cpuid-cores_per_socket.patch
+Patch176: libxc-cpu-clear-deps.patch
+Patch177: libxc-cpu-policies.patch
+Patch178: max-featureset-compat.patch
+Patch179: pygrub-add-disk-as-extra-group.patch
+Patch180: pygrub-add-default-and-extra-args.patch
+Patch181: pygrub-always-boot-default.patch
+Patch182: pygrub-friendly-no-fs.patch
+Patch183: pygrub-default-xenmobile-kernel.patch
+Patch184: pygrub-blacklist-support.patch
+Patch185: oem-bios-xensource.patch
+Patch186: misc-log-guest-consoles.patch
+Patch187: mixed-domain-runstates.patch
+Patch188: xenguest.patch
+Patch189: xen-vmdebug.patch
+Patch190: oxenstore-censor-sensitive-data.patch
+Patch191: oxenstore-large-packets.patch
+Patch192: nvidia-vga.patch
+Patch193: hvmloader-disable-pci-option-rom-loading.patch
+Patch194: xen-force-software-vmcs-shadow.patch
+Patch195: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch196: use-msr-ll-instead-of-vmcs-efer.patch
+Patch197: revert-4a7e71aa0851-partial.patch
+Patch198: add-pv-iommu-headers.patch
+Patch199: add-pv-iommu-local-domain-ops.patch
+Patch200: add-pv-iommu-foreign-support.patch
+Patch201: upstream-pv-iommu-tools.patch
+Patch202: Add-PV-IOMMU-elf-note.patch
+Patch203: allow-rombios-pci-config-on-any-host-bridge.patch
+Patch204: gvt-g-hvmloader+rombios.patch
+Patch205: xen-spec-ctrl-utility.patch
+Patch206: vtpm-ppi-acpi-dsm.patch
 
 ExclusiveArch: x86_64
 
@@ -296,7 +308,7 @@ BuildRequires: zlib-devel
 # For libxl
 BuildRequires: yajl-devel
 BuildRequires: libuuid-devel
-BuildRequires: perl
+BuildRequires: perl-interpreter
 
 # For libacpi
 BuildRequires: iasl
@@ -1081,6 +1093,18 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Feb 07 2025 Javi Merino <javi.merino@cloud.com> - 4.17.5-9
+- Fix PCI config reads patch
+
+* Tue Feb  4 2025 Javi Merino <javi.merino@cloud.com> - 4.17.5-8
+- Fix IO_PAGE_FAULT reported by AMD
+- Reduce PCI config reads
+
+* Wed Dec 18 2024 Roger Pau Monné <roger.pau@citrix.com> - 4.17.5-7
+- Fix IO-APIC initialization with ExtINT mode pins
+- Fix emulation of MOVBE instruction
+- Fix Ocaml rpath setting
+
 * Tue Dec  3 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-6
 - Fix migration of VMs from CH 8.2 CU1 to XS8 when the guest is using BHI_DIS_S
 

@@ -1,0 +1,43 @@
+From b7e78f7b944c4e95fb0eaf76ba5ffa6ed653facc Mon Sep 17 00:00:00 2001
+Message-ID: <b7e78f7b944c4e95fb0eaf76ba5ffa6ed653facc.1744029730.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 7 Apr 2025 14:42:04 +0200
+Subject: [PATCH] x86: Replace memcpy implementation with ERMS variant
+
+Xen uses rep movsq+b for copying memory, according Intel Optimization Reference Manual,
+this is not the most efficient way of doing it, at least for CPUs exposing the ERMS flag
+(which concern the vast majority of relevant Intel CPUs and Zen3+ AMD CPUs).
+
+This patch replace the memcpy implementation with a plain rep movsb which is expected to
+perform better on most CPUs.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/string.c | 11 +----------
+ 1 file changed, 1 insertion(+), 10 deletions(-)
+
+diff --git a/xen/arch/x86/string.c b/xen/arch/x86/string.c
+index bda24b14ac..154d1fda3b 100644
+--- a/xen/arch/x86/string.c
++++ b/xen/arch/x86/string.c
+@@ -9,16 +9,7 @@
+ 
+ void *(memcpy)(void *dest, const void *src, size_t n)
+ {
+-    long d0, d1, d2;
+-
+-    asm volatile (
+-        "   rep ; movs"__OS" ; "
+-        "   mov %k4,%k3      ; "
+-        "   rep ; movsb        "
+-        : "=&c" (d0), "=&D" (d1), "=&S" (d2)
+-        : "0" (n/BYTES_PER_LONG), "r" (n%BYTES_PER_LONG), "1" (dest), "2" (src)
+-        : "memory" );
+-
++    asm volatile ("rep movsb" :: "c"(n), "D"(dest), "S"(src) : "memory");
+     return dest;
+ }
+ 
+-- 
+2.47.2
+

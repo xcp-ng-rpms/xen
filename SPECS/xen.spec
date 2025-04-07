@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.1.0.erms.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -240,6 +240,7 @@ Patch194: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: xsa467.patch
+Patch1002: memcpy-erms.patch
 
 ExclusiveArch: x86_64
 
@@ -1085,6 +1086,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Apr  7 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-6.1.0.erms.1
+ - Use ERMS variant for memcpy
+
 * Wed Mar 05 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-6.1
 - Sync with 4.17.5-6
 - *** Upstream changelog ***

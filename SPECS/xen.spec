@@ -198,7 +198,10 @@ Patch153: quiet-broke-irq-affinity.patch
 Patch154: xen-hide-AVX512-on-SKX-by-default.patch
 Patch155: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
 Patch156: vpci-drop-const.patch
+# Compatibility hack (fixed in Xen upstream in a different way)
+# Fixed by https://xenbits.xen.org/gitweb/?p=xen.git;a=commit;h=8e60d47cf0112c145b6b0e454d102b04c857db8c
 Patch157: pci-cache-memory-decode-bit.patch
+# See pci-cache-memory-decode-bit note
 Patch158: pci-cache-msi-x-enabled-bit.patch
 Patch159: xen-tweak-cmdline-defaults.patch
 Patch160: xen-tweak-debug-overhead.patch

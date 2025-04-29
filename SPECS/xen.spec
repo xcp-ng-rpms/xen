@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -1100,6 +1100,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Apr 29 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-9.2
+- Rebuild against ncurses 6.4-6.20240309 to pull abi5 (compat) libs
+
 * Mon Mar 31 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.17.5-9.1
 - Sync with 4.17.5-9
 - *** Upstream changelog ***

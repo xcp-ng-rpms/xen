@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -255,6 +255,7 @@ Patch206: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: xsa467.patch
+Patch1002: xen-4.17.5-x86-intel-Fix-PERF_GLOBAL-fixup-when-virtualised.patch
 
 ExclusiveArch: x86_64
 
@@ -1100,6 +1101,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon May 05 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-9.3
+- Backport dd05d265b8ab "x86/intel: Fix PERF_GLOBAL fixup when virtualised"
+
 * Tue Apr 29 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-9.2
 - Rebuild against ncurses 6.4-6.20240309 to pull abi5 (compat) libs
 

@@ -1369,11 +1369,12 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 
 %changelog
 
-* Tue May 13 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.49.1 - WIP
+* Tue May 13 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.13.5-9.49.1
 - Sync with 4.13.5-9.49 from hotfix XS82ECU1086
 - Fix for XSA-469
 - Drop xsa467.patch, applied in upstream package
-- FIXME regression on PV-shim to be fixed
+- Update x86-alternative-Support-replacements-when-a-feature-.patch to fix a backporting bug
+  (fix coming from XenServer's xen.pg github repository)
 - *** Upstream changelog ***
   * Thu May  8 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-9.49
   - Fixes for:

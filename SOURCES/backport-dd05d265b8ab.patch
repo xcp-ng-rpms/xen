@@ -1,9 +1,9 @@
 From dd05d265b8abda4cc7206b29cd71b77fb46658bf Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
 Date: Tue, 21 Jan 2025 16:56:26 +0000
-Subject: [PATCH] x86/intel: Fix PERF_GLOBAL fixup when virtualised
+Subject: x86/intel: Fix PERF_GLOBAL fixup when virtualised
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 Logic using performance counters needs to look at
@@ -23,14 +23,11 @@ Fixes: 6bdb965178bb ("x86/intel: ensure Global Performance Counter Control is se
 Reported-by: Jonathan Katz <jonathan.katz@aptar.com>
 Link: https://xcp-ng.org/forum/topic/10286/nesting-xcp-ng-on-esx-8
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
-Reviewed-by: Roger Pau MonnÃ© <roger.pau@citrix.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 Tested-by: Jonathan Katz <jonathan.katz@aptar.com>
----
- xen/arch/x86/cpu/intel.c | 64 +++++++++++++++++++++++-----------------
- 1 file changed, 37 insertions(+), 27 deletions(-)
 
 diff --git a/xen/arch/x86/cpu/intel.c b/xen/arch/x86/cpu/intel.c
-index 6a7347968b..6a680ba38d 100644
+index 6a7347968ba2..6a680ba38dc9 100644
 --- a/xen/arch/x86/cpu/intel.c
 +++ b/xen/arch/x86/cpu/intel.c
 @@ -535,39 +535,49 @@ static void intel_log_freq(const struct cpuinfo_x86 *c)
@@ -110,6 +107,3 @@ index 6a7347968b..6a680ba38d 100644
  
  	if ( !cpu_has(c, X86_FEATURE_XTOPOLOGY) )
  	{
--- 
-2.39.5
-

@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -299,6 +299,8 @@ Patch254: vtpm-ppi-acpi-dsm.patch
 
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
+Patch1001: 0001-x86-hvmloader-select-xen-platform-pci-MMIO-BAR-UC-or.patch
+Patch1002: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
 
 ExclusiveArch: x86_64
 
@@ -1144,6 +1146,11 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Jul 11 2025 Anthoine Bourgeois <anthoine.bourgeois@vates.tech> - 4.17.5-15.2
+- Backport 22650d605462 "x86/hvmloader: select xen platform pci MMIO BAR UC or WB MTRR
+  cache attributes"
+- Backport fd06f8700769 "tools/golang: update auto-generated libxl based types"
+
 * Wed Jul 09 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-15.1
 - Sync with 4.17.5-15
 - *** Upstream changelog ***

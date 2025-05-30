@@ -274,6 +274,7 @@ Patch229: vtpm-ppi-acpi-dsm.patch
 
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
+Patch1001: 0001-x86-hvmloader-don-t-set-xenpci-MMIO-BAR-as-UC-in-MTR.patch
 
 ExclusiveArch: x86_64
 
@@ -1119,6 +1120,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri May 30 2025 Anthoine Bourgeois <anthoine.bourgeois@vates.tech> - 4.17.5-13.1
+- Workaround the Linux grant table cache mismatch on AMD cpus.
+
 * Mon May 12 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.17.5-13.1
 - Sync with 4.17.5-13
 - Remove xen-4.17.5-x86-intel-Fix-PERF_GLOBAL-fixup-when-virtualised.patch included in XS

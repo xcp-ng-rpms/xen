@@ -1,0 +1,151 @@
+From bfef1b02882d5bdebc49e8598854877e25cf5deb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>
+Date: Fri, 30 May 2025 13:54:08 +0200
+Subject: [PATCH] x86/hvmloader: don't set xenpci MMIO BAR as UC in MTRR
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The Xen PCI device (vendor ID 0x5853) exposed to x86 HVM guests doesn't
+have the functionality of a traditional PCI device.  The exposed MIO BAR is
+used by some guests (including Linux) as a safe place to map foreign
+memory, including the grant table itself.
+
+Traditionally BARs from devices have the uncacheable (UC) cache attribute
+from the MTRR, to ensure correct functionality of such devices.  hvmloader
+mimics this behaviour and sets the MTRR attributes of both the low and high
+PCI MMIO windows (where BARs of PCI devices reside) as UC in MTRR.
+
+This however causes performance issues for the users of the Xen PCI device
+BAR, as for the purposes of mapping remote memory there's no need to use
+the UC attribute.  On Intel systems this is worked around by using iPAT,
+that allows the hypervisor to force the effective cache attribute of a p2m
+entry regardless of the guest PAT value.  AMD however doesn't have an
+equivalent of iPAT, and guest PAT values are always considered.
+
+Linux commit:
+
+41925b105e34 xen: replace xen_remap() with memremap()
+
+Attempted to mitigate this by forcing mappings of the grant-table to use
+the write-back (WB) cache attribute.  However Linux memremap() takes MTRRs
+into account to calculate which PAT type to use, and seeing the MTRR cache
+attribute for the region being UC the PAT also ends up as UC, regardless of
+the caller having requested WB.
+
+As a workaround to allow current Linux to map the grant-table as WB using
+memremap() special case the Xen PCI device BAR in hvmloader and don't set
+its cache attribute as UC.  Such workaround in hvmloader should also be
+paired with a fix for Linux so it attempts to change the MTRR of the Xen
+PCI device BAR to WB by itself.
+
+Overall, the long term solution would be to provide the guest with a safe
+range in the guest physical address space where mappings to foreign pages
+can be created.
+
+Some vif throughput performance figures provided by Anthoine from a 8
+vCPUs, 4GB of RAM HVM guest(s) running on AMD hardware:
+
+Without this patch:
+vm -> dom0: 1.1Gb/s
+vm -> vm:   5.0Gb/s
+
+With the patch:
+vm -> dom0: 4.5Gb/s
+vm -> vm:   7.0Gb/s
+
+Reported-by: Anthoine Bourgeois <anthoine.bourgeois@vates.tech>
+Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+---
+ tools/firmware/hvmloader/config.h |  2 +-
+ tools/firmware/hvmloader/pci.c    | 33 +++++++++++++++++++++++++++++--
+ tools/firmware/hvmloader/util.c   |  2 +-
+ 3 files changed, 33 insertions(+), 4 deletions(-)
+
+diff --git a/tools/firmware/hvmloader/config.h b/tools/firmware/hvmloader/config.h
+index c82adf6dc5..f462f6cea1 100644
+--- a/tools/firmware/hvmloader/config.h
++++ b/tools/firmware/hvmloader/config.h
+@@ -58,7 +58,7 @@ extern uint8_t ioapic_version;
+ #define ACPI_TIS_HDR_ADDRESS 0xFED40F00UL
+ 
+ extern uint32_t pci_mem_start;
+-extern const uint32_t pci_mem_end;
++extern uint32_t pci_mem_end;
+ extern uint64_t pci_hi_mem_start, pci_hi_mem_end;
+ 
+ extern bool acpi_enabled;
+diff --git a/tools/firmware/hvmloader/pci.c b/tools/firmware/hvmloader/pci.c
+index c3c61ca060..196fab4227 100644
+--- a/tools/firmware/hvmloader/pci.c
++++ b/tools/firmware/hvmloader/pci.c
+@@ -30,7 +30,7 @@
+ #include <xen/hvm/e820.h>
+ 
+ uint32_t pci_mem_start = HVM_BELOW_4G_MMIO_START;
+-const uint32_t pci_mem_end = RESERVED_MEMBASE;
++uint32_t pci_mem_end = RESERVED_MEMBASE;
+ uint64_t pci_hi_mem_start = 0, pci_hi_mem_end = 0;
+ 
+ /*
+@@ -281,6 +281,35 @@ void pci_setup(void)
+             if ( bar_sz == 0 )
+                 continue;
+ 
++            if ( ((bar_data & PCI_BASE_ADDRESS_SPACE) ==
++                   PCI_BASE_ADDRESS_SPACE_MEMORY) &&
++                 vendor_id == 0x5853 &&
++                 (device_id == 0x0001 || device_id == 0x0002) )
++            {
++                if ( is_64bar )
++                {
++                     printf("xenpci dev %02x:%x unexpected MMIO 64bit BAR%u\n",
++                            devfn>>3, devfn&7, bar);
++                     continue;
++                }
++
++                if ( bar_sz > (pci_mem_end - pci_mem_start) )
++                {
++                     printf("xenpci dev %02x:%x BAR%u size %llx overflows low PCI hole\n",
++                            devfn>>3, devfn&7, bar, bar_sz);
++                     continue;
++                }
++
++                /* Put unconditionally at the end of the low PCI MMIO hole. */
++                pci_mem_end -= bar_sz;
++                bar_data &= ~PCI_BASE_ADDRESS_MEM_MASK;
++                bar_data |= pci_mem_end;
++                pci_writel(devfn, bar_reg, bar_data);
++                pci_devfn_decode_type[devfn] |= PCI_COMMAND_MEMORY;
++
++                continue;
++            }
++
+             for ( i = 0; i < nr_bars; i++ )
+                 if ( bars[i].bar_sz < bar_sz )
+                     break;
+@@ -320,7 +349,7 @@ void pci_setup(void)
+         }
+ 
+         /* Enable bus master for this function later */
+-        pci_devfn_decode_type[devfn] = PCI_COMMAND_MASTER;
++        pci_devfn_decode_type[devfn] |= PCI_COMMAND_MASTER;
+     }
+ 
+     if ( mmio_hole_size )
+diff --git a/tools/firmware/hvmloader/util.c b/tools/firmware/hvmloader/util.c
+index 581b35e5cf..8633a62738 100644
+--- a/tools/firmware/hvmloader/util.c
++++ b/tools/firmware/hvmloader/util.c
+@@ -957,7 +957,7 @@ void hvmloader_acpi_build_tables(struct acpi_config *config,
+         config->table_flags |= ACPI_HAS_HPET;
+ 
+     config->pci_start = pci_mem_start;
+-    config->pci_len = pci_mem_end - pci_mem_start;
++    config->pci_len = RESERVED_MEMBASE - pci_mem_start;
+     if ( pci_hi_mem_end > pci_hi_mem_start )
+     {
+         config->pci_hi_start = pci_hi_mem_start;
+-- 
+2.49.0
+

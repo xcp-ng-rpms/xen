@@ -274,7 +274,7 @@ Patch229: vtpm-ppi-acpi-dsm.patch
 
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
-Patch1001: 0001-x86-hvmloader-don-t-set-xenpci-MMIO-BAR-as-UC-in-MTR.patch
+Patch1001: 0001-x86-hvmloader-select-xen-platform-pci-MMIO-BAR-UC-or.patch
 
 ExclusiveArch: x86_64
 

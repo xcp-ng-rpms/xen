@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -275,6 +275,25 @@ Patch229: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: xsa470-4.17.patch
+# xsa471-4.17-01.patch is backport-4aae4452efee.patch
+Patch1002: xsa471-4.17-02.patch
+Patch1003: xsa471-4.17-03.patch
+Patch1004: xsa471-4.17-04.patch
+Patch1005: xsa471-4.17-05.patch
+Patch1006: xsa471-4.17-06.patch
+Patch1007: xsa471-4.17-07.patch
+Patch1008: xsa471-4.17-08.patch
+Patch1009: xsa471-4.17-09.patch
+Patch1010: xsa471-4.17-10.patch
+Patch1011: xsa471-4.17-11.patch
+Patch1012: xsa471-4.17-12.patch
+Patch1013: xsa471-4.17-13.patch
+Patch1014: xsa471-4.17-14.patch
+Patch1015: xsa471-4.17-15.patch
+Patch1016: xsa471-4.17-16.patch
+Patch1017: xsa471-4.17-17.patch
+Patch1018: xsa471-4.17-18.patch
+Patch1019: xsa471-4.17-19.patch
 
 ExclusiveArch: x86_64
 
@@ -1120,6 +1139,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Jul 08 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-13.3
+- Fix for XSA-471
+- Various fixes in MWAIT/MONITOR logic (part of XSA-471)
+
 * Tue Jul 01 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-13.2
 - Fix for XSA-470
 

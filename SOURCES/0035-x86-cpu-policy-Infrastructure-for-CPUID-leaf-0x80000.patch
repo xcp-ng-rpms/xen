@@ -1,0 +1,161 @@
+From c11689a55a5b4e7af8c29fe320620898c074def3 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 10 Sep 2024 19:55:15 +0100
+Subject: [PATCH 35/38] x86/cpu-policy: Infrastructure for CPUID leaf
+ 0x80000021.ecx
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Co-backported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Backport notes:
+- Not backported the CPUID_ENTRY() addition to libxl as we don't
+  use it to start VMs on XCP-ng
+- Update to FSCAPINTS size check as it has grown by 1 entry
+- Update fill_feature() to read e21c cpu feature
+- Minor index changes
+---
+ tools/misc/xen-cpuid.c                      | 5 +++++
+ xen/arch/x86/cpu-policy.c                   | 1 -
+ xen/arch/x86/cpu/common.c                   | 8 +++++---
+ xen/include/public/arch-x86/cpufeatureset.h | 2 ++
+ xen/include/xen/lib/x86/cpu-policy.h        | 7 ++++++-
+ xen/lib/x86/cpuid.c                         | 4 +++-
+ 6 files changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/tools/misc/xen-cpuid.c b/tools/misc/xen-cpuid.c
+index 6f12eb6..29979e9 100644
+--- a/tools/misc/xen-cpuid.c
++++ b/tools/misc/xen-cpuid.c
+@@ -232,6 +232,10 @@ static const char *const str_m10Al[64] =
+     [62] = "its-no",
+ };
+ 
++static const char *const str_e21c[32] =
++{
++};
++
+ static const struct {
+     const char *name;
+     const char *abbr;
+@@ -256,6 +260,7 @@ static const struct {
+     { "CPUID 0x00000007:1.edx",     "7d1", str_7d1 },
+     { "MSR_ARCH_CAPS.lo",         "m10Al", str_m10Al },
+     { "MSR_ARCH_CAPS.hi",         "m10Ah", str_m10Al + 32 },
++    { "CPUID 0x80000021.ecx",      "e21c", str_e21c },
+ };
+ 
+ #define COL_ALIGN "24"
+diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
+index 8ee2cf8..e8cc4bb 100644
+--- a/xen/arch/x86/cpu-policy.c
++++ b/xen/arch/x86/cpu-policy.c
+@@ -339,7 +339,6 @@ static void recalculate_misc(struct cpu_policy *p)
+         p->extd.raw[0x1f] = EMPTY_LEAF; /* SEV */
+         p->extd.raw[0x20] = EMPTY_LEAF; /* Platform QoS */
+         p->extd.raw[0x21].b = 0;
+-        p->extd.raw[0x21].c = 0;
+         p->extd.raw[0x21].d = 0;
+         break;
+     }
+diff --git a/xen/arch/x86/cpu/common.c b/xen/arch/x86/cpu/common.c
+index 4da6b6c..3444854 100644
+--- a/xen/arch/x86/cpu/common.c
++++ b/xen/arch/x86/cpu/common.c
+@@ -438,7 +438,9 @@ static void generic_identify(struct cpuinfo_x86 *c)
+ 	if (c->extended_cpuid_level >= 0x80000008)
+ 		c->x86_capability[FEATURESET_e8b] = cpuid_ebx(0x80000008);
+ 	if (c->extended_cpuid_level >= 0x80000021)
+-		c->x86_capability[FEATURESET_e21a] = cpuid_eax(0x80000021);
++		cpuid(0x80000021,
++		      &c->x86_capability[FEATURESET_e21a], &tmp,
++		      &c->x86_capability[FEATURESET_e21c], &tmp);
+ 
+ 	/* Intel-defined flags: level 0x00000007 */
+ 	if (c->cpuid_level >= 7) {
+@@ -597,7 +599,7 @@ static void fill_featureset(uint32_t fs[FSCAPINTS])
+ {
+     unsigned int i, max_leaf, max_extd, tmp;
+ 
+-    BUILD_BUG_ON(FSCAPINTS != 22);
++    BUILD_BUG_ON(FSCAPINTS != 23);
+ 
+     max_leaf = cpuid_eax(0);
+     if ( max_leaf >= 1 )
+@@ -630,7 +632,7 @@ static void fill_featureset(uint32_t fs[FSCAPINTS])
+     if ( max_extd >= 0x80000008 )
+         cpuid(0x80000008, &tmp, &fs[FEATURESET_e8b], &tmp, &tmp);
+     if ( max_extd >= 0x80000021 )
+-        cpuid(0x80000021, &fs[FEATURESET_e21a], &tmp, &tmp, &tmp);
++        cpuid(0x80000021, &fs[FEATURESET_e21a], &tmp, &fs[FEATURESET_e21c], &tmp);
+ 
+     if (test_bit(X86_FEATURE_ARCH_CAPS, fs))
+         rdmsr(MSR_ARCH_CAPABILITIES, fs[FEATURESET_m10Al], fs[FEATURESET_m10Ah]);
+diff --git a/xen/include/public/arch-x86/cpufeatureset.h b/xen/include/public/arch-x86/cpufeatureset.h
+index 1c6dc3c..ab6a17e 100644
+--- a/xen/include/public/arch-x86/cpufeatureset.h
++++ b/xen/include/public/arch-x86/cpufeatureset.h
+@@ -333,6 +333,8 @@ XEN_CPUFEATURE(RFDS_CLEAR,         16*32+28) /*!A| Register File(s) cleared by V
+ XEN_CPUFEATURE(PB_OPT_CTRL,        16*32+32) /*   MSR_PB_OPT_CTRL.IBPB_ALT */
+ XEN_CPUFEATURE(ITS_NO,             16*32+62) /*!A No Indirect Target Selection */
+ 
++/* AMD-defined CPU features, CPUID level 0x80000021.ecx, word 18 */
++
+ #endif /* XEN_CPUFEATURE */
+ 
+ /* Clean up from a default include.  Close the enum (for C). */
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index 075ab08..ebaa896 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -22,6 +22,7 @@
+ #define FEATURESET_7d1       15 /* 0x00000007:1.edx    */
+ #define FEATURESET_m10Al     16 /* 0x0000010a.eax      */
+ #define FEATURESET_m10Ah     17 /* 0x0000010a.edx      */
++#define FEATURESET_e21c      18 /* 0x80000021.ecx      */
+ 
+ struct cpuid_leaf
+ {
+@@ -327,7 +328,11 @@ struct cpu_policy
+             uint16_t ucode_size; /* Units of 16 bytes */
+             uint8_t  rap_size;   /* Units of 8 entries */
+             uint8_t  :8;
+-            uint32_t /* c */:32, /* d */:32;
++            union {
++                uint32_t e21c;
++                struct { DECL_BITFIELD(e21c); };
++            };
++            uint32_t /* d */:32;
+         };
+     } extd;
+ 
+diff --git a/xen/lib/x86/cpuid.c b/xen/lib/x86/cpuid.c
+index 353b592..31f70da 100644
+--- a/xen/lib/x86/cpuid.c
++++ b/xen/lib/x86/cpuid.c
+@@ -83,9 +83,10 @@ void x86_cpu_policy_to_featureset(
+     fs[FEATURESET_7d1]       = p->feat._7d1;
+     fs[FEATURESET_m10Al]     = p->arch_caps.lo;
+     fs[FEATURESET_m10Ah]     = p->arch_caps.hi;
++    fs[FEATURESET_e21c]      = p->extd.e21c;
+ 
+     /* Zero reserved featureset words */
+-    for ( i = FEATURESET_m10Ah + 1; i < FEATURESET_NR_ENTRIES; i++ )
++    for ( i = FEATURESET_e21c + 1; i < FEATURESET_NR_ENTRIES; i++ )
+         fs[i] = 0;
+ }
+ 
+@@ -110,6 +111,7 @@ void x86_cpu_featureset_to_policy(
+     p->feat._7d1             = fs[FEATURESET_7d1];
+     p->arch_caps.lo          = fs[FEATURESET_m10Al];
+     p->arch_caps.hi          = fs[FEATURESET_m10Ah];
++    p->extd.e21c             = fs[FEATURESET_e21c];
+ }
+ 
+ void x86_cpu_policy_recalc_synth(struct cpu_policy *p)
+-- 
+2.47.2
+

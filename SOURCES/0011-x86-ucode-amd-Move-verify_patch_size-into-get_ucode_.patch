@@ -1,0 +1,97 @@
+From 875f13abc017d4af1a49fd50cc5e2120918b7858 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Mon, 30 Mar 2020 18:10:50 +0100
+Subject: [PATCH 11/38] x86/ucode/amd: Move verify_patch_size() into
+ get_ucode_from_buffer_amd()
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+We only stash the microcode blob size so it can be audited in
+microcode_fits().  However, the patch size check depends only on the CPU
+family.
+
+Move the check earlier to when we are parsing the container, which avoids
+caching bad microcode in the first place, and allows us to avoid storing the
+size at all.
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Use of xmalloc_bytes() and memcpy() instead of xmemdup_bytes()
+- Filename changes (not yet moved to xen/arch/x86/cpu/microcode)
+---
+ xen/arch/x86/microcode_amd.c | 18 +++++++-----------
+ 1 file changed, 7 insertions(+), 11 deletions(-)
+
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index 9dcdabc..859260f 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -62,7 +62,6 @@ struct __packed microcode_header_amd {
+ 
+ struct microcode_patch {
+     void *mpb;
+-    size_t mpb_size;
+ };
+ 
+ /* Temporary, until the microcode_* structure are disentangled. */
+@@ -200,12 +199,6 @@ static enum microcode_match_result microcode_fits(
+          equiv.id  != mc_header->processor_rev_id )
+         return MIS_UCODE;
+ 
+-    if ( !verify_patch_size(mc_amd->mpb_size) )
+-    {
+-        pr_debug("microcode: patch size mismatch\n");
+-        return MIS_UCODE;
+-    }
+-
+     if ( mc_header->patch_id < sig->rev )
+     {
+         pr_debug("microcode: patch is already at a greater level.\n");
+@@ -350,10 +343,15 @@ static int get_ucode_from_buffer_amd(
+         return -EINVAL;
+     }
+ 
++    if ( !verify_patch_size(mpbuf->len) )
++    {
++        printk(XENLOG_ERR "microcode: patch size mismatch\n");
++        return -EINVAL;
++    }
++
+     mc_amd->mpb = xmalloc_bytes(mpbuf->len);
+     if ( !mc_amd->mpb )
+         return -ENOMEM;
+-    mc_amd->mpb_size = mpbuf->len;
+     memcpy(mc_amd->mpb, mpbuf->data, mpbuf->len);
+ 
+     pr_debug("microcode: CPU%d size %zu, block size %u offset %zu equivID %#x rev %#x\n",
+@@ -473,7 +471,7 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+     struct microcode_amd *mc_amd;
+     struct microcode_header_amd *saved = NULL;
+     struct microcode_patch *patch = NULL;
+-    size_t offset = 0, saved_size = 0;
++    size_t offset = 0;
+     int error = 0;
+     unsigned int cpu = smp_processor_id();
+     const struct cpu_signature *sig = &per_cpu(cpu_sig, cpu);
+@@ -549,7 +547,6 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+         {
+             xfree(saved);
+             saved = mc_amd->mpb;
+-            saved_size = mc_amd->mpb_size;
+         }
+         else
+         {
+@@ -588,7 +585,6 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+     if ( saved )
+     {
+         mc_amd->mpb = saved;
+-        mc_amd->mpb_size = saved_size;
+         patch = mc_amd;
+     }
+     else
+-- 
+2.47.2
+

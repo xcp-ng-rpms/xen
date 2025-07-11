@@ -1,0 +1,98 @@
+From 9c7fc3bad1d1eca45344fc43001422dc0b1a31e9 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 9 Feb 2021 20:49:07 +0000
+Subject: [PATCH 18/38] x86/ucode/amd: Handle length sanity check failures more
+ gracefully
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+Currently, a failure of verify_patch_size() causes an early abort of the
+microcode blob loop, which in turn causes a second go around the main
+container loop, ultimately failing the UCODE_MAGIC check.
+
+First, check for errors after the blob loop.  An error here is unrecoverable,
+so avoid going around the container loop again and printing an
+unhelpful-at-best error concerning bad UCODE_MAGIC.
+
+Second, split the verify_patch_size() check out of the microcode blob header
+check.  In the case that the sanity check fails, we can still use the
+known-to-be-plausible header length to continue walking the container to
+potentially find other applicable microcode blobs.
+
+Before:
+  (XEN) microcode: Bad microcode data
+  (XEN) microcode: Wrong microcode patch file magic
+  (XEN) Parsing microcode blob error -22
+
+After:
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa000
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa010
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa011
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa200
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa210
+  (XEN) microcode: Bad microcode length 0x000015c0 for cpu 0xa500
+  (XEN) microcode: couldn't find any matching ucode in the provided blob!
+
+Fixes: 4de936a38a ("x86/ucode/amd: Rework parsing logic in cpu_request_microcode()")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Filename changes (not yet moved to xen/arch/x86/cpu/microcode)
+---
+ xen/arch/x86/microcode_amd.c | 24 ++++++++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index f769eb9..69b6fd8 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -388,8 +388,7 @@ static struct microcode_patch *cpu_request_microcode(const void *buf, size_t siz
+             if ( size < sizeof(*mc) ||
+                  (mc = buf)->type != UCODE_UCODE_TYPE ||
+                  size - sizeof(*mc) < mc->len ||
+-                 mc->len < sizeof(struct microcode_patch) ||
+-                 (!skip_ucode && !verify_patch_size(mc->len)) )
++                 mc->len < sizeof(struct microcode_patch) )
+             {
+                 printk(XENLOG_ERR "microcode: Bad microcode data\n");
+                 error = -EINVAL;
+@@ -399,6 +398,19 @@ static struct microcode_patch *cpu_request_microcode(const void *buf, size_t siz
+             if ( skip_ucode )
+                 goto skip;
+ 
++            if ( !verify_patch_size(mc->len) )
++            {
++                printk(XENLOG_WARNING
++                       "microcode: Bad microcode length 0x%08x for cpu 0x%04x\n",
++                       mc->len, mc->patch->processor_rev_id);
++                /*
++                 * If the blob size sanity check fails, trust the container
++                 * length which has already been checked to be at least
++                 * plausible at this point.
++                 */
++                goto skip;
++            }
++
+             /*
+              * If the new ucode covers current CPU, compare ucodes and store the
+              * one with higher revision.
+@@ -422,6 +434,14 @@ static struct microcode_patch *cpu_request_microcode(const void *buf, size_t siz
+             if ( size >= 4 && *(const uint32_t *)buf == UCODE_MAGIC )
+                 break;
+         }
++
++        /*
++         * Any error means we didn't get cleanly to the end of the microcode
++         * container.  There isn't an overall length field, so we've got no
++         * way of skipping to the next container in the stream.
++         */
++        if ( error )
++            break;
+     }
+ 
+     if ( saved )
+-- 
+2.47.2
+

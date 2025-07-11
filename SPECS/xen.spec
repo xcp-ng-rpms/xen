@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -527,6 +527,56 @@ Patch480: xen-spec-ctrl-utility.patch
 # XCP-ng patches
 Patch1000: xsa461.patch
 Patch1001: xsa470-4.13.patch
+
+# Backports for XSA-471 from Xen 4.17 patchset
+# Patches 1002 to 1020 are backported from Xen 4.17 for some of the XSA-471
+# patches to be meaningful
+Patch1002: 0001-xen-x86-import-intel-family.h-from-Linux.patch
+Patch1003: 0002-x86-Resync-intel-family.h-from-Linux.patch
+Patch1004: 0003-x86-mwait-idle-enable-interrupts-before-C1-on-Xeons.patch
+Patch1005: 0004-x86-mwait-idle-disable-IBRS-during-long-idle.patch
+Patch1006: 0005-x86-mwait-idle-re-order-state-entry-exit-code-a-litt.patch
+Patch1007: 0006-xen-lib-Introduce-SHA2-256.patch
+Patch1008: 0007-x86-ucode-Remove-unnecessary-indirection-in-struct-m.patch
+Patch1009: 0008-x86-ucode-amd-Move-check_final_patch_levels-to-apply.patch
+Patch1010: 0009-x86-ucode-amd-Collect-CPUID.1.EAX-in-collect_cpu_inf.patch
+Patch1011: 0010-x86-ucode-amd-Overhaul-the-equivalent-cpu-table-hand.patch
+Patch1012: 0011-x86-ucode-amd-Move-verify_patch_size-into-get_ucode_.patch
+Patch1013: 0012-x86-ucode-amd-Alter-API-for-microcode_fits.patch
+Patch1014: 0013-x86-ucode-amd-Rename-bufsize-to-size-in-cpu_request_.patch
+Patch1015: 0014-x86-ucode-amd-Remove-gratuitous-memory-allocations-f.patch
+Patch1016: 0015-x86-ucode-amd-Fold-structures-together.patch
+Patch1017: 0016-x86-ucode-amd-Rework-parsing-logic-in-cpu_request_mi.patch
+Patch1018: 0017-x86-ucode-amd-Fix-OoB-read-in-cpu_request_microcode.patch
+Patch1019: 0018-x86-ucode-amd-Handle-length-sanity-check-failures-mo.patch
+Patch1020: 0019-x86-ucode-Perform-extra-SHA2-checks-on-AMD-Fam17h-19.patch
+Patch1021: 0020-x86-ucode-Extend-AMD-digest-checks-to-cover-Zen5-CPU.patch
+Patch1022: 0021-x86-ucode-Extend-warning-about-disabling-digest-chec.patch
+
+# XSA471 patches
+# 2 patches from the original 4.17 patchset have not been backported. These are
+# xsa471-4.17-06.patch (x86/cpu-policy: Simplify logic in guest_common_default_feature_adjustments())
+# and xsa471-4.17-15.patch (x86/cpu-policy: Rearrange guest_common_*_feature_adjustments())
+# as they concern Intel CPUs only, not related with XSA-471 fix. I suppose these
+# patch are part of the 4.17 patchset for the last patch (x86/spec-ctrl: Mitigate
+# Transitive Scheduler Attacks) to apply flawlessly.
+Patch1023: 0022-x86-intel-workaround-several-MONITOR-MWAIT-errata.patch
+Patch1024: 0023-x86-cpufeature-Reposition-cpu_has_-lfence_dispatch-n.patch
+Patch1025: 0024-x86-idle-Move-monitor-mwait-wrappers-into-cpu-idle.c.patch
+Patch1026: 0025-x86-idle-Remove-MFENCEs-for-CLFLUSH_MONITOR.patch
+Patch1027: 0026-Revert-part-of-x86-mwait-idle-disable-IBRS-during-lo.patch
+Patch1028: 0027-x86-cpu-policy-Fix-handling-of-leaf-0x80000021.patch
+Patch1029: 0028-x86-idle-Remove-broken-MWAIT-implementation.patch
+Patch1030: 0029-x86-idle-Drop-incorrect-smp_mb-in-mwait_idle_with_hi.patch
+Patch1031: 0030-x86-idle-Convert-force_mwait_ipi_wakeup-to-X86_BUG_M.patch
+Patch1032: 0031-xen-softirq-Rework-arch_skip_send_event_check-into-a.patch
+Patch1033: 0032-x86-idle-Implement-a-new-MWAIT-IPI-elision-algorithm.patch
+Patch1034: 0033-x86-idle-Fix-buggy-x86-mwait-idle-enable-interrupts-.patch
+Patch1035: 0034-x86-xen-cpuid-Fix-backports-of-new-features.patch
+Patch1036: 0035-x86-cpu-policy-Infrastructure-for-CPUID-leaf-0x80000.patch
+Patch1037: 0036-x86-ucode-Digests-for-TSA-microcode.patch
+Patch1038: 0037-x86-idle-Rearrange-VERW-and-MONITOR-in-mwait_idle_wi.patch
+Patch1039: 0038-x86-spec-ctrl-Mitigate-Transitive-Scheduler-Attacks.patch
 
 ExclusiveArch: x86_64
 
@@ -1369,6 +1419,11 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Tue Jul 22 2025 Thierry Escande <thierry.escande@vates.tech> - 4.13.5-9.49.3
+- Backport fix for XSA-471 patchset from Xen 4.17 to 4.13
+- Backport mwait-idle driver fixes (for XSA-471 patches to apply correctly)
+- Backport microcode digest check support (for XSA-471 patches to be meaningful)
+
 * Tue Jul 01 2025 Thierry Escande <thierry.escande@vates.tech> - 4.13.5-9.49.2
 - Fix for XSA-470
 

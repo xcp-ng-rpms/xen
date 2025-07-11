@@ -1,0 +1,82 @@
+From 6874ae9f0bab4b24b821beee805b7c5347de7a2f Mon Sep 17 00:00:00 2001
+From: Jan Beulich <jbeulich@suse.com>
+Date: Thu, 24 Feb 2022 11:20:34 +0100
+Subject: [PATCH 05/38] x86/mwait-idle: re-order state entry/exit code a little
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+The initial observation is that unlike the original ACPI idle driver we
+have a 2nd cpu_is_haltable() in here. By making the actual state entry
+conditional, the emitted trace records as well as the subsequent stats
+update are at least misleading in case the state wasn't actually entered.
+Hence they would want moving inside the conditional. At which point the
+cpuidle_get_tick() invocations could (and hence should) move as well.
+cstate_restore_tsc() also isn't needed if we didn't actually enter the
+state.
+
+This leaves only the errata_c6_workaround() and lapic_timer_off()
+invocations outside the conditional. As a result it looks easier to
+drop the conditional (and come back in sync with the other driver again)
+than to move almost everything into the conditional.
+
+While there also move the TRACE_6D() out of the IRQ-disabled region.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Needed for next patch "x86/idle: Fix buggy "x86/mwait-idle: enable
+  interrupts before C1 on Xeons"
+- Minor index changes
+- Variable name changes
+---
+ xen/arch/x86/cpu/mwait-idle.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/mwait-idle.c b/xen/arch/x86/cpu/mwait-idle.c
+index 37026d6..85518da 100644
+--- a/xen/arch/x86/cpu/mwait-idle.c
++++ b/xen/arch/x86/cpu/mwait-idle.c
+@@ -829,21 +829,17 @@ static void mwait_idle(void)
+ 
+ 	update_last_cx_stat(power, cx, before);
+ 
+-	if (cpu_is_haltable(cpu)) {
+-		if (cx->irq_enable_early)
+-			local_irq_enable();
++	if (cx->irq_enable_early)
++		local_irq_enable();
+ 
+-		mwait_idle_with_hints(eax, MWAIT_ECX_INTERRUPT_BREAK);
++	mwait_idle_with_hints(eax, MWAIT_ECX_INTERRUPT_BREAK);
+ 
+-		local_irq_disable();
+-	}
++	local_irq_disable();
+ 
+ 	after = alternative_call(cpuidle_get_tick);
+ 
+ 	cstate_restore_tsc();
+ 	trace_exit_reason(irq_traced);
+-	TRACE_6D(TRC_PM_IDLE_EXIT, cx->type, after,
+-		irq_traced[0], irq_traced[1], irq_traced[2], irq_traced[3]);
+ 
+ 	/* Now back in C0. */
+ 	update_idle_stats(power, cx, before, after);
+@@ -853,6 +849,9 @@ static void mwait_idle(void)
+ 
+ 	local_irq_enable();
+ 
++	TRACE_6D(TRC_PM_IDLE_EXIT, cx->type, after,
++		irq_traced[0], irq_traced[1], irq_traced[2], irq_traced[3]);
++
+ 	if (!(lapic_timer_reliable_states & (1 << cstate)))
+ 		lapic_timer_on();
+ 
+-- 
+2.47.2
+

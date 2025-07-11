@@ -1,0 +1,93 @@
+From efe6f7ae3b8bdb10572063485364e123652dbbfc Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Wed, 2 Jul 2025 14:51:38 +0100
+Subject: [PATCH 33/38] x86/idle: Fix buggy "x86/mwait-idle: enable interrupts
+ before C1 on Xeons"
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+The check of this_softirq_pending must be performed with irqs disabled, but
+this property was broken by an attempt to optimise entry/exit latency.
+
+Commit c227233ad64c in Linux (which we copied into Xen) was fixed up by
+edc8fc01f608 in Linux, which we have so far missed.
+
+Going to sleep without waking on interrupts is nonsensical outside of
+play_dead(), so overload this to select between two possible MWAITs, the
+second using the STI shadow to cover MWAIT for exactly the same reason as we
+do in safe_halt().
+
+Fixes: b17e0ec72ede ("x86/mwait-idle: enable interrupts before C1 on Xeons")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 9b0f0f6e235618c2764e925b58c4bfe412730ced)
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Minor index changes
+---
+ xen/arch/x86/acpi/cpu_idle.c  | 16 +++++++++++++++-
+ xen/arch/x86/cpu/mwait-idle.c |  7 ++-----
+ 2 files changed, 17 insertions(+), 6 deletions(-)
+
+diff --git a/xen/arch/x86/acpi/cpu_idle.c b/xen/arch/x86/acpi/cpu_idle.c
+index 10b0c53..b9a21e9 100644
+--- a/xen/arch/x86/acpi/cpu_idle.c
++++ b/xen/arch/x86/acpi/cpu_idle.c
+@@ -78,6 +78,13 @@ static always_inline void mwait(unsigned int eax, unsigned int ecx)
+                    :: "a" (eax), "c" (ecx) );
+ }
+ 
++static always_inline void sti_mwait_cli(unsigned int eax, unsigned int ecx)
++{
++    /* STI shadow covers MWAIT. */
++    asm volatile ( "sti; mwait; cli"
++                   :: "a" (eax), "c" (ecx) );
++}
++
+ #define GET_HW_RES_IN_NS(msr, val) \
+     do { rdmsrl(msr, val); val = tsc_ticks2ns(val); } while( 0 )
+ #define GET_MC6_RES(val)  GET_HW_RES_IN_NS(0x664, val)
+@@ -452,12 +459,19 @@ void mwait_idle_with_hints(unsigned int eax, unsigned int ecx)
+ 
+     monitor(this_softirq_pending, 0, 0);
+ 
++    ASSERT(!local_irq_is_enabled());
++
+     if ( !*this_softirq_pending )
+     {
+         struct cpu_info *info = get_cpu_info();
+ 
+         spec_ctrl_enter_idle(info);
+-        mwait(eax, ecx);
++
++        if ( ecx & MWAIT_ECX_INTERRUPT_BREAK )
++            mwait(eax, ecx);
++        else
++            sti_mwait_cli(eax, ecx);
++
+         spec_ctrl_exit_idle(info);
+     }
+ 
+diff --git a/xen/arch/x86/cpu/mwait-idle.c b/xen/arch/x86/cpu/mwait-idle.c
+index fea736c..01d84d9 100644
+--- a/xen/arch/x86/cpu/mwait-idle.c
++++ b/xen/arch/x86/cpu/mwait-idle.c
+@@ -825,12 +825,9 @@ static void mwait_idle(void)
+ 
+ 	update_last_cx_stat(power, cx, before);
+ 
+-	if (cx->irq_enable_early)
+-		local_irq_enable();
+-
+-	mwait_idle_with_hints(eax, MWAIT_ECX_INTERRUPT_BREAK);
++	mwait_idle_with_hints(eax,
++			      cx->irq_enable_early ? 0 : MWAIT_ECX_INTERRUPT_BREAK);
+ 
+-	local_irq_disable();
+ 
+ 	after = alternative_call(cpuidle_get_tick);
+ 
+-- 
+2.47.2
+

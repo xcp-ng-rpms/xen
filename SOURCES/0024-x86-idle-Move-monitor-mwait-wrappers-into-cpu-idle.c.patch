@@ -1,0 +1,114 @@
+From f12e40ee335fd84806025a051699def6752a1482 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 1 Apr 2025 14:59:01 +0100
+Subject: [PATCH 24/38] x86/idle: Move monitor()/mwait() wrappers into
+ cpu-idle.c
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+They're not used by any other translation unit, so shouldn't live in
+asm/processor.h, which is included almost everywhere.
+
+Our new toolchain baseline knows the MONITOR/MWAIT instructions, so use them
+directly rather than using raw hex.
+
+Change the hint/extention parameters from long to int.  They're specified to
+remain 32bit operands even 64-bit mode.
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 61e10fc28ccddff7c72c14acec56dc7ef2b155d1)
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Minor index changes
+---
+ xen/arch/x86/acpi/cpu_idle.c    | 21 +++++++++++++++++----
+ xen/include/asm-x86/processor.h | 17 -----------------
+ 2 files changed, 17 insertions(+), 21 deletions(-)
+
+diff --git a/xen/arch/x86/acpi/cpu_idle.c b/xen/arch/x86/acpi/cpu_idle.c
+index 4efe281..d1805ff 100644
+--- a/xen/arch/x86/acpi/cpu_idle.c
++++ b/xen/arch/x86/acpi/cpu_idle.c
+@@ -58,6 +58,19 @@
+ 
+ /*#define DEBUG_PM_CX*/
+ 
++static always_inline void monitor(
++    const void *addr, unsigned int ecx, unsigned int edx)
++{
++    asm volatile ( "monitor"
++                   :: "a" (addr), "c" (ecx), "d" (edx) );
++}
++
++static always_inline void mwait(unsigned int eax, unsigned int ecx)
++{
++    asm volatile ( "mwait"
++                   :: "a" (eax), "c" (ecx) );
++}
++
+ #define GET_HW_RES_IN_NS(msr, val) \
+     do { rdmsrl(msr, val); val = tsc_ticks2ns(val); } while( 0 )
+ #define GET_MC6_RES(val)  GET_HW_RES_IN_NS(0x664, val)
+@@ -461,7 +474,7 @@ void mwait_idle_with_hints(unsigned int eax, unsigned int ecx)
+         mb();
+     }
+ 
+-    __monitor(monitor_addr, 0, 0);
++    monitor(monitor_addr, 0, 0);
+     smp_mb();
+ 
+     /*
+@@ -475,7 +488,7 @@ void mwait_idle_with_hints(unsigned int eax, unsigned int ecx)
+         cpumask_set_cpu(cpu, &cpuidle_mwait_flags);
+ 
+         spec_ctrl_enter_idle(info);
+-        __mwait(eax, ecx);
++        mwait(eax, ecx);
+         spec_ctrl_exit_idle(info);
+ 
+         cpumask_clear_cpu(cpu, &cpuidle_mwait_flags);
+@@ -905,9 +918,9 @@ void acpi_dead_idle(void)
+              */
+             mb();
+             clflush(mwait_ptr);
+-            __monitor(mwait_ptr, 0, 0);
++            monitor(mwait_ptr, 0, 0);
+             mb();
+-            __mwait(cx->address, 0);
++            mwait(cx->address, 0);
+         }
+     }
+     else if ( (current_cpu_data.x86_vendor &
+diff --git a/xen/include/asm-x86/processor.h b/xen/include/asm-x86/processor.h
+index 37bb0ee..0b18005 100644
+--- a/xen/include/asm-x86/processor.h
++++ b/xen/include/asm-x86/processor.h
+@@ -408,23 +408,6 @@ static inline bool_t read_pkru_wd(uint32_t pkru, unsigned int pkey)
+     return (pkru >> (pkey * PKRU_ATTRS + PKRU_WRITE)) & 1;
+ }
+ 
+-static always_inline void __monitor(const void *eax, unsigned long ecx,
+-                                    unsigned long edx)
+-{
+-    /* "monitor %eax,%ecx,%edx;" */
+-    asm volatile (
+-        ".byte 0x0f,0x01,0xc8;"
+-        : : "a" (eax), "c" (ecx), "d"(edx) );
+-}
+-
+-static always_inline void __mwait(unsigned long eax, unsigned long ecx)
+-{
+-    /* "mwait %eax,%ecx;" */
+-    asm volatile (
+-        ".byte 0x0f,0x01,0xc9;"
+-        : : "a" (eax), "c" (ecx) );
+-}
+-
+ #define IOBMP_BYTES             8192
+ #define IOBMP_INVALID_OFFSET    0x8000
+ 
+-- 
+2.47.2
+

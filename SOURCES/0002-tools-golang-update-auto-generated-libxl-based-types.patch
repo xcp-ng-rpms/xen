@@ -1,0 +1,63 @@
+From fd06f87007698dd2a669922dcf4dcd69fa525e5b Mon Sep 17 00:00:00 2001
+From: Roger Pau Monne <roger.pau@citrix.com>
+Date: Wed, 2 Jul 2025 11:52:48 +0200
+Subject: [PATCH] tools/golang: update auto-generated libxl based types
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+As a result of the addition of a new field in libxl domain build info
+structure the golang types need to be regnerated, this was missing as part
+of 22650d6054.
+
+Regenerate the headers now.
+
+Reported-by: Juergen Gross <jgross@suse.com>
+Fixes: 22650d605462 ('x86/hvmloader: select xen platform pci MMIO BAR UC or WB MTRR cache attribute')
+Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+Reviewed-by: Juergen Gross <jgross@suse.com>
+Acked-by: Nick Rosbrook <enr0n@ubuntu.com>
+---
+ tools/golang/xenlight/helpers.gen.go | 6 ++++++
+ tools/golang/xenlight/types.gen.go   | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/tools/golang/xenlight/helpers.gen.go b/tools/golang/xenlight/helpers.gen.go
+index 191be87297..c45df1005f 100644
+--- a/tools/golang/xenlight/helpers.gen.go
++++ b/tools/golang/xenlight/helpers.gen.go
+@@ -1277,6 +1277,9 @@ x.Soundhw = C.GoString(tmp.soundhw)
+ if err := x.XenPlatformPci.fromC(&tmp.xen_platform_pci);err != nil {
+ return fmt.Errorf("converting field XenPlatformPci: %v", err)
+ }
++if err := x.XenPlatformPciBarUc.fromC(&tmp.xen_platform_pci_bar_uc);err != nil {
++return fmt.Errorf("converting field XenPlatformPciBarUc: %v", err)
++}
+ if err := x.UsbdeviceList.fromC(&tmp.usbdevice_list);err != nil {
+ return fmt.Errorf("converting field UsbdeviceList: %v", err)
+ }
+@@ -1621,6 +1624,9 @@ hvm.soundhw = C.CString(tmp.Soundhw)}
+ if err := tmp.XenPlatformPci.toC(&hvm.xen_platform_pci); err != nil {
+ return fmt.Errorf("converting field XenPlatformPci: %v", err)
+ }
++if err := tmp.XenPlatformPciBarUc.toC(&hvm.xen_platform_pci_bar_uc); err != nil {
++return fmt.Errorf("converting field XenPlatformPciBarUc: %v", err)
++}
+ if err := tmp.UsbdeviceList.toC(&hvm.usbdevice_list); err != nil {
+ return fmt.Errorf("converting field UsbdeviceList: %v", err)
+ }
+diff --git a/tools/golang/xenlight/types.gen.go b/tools/golang/xenlight/types.gen.go
+index 656933c6c9..61e322f20a 100644
+--- a/tools/golang/xenlight/types.gen.go
++++ b/tools/golang/xenlight/types.gen.go
+@@ -654,6 +654,7 @@ Usbdevice string
+ VkbDevice Defbool
+ Soundhw string
+ XenPlatformPci Defbool
++XenPlatformPciBarUc Defbool
+ UsbdeviceList StringList
+ VendorDevice VendorDevice
+ MsVmGenid MsVmGenid
+-- 
+2.49.1
+

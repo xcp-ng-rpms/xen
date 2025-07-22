@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1.0.ydi.2%{?dist}
+Release: %{?xsrel}.1.0.ydi.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -1096,6 +1096,23 @@ else
     fi
 fi
 
+# Point /boot/xen.efi appropriately
+if [ ! -e /boot/xen.efi ]; then
+    # Use a production hypervisor by default
+    ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+elif [ ! -L /boot/xen.efi ]; then
+    # Use the production hypervisor, but keep it unlinked
+    cp -f /boot/%{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+else
+    # Else look at the current link, and whether it is debug
+    path="`readlink -f /boot/xen.efi`"
+    if [ ${path} != ${path%%-d.efi} ]; then
+        ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen.efi
+    else
+        ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+    fi
+fi
+
 if [ -e %{_sysconfdir}/sysconfig/kernel ] && ! grep -q '^HYPERVISOR' %{_sysconfdir}/sysconfig/kernel ; then
   cat %{_sysconfdir}/sysconfig/kernel-xen >> %{_sysconfdir}/sysconfig/kernel
 fi
@@ -1127,10 +1144,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Thu Jun 26 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-13.1.0.ydi.2
+* Thu Jun 26 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-13.1.0.ydi.3
 - Pull python3-setuptools when using python3
 - /etc/rc.d/init.d is dead, long live /etc/init.d
-- Install xen.efi
+- Install xen.efi, replicate logic to handle xen.gz
 
 * Mon May 12 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.17.5-13.1
 - Sync with 4.17.5-13

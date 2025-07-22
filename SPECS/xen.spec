@@ -1147,6 +1147,23 @@ else
     fi
 fi
 
+# Point /boot/xen.efi appropriately
+if [ ! -e /boot/xen.efi ]; then
+    # Use a production hypervisor by default
+    ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+elif [ ! -L /boot/xen.efi ]; then
+    # Use the production hypervisor, but keep it unlinked
+    cp -f /boot/%{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+else
+    # Else look at the current link, and whether it is debug
+    path="`readlink -f /boot/xen.efi`"
+    if [ ${path} != ${path%%-d.efi} ]; then
+        ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen.efi
+    else
+        ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+    fi
+fi
+
 if [ -e %{_sysconfdir}/sysconfig/kernel ] && ! grep -q '^HYPERVISOR' %{_sysconfdir}/sysconfig/kernel ; then
   cat %{_sysconfdir}/sysconfig/kernel-xen >> %{_sysconfdir}/sysconfig/kernel
 fi
@@ -1181,7 +1198,7 @@ fi
 * Thu Oct 09 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-20.1.0.ydi.1
 - Pull python3-setuptools when using python3
 - /etc/rc.d/init.d is dead, long live /etc/init.d
-- Install xen.efi
+- Install xen.efi, replicate logic to handle xen.gz
 
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20

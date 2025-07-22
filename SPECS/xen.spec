@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1.0.ydi.1%{?dist}
+Release: %{?xsrel}.1.0.ydi.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -570,6 +570,8 @@ install_xen () { # $1=vendorversion $2=outdir
     %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
     %{__install} -p -D -m 644 xen/$2/xen-syms   %{buildroot}/boot/xen-syms-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/xen.efi     %{buildroot}/boot/xen-%{version}$1.efi
+    %{__install} -p -D -m 644 xen/$2/xen.efi.map %{buildroot}/boot/xen-%{version}$1.efi.map
 }
 install_xen -%{hv_rel}   build-xen-release
 install_xen -%{hv_rel}-d build-xen-debug
@@ -589,9 +591,13 @@ install_xen -%{hv_rel}-d build-xen-debug
 %files hypervisor
 /boot/%{name}-%{version}-%{hv_rel}.gz
 /boot/%{name}-%{version}-%{hv_rel}.map
+/boot/%{name}-%{version}-%{hv_rel}.efi
+/boot/%{name}-%{version}-%{hv_rel}.efi.map
 /boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
 /boot/%{name}-%{version}-%{hv_rel}-d.map
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
+/boot/%{name}-%{version}-%{hv_rel}-d.efi.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
 %license COPYING
@@ -1121,9 +1127,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Thu Jun 26 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-13.1.0.ydi.1
+* Thu Jun 26 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-13.1.0.ydi.2
 - Pull python3-setuptools when using python3
 - /etc/rc.d/init.d is dead, long live /etc/init.d
+- Install xen.efi
 
 * Mon May 12 2025 Samuel Verschelde <stormi-xcp@ylix.fr> - 4.17.5-13.1
 - Sync with 4.17.5-13

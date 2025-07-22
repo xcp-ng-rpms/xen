@@ -619,6 +619,8 @@ install_xen () { # $1=vendorversion $2=outdir
     %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
     %{__install} -p -D -m 644 xen/$2/xen-syms   %{buildroot}/boot/xen-syms-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/xen.efi     %{buildroot}/boot/xen-%{version}$1.efi
+    %{__install} -p -D -m 644 xen/$2/xen.efi.map %{buildroot}/boot/xen-%{version}$1.efi.map
 }
 install_xen -%{hv_rel}   build-xen-release
 install_xen -%{hv_rel}-d build-xen-debug
@@ -638,9 +640,13 @@ install_xen -%{hv_rel}-d build-xen-debug
 %files hypervisor
 /boot/%{name}-%{version}-%{hv_rel}.gz
 /boot/%{name}-%{version}-%{hv_rel}.map
+/boot/%{name}-%{version}-%{hv_rel}.efi
+/boot/%{name}-%{version}-%{hv_rel}.efi.map
 /boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
 /boot/%{name}-%{version}-%{hv_rel}-d.map
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
+/boot/%{name}-%{version}-%{hv_rel}-d.efi.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
 %license COPYING
@@ -1175,6 +1181,7 @@ fi
 * Thu Oct 09 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-20.1.0.ydi.1
 - Pull python3-setuptools when using python3
 - /etc/rc.d/init.d is dead, long live /etc/init.d
+- Install xen.efi
 
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20

@@ -1,0 +1,171 @@
+From f964d0d70699e32c5d777fd80f37c8ab0f5ed2c1 Mon Sep 17 00:00:00 2001
+From: Peter Zijlstra <peterz@infradead.org>
+Date: Thu, 13 Oct 2022 17:55:22 +0200
+Subject: [PATCH 04/38] x86/mwait-idle: disable IBRS during long idle
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+Having IBRS enabled while the SMT sibling is idle unnecessarily slows
+down the running sibling. OTOH, disabling IBRS around idle takes two
+MSR writes, which will increase the idle latency.
+
+Therefore, only disable IBRS around deeper idle states. Shallow idle
+states are bounded by the tick in duration, since NOHZ is not allowed
+for them by virtue of their short target residency.
+
+Only do this for mwait-driven idle, since that keeps interrupts disabled
+across idle, which makes disabling IBRS vs IRQ-entry a non-issue.
+
+Note: C6 is a random threshold, most importantly C1 probably shouldn't
+disable IBRS, benchmarking needed.
+
+Suggested-by: Tim Chen <tim.c.chen@linux.intel.com>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Reviewed-by: Josh Poimboeuf <jpoimboe@kernel.org>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Origin: git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git bf5835bcdb96
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Acked-by: Roger Pau Monné <roger.pau@citrix.com>
+Release-acked-by: Henry Wang <Henry.Wang@arm.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Minor index changes
+---
+ xen/arch/x86/cpu/mwait-idle.c | 32 ++++++++++++++++++++++++--------
+ xen/include/xen/cpuidle.h     |  3 ++-
+ 2 files changed, 26 insertions(+), 9 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/mwait-idle.c b/xen/arch/x86/cpu/mwait-idle.c
+index 6313ccf..37026d6 100644
+--- a/xen/arch/x86/cpu/mwait-idle.c
++++ b/xen/arch/x86/cpu/mwait-idle.c
+@@ -115,6 +115,12 @@ static const struct cpuidle_state {
+  */
+ #define CPUIDLE_FLAG_TLB_FLUSHED	0x10000
+ 
++/*
++ * Disable IBRS across idle (when KERNEL_IBRS), is exclusive vs IRQ_ENABLE
++ * above.
++ */
++#define CPUIDLE_FLAG_IBRS		0x20000
++
+ /*
+  * MWAIT takes an 8-bit "hint" in EAX "suggesting"
+  * the C-state (top nibble) and sub-state (bottom nibble)
+@@ -505,31 +511,31 @@ static struct cpuidle_state skl_cstates[] = {
+ 	},
+ 	{
+ 		.name = "C6-SKL",
+-		.flags = MWAIT2flg(0x20) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x20) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 85,
+ 		.target_residency = 200,
+ 	},
+ 	{
+ 		.name = "C7s-SKL",
+-		.flags = MWAIT2flg(0x33) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x33) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 124,
+ 		.target_residency = 800,
+ 	},
+ 	{
+ 		.name = "C8-SKL",
+-		.flags = MWAIT2flg(0x40) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x40) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 200,
+ 		.target_residency = 800,
+ 	},
+ 	{
+ 		.name = "C9-SKL",
+-		.flags = MWAIT2flg(0x50) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x50) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 480,
+ 		.target_residency = 5000,
+ 	},
+ 	{
+ 		.name = "C10-SKL",
+-		.flags = MWAIT2flg(0x60) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x60) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 890,
+ 		.target_residency = 5000,
+ 	},
+@@ -551,7 +557,7 @@ static const struct cpuidle_state skx_cstates[] = {
+ 	},
+ 	{
+ 		.name = "C6-SKX",
+-		.flags = MWAIT2flg(0x20) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.flags = MWAIT2flg(0x20) | CPUIDLE_FLAG_TLB_FLUSHED | CPUIDLE_FLAG_IBRS,
+ 		.exit_latency = 133,
+ 		.target_residency = 600,
+ 	},
+@@ -745,6 +751,7 @@ static const struct cpuidle_state dnv_cstates[] = {
+ static void mwait_idle(void)
+ {
+ 	unsigned int cpu = smp_processor_id();
++	struct cpu_info *info = get_cpu_info();
+ 	struct acpi_processor_power *power = processor_powers[cpu];
+ 	struct acpi_processor_cx *cx = NULL;
+ 	unsigned int eax, next_state, cstate;
+@@ -771,8 +778,6 @@ static void mwait_idle(void)
+ 			pm_idle_save();
+ 		else
+ 		{
+-			struct cpu_info *info = get_cpu_info();
+-
+ 			spec_ctrl_enter_idle(info);
+ 			safe_halt();
+ 			spec_ctrl_exit_idle(info);
+@@ -802,6 +807,11 @@ static void mwait_idle(void)
+ 	eax = cx->address;
+ 	cstate = ((eax >> MWAIT_SUBSTATE_SIZE) & MWAIT_CSTATE_MASK) + 1;
+ 
++	if (cx->ibrs_disable) {
++		ASSERT(!cx->irq_enable_early);
++		spec_ctrl_enter_idle(info);
++	}
++
+ #if 0 /* XXX Can we/do we need to do something similar on Xen? */
+ 	/*
+ 	 * leave_mm() to avoid costly and often unnecessary wakeups
+@@ -837,6 +847,10 @@ static void mwait_idle(void)
+ 
+ 	/* Now back in C0. */
+ 	update_idle_stats(power, cx, before, after);
++
++	if (cx->ibrs_disable)
++		spec_ctrl_exit_idle(info);
++
+ 	local_irq_enable();
+ 
+ 	if (!(lapic_timer_reliable_states & (1 << cstate)))
+@@ -1284,6 +1298,8 @@ static int mwait_idle_cpu_init(struct notifier_block *nfb,
+ 		    /* cstate_restore_tsc() needs to be a no-op */
+ 		    boot_cpu_has(X86_FEATURE_NONSTOP_TSC))
+ 			cx->irq_enable_early = true;
++		if (cpuidle_state_table[cstate].flags & CPUIDLE_FLAG_IBRS)
++			cx->ibrs_disable = true;
+ 
+ 		dev->count++;
+ 	}
+diff --git a/xen/include/xen/cpuidle.h b/xen/include/xen/cpuidle.h
+index bd24a31..521a8de 100644
+--- a/xen/include/xen/cpuidle.h
++++ b/xen/include/xen/cpuidle.h
+@@ -42,7 +42,8 @@ struct acpi_processor_cx
+     u8 idx;
+     u8 type;         /* ACPI_STATE_Cn */
+     u8 entry_method; /* ACPI_CSTATE_EM_xxx */
+-    bool irq_enable_early;
++    bool irq_enable_early:1;
++    bool ibrs_disable:1;
+     u32 address;
+     u32 latency;
+     u32 target_residency;
+-- 
+2.47.2
+

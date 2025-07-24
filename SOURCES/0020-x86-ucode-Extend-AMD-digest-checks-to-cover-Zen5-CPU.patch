@@ -1,0 +1,52 @@
+From 27822a7b0539b37c972131194f59078d2da3add9 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 8 Apr 2025 17:09:15 +0100
+Subject: [PATCH 20/38] x86/ucode: Extend AMD digest checks to cover Zen5 CPUs
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+AMD have updated the SB-7033 advisory to include Zen5 CPUs.  Extend the digest
+check to cover Zen5 too.
+
+In practice, cover everything until further notice.
+
+Observant readers may be wondering where the update to the digest list is.  At
+the time of writing, no Zen5 patches are available via a verifiable channel.
+
+Link: https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html
+Fixes: 630e8875ab36 ("x86/ucode: Perform extra SHA2 checks on AMD Fam17h/19h microcode")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Minor index changes
+---
+ xen/arch/x86/microcode_amd.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index ffb5c62..a41e183 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -120,8 +120,12 @@ static bool check_digest(const struct container_microcode *mc)
+     const struct patch_digest *pd;
+     uint8_t digest[SHA2_256_DIGEST_SIZE];
+ 
+-    /* Only Fam17h/19h are known to need extra checks.  Skip other families. */
+-    if ( boot_cpu_data.x86 < 0x17 || boot_cpu_data.x86 > 0x19 ||
++    /*
++     * Zen1 thru Zen5 CPUs are known to use a weak signature algorithm on
++     * microcode updates.  Mitigate by checking the digest of the patch
++     * against a list of known provenance.
++     */
++    if ( boot_cpu_data.x86 < 0x17 ||
+          !opt_digest_check )
+         return true;
+ 
+-- 
+2.47.2
+

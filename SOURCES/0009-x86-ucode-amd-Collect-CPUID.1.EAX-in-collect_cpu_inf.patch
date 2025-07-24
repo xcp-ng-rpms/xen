@@ -1,0 +1,87 @@
+From 45bda61d3a2c49c8c34388308f7a0ef37bb5c687 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Fri, 27 Mar 2020 13:20:12 +0000
+Subject: [PATCH 09/38] x86/ucode/amd: Collect CPUID.1.EAX in
+ collect_cpu_info()
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+... rather than collecting it repeatedly in microcode_fits().  This brings the
+behaviour in line with the Intel side.
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Filename changes (not yet moved to xen/arch/x86/cpu/microcode)
+- Minor index changes
+---
+ xen/arch/x86/microcode_amd.c    | 11 +++--------
+ xen/include/asm-x86/microcode.h |  1 +
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index 3de990c..86a9973 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -91,6 +91,7 @@ static int collect_cpu_info(struct cpu_signature *csig)
+         return -EINVAL;
+     }
+ 
++    csig->sig = cpuid_eax(1);
+     rdmsrl(MSR_AMD_PATCHLEVEL, csig->rev);
+ 
+     pr_debug("microcode: CPU%d collect_cpu_info: patch_id=%#x\n",
+@@ -193,12 +194,9 @@ static enum microcode_match_result microcode_fits(
+     const struct cpu_signature *sig = &per_cpu(cpu_sig, cpu);
+     const struct microcode_header_amd *mc_header = mc_amd->mpb;
+     const struct equiv_cpu_entry *equiv_cpu_table = mc_amd->equiv_cpu_table;
+-    unsigned int current_cpu_id;
+     unsigned int equiv_cpu_id;
+ 
+-    current_cpu_id = cpuid_eax(0x00000001);
+-
+-    if ( !find_equiv_cpu_id(equiv_cpu_table, current_cpu_id, &equiv_cpu_id) )
++    if ( !find_equiv_cpu_id(equiv_cpu_table, sig->sig, &equiv_cpu_id) )
+         return MIS_UCODE;
+ 
+     if ( (mc_header->processor_rev_id) != equiv_cpu_id )
+@@ -457,13 +455,10 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+     struct microcode_patch *patch = NULL;
+     size_t offset = 0, saved_size = 0;
+     int error = 0;
+-    unsigned int current_cpu_id;
+     unsigned int equiv_cpu_id;
+     unsigned int cpu = smp_processor_id();
+     const struct cpu_signature *sig = &per_cpu(cpu_sig, cpu);
+ 
+-    current_cpu_id = cpuid_eax(0x00000001);
+-
+     if ( bufsize < 4 || *(const uint32_t *)buf != UCODE_MAGIC )
+     {
+         printk(KERN_ERR "microcode: Wrong microcode patch file magic\n");
+@@ -493,7 +488,7 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+             break;
+         }
+ 
+-        if ( find_equiv_cpu_id(mc_amd->equiv_cpu_table, current_cpu_id,
++        if ( find_equiv_cpu_id(mc_amd->equiv_cpu_table, sig->sig,
+                                &equiv_cpu_id) )
+             break;
+ 
+diff --git a/xen/include/asm-x86/microcode.h b/xen/include/asm-x86/microcode.h
+index 44ac91e..dea1f93 100644
+--- a/xen/include/asm-x86/microcode.h
++++ b/xen/include/asm-x86/microcode.h
+@@ -27,6 +27,7 @@ struct microcode_ops {
+ };
+ 
+ struct cpu_signature {
++    /* CPU signature (CPUID.1.EAX). */
+     unsigned int sig;
+     unsigned int pf;
+     unsigned int rev;
+-- 
+2.47.2
+

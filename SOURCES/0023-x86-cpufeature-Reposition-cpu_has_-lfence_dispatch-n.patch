@@ -1,0 +1,51 @@
+From 82a68a883cf9aae1810ad5fa7ec1e0141101c62e Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 10 Sep 2024 20:59:37 +0100
+Subject: [PATCH 23/38] x86/cpufeature: Reposition
+ cpu_has_{lfence_dispatch,nscb}
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+LFENCE_DISPATCH used to be a synthetic feature, but was given a real CPUID bit
+by AMD.  The define wasn't moved when this was changed.
+
+NSCB has always been a real CPUID bit, and was misplaced when introduced in
+the synthetic block alongside LFENCE_DISPATCH.
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 6a039b050071eba644ab414d76ac5d5fc9e067a5)
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Minor index changes
+---
+ xen/include/asm-x86/cpufeature.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/xen/include/asm-x86/cpufeature.h b/xen/include/asm-x86/cpufeature.h
+index 7cc2341..1b8757b 100644
+--- a/xen/include/asm-x86/cpufeature.h
++++ b/xen/include/asm-x86/cpufeature.h
+@@ -142,6 +142,10 @@
+ /* CPUID level 0x00000007:1.eax */
+ #define cpu_has_avx512_bf16     boot_cpu_has(X86_FEATURE_AVX512_BF16)
+ 
++/* CPUID level 0x80000021.eax */
++#define cpu_has_lfence_dispatch boot_cpu_has(X86_FEATURE_LFENCE_DISPATCH)
++#define cpu_has_nscb            boot_cpu_has(X86_FEATURE_NSCB)
++
+ /* MSR_ARCH_CAPS */
+ #define cpu_has_rdcl_no         boot_cpu_has(X86_FEATURE_RDCL_NO)
+ #define cpu_has_eibrs           boot_cpu_has(X86_FEATURE_EIBRS)
+@@ -164,7 +168,6 @@
+ #define cpu_has_arch_perfmon    boot_cpu_has(X86_FEATURE_ARCH_PERFMON)
+ #define cpu_has_cpuid_faulting  boot_cpu_has(X86_FEATURE_CPUID_FAULTING)
+ #define cpu_has_aperfmperf      boot_cpu_has(X86_FEATURE_APERFMPERF)
+-#define cpu_has_lfence_dispatch boot_cpu_has(X86_FEATURE_LFENCE_DISPATCH)
+ #define cpu_has_xen_lbr         boot_cpu_has(X86_FEATURE_XEN_LBR)
+ 
+ #define cpu_has_msr_tsc_aux     (cpu_has_rdtscp || cpu_has_rdpid)
+-- 
+2.47.2
+

@@ -1,0 +1,41 @@
+From 3e010f055a1caaf4c96cee23b1438b974f9963e7 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Wed, 9 Apr 2025 11:36:40 +0100
+Subject: [PATCH 21/38] x86/ucode: Extend warning about disabling digest check
+ too
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+This was missed by accident.
+
+Fixes: b63951467e96 ("x86/ucode: Extend AMD digest checks to cover Zen5 CPUs")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Applied to microcode_init_amd() insteasd of ucode_probe_amd()
+---
+ xen/arch/x86/microcode_amd.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index a41e183..2e8122f 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -534,8 +534,7 @@ int __init microcode_init_amd(void)
+     if ( boot_cpu_data.x86_vendor == X86_VENDOR_AMD ) {
+         microcode_ops = &microcode_amd_ops;
+ 
+-        if ( !opt_digest_check &&
+-             boot_cpu_data.x86 >= 0x17 && boot_cpu_data.x86 <= 0x19 )
++        if ( !opt_digest_check && boot_cpu_data.x86 >= 0x17 )
+         {
+             printk(XENLOG_WARNING
+                    "Microcode patch additional digest checks disabled");
+-- 
+2.47.2
+

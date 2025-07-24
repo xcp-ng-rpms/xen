@@ -1,0 +1,247 @@
+From 82b261da3c94bf75f171c5fa17646e76296c132d Mon Sep 17 00:00:00 2001
+From: Jan Beulich <jbeulich@suse.com>
+Date: Fri, 27 Mar 2020 00:29:55 +0000
+Subject: [PATCH 07/38] x86/ucode: Remove unnecessary indirection in struct
+ microcode_patch
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+Currently, each cpu_request_microcode() allocates a struct microcode_patch,
+which is a single pointer to a separate allocated structure.  This is
+wasteful.
+
+Fixing this is complicated because the common microcode_free_patch() code is
+responsible for freeing struct microcode_patch, despite this being asymmetric
+with how it is allocated.
+
+Make struct microcode_patch fully opaque to the common logic.  This involves
+moving the responsibility for freeing struct microcode_patch fully into the
+free_patch() hook.
+
+In each vendor logic, use some temporary ifdef-ary (cleaned up in subsequent
+changes) to reduce the churn as much as possible, and forgo allocating the
+intermediate pointer in cpu_request_microcode().
+
+Suggested-by: Jan Beulich <jbeulich@suse.com>
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backport notes:
+- Filename changes (because not yet moved to xen/arch/x86/cpu/microcode
+  on 4.13)
+---
+ xen/arch/x86/microcode.c        |  3 +--
+ xen/arch/x86/microcode_amd.c    | 30 ++++++++++++------------------
+ xen/arch/x86/microcode_intel.c  | 31 ++++++++++++-------------------
+ xen/include/asm-x86/microcode.h | 11 +++--------
+ 4 files changed, 28 insertions(+), 47 deletions(-)
+
+diff --git a/xen/arch/x86/microcode.c b/xen/arch/x86/microcode.c
+index 5eda448..e495133 100644
+--- a/xen/arch/x86/microcode.c
++++ b/xen/arch/x86/microcode.c
+@@ -275,8 +275,7 @@ static struct microcode_patch *parse_blob(const char *buf, size_t len)
+ 
+ void microcode_free_patch(struct microcode_patch *microcode_patch)
+ {
+-    microcode_ops->free_patch(microcode_patch->mc);
+-    xfree(microcode_patch);
++    microcode_ops->free_patch(microcode_patch);
+ }
+ 
+ /* Return true if cache gets updated. Otherwise, return false */
+diff --git a/xen/arch/x86/microcode_amd.c b/xen/arch/x86/microcode_amd.c
+index 9126e6f..eb23fb0 100644
+--- a/xen/arch/x86/microcode_amd.c
++++ b/xen/arch/x86/microcode_amd.c
+@@ -60,13 +60,16 @@ struct __packed microcode_header_amd {
+ #define UCODE_EQUIV_CPU_TABLE_TYPE 0x00000000
+ #define UCODE_UCODE_TYPE           0x00000001
+ 
+-struct microcode_amd {
++struct microcode_patch {
+     void *mpb;
+     size_t mpb_size;
+     struct equiv_cpu_entry *equiv_cpu_table;
+     size_t equiv_cpu_table_size;
+ };
+ 
++/* Temporary, until the microcode_* structure are disentangled. */
++#define microcode_amd microcode_patch
++
+ struct mpbhdr {
+     uint32_t type;
+     uint32_t len;
+@@ -196,7 +199,7 @@ static enum microcode_match_result microcode_fits(
+ 
+ static bool match_cpu(const struct microcode_patch *patch)
+ {
+-    enum microcode_match_result res = microcode_fits(patch->mc_amd);
++    enum microcode_match_result res = microcode_fits(patch);
+ 
+     /*
+      * Allow application of the same revision to pick up SMT-specific changes
+@@ -205,10 +208,8 @@ static bool match_cpu(const struct microcode_patch *patch)
+     return patch && (res == NEW_UCODE || res == SAME_UCODE);
+ }
+ 
+-static void free_patch(void *mc)
++static void free_patch(struct microcode_patch *mc_amd)
+ {
+-    struct microcode_amd *mc_amd = mc;
+-
+     if ( mc_amd )
+     {
+         xfree(mc_amd->equiv_cpu_table);
+@@ -231,12 +232,12 @@ static enum microcode_match_result compare_header(
+ static enum microcode_match_result compare_patch(
+     const struct microcode_patch *new, const struct microcode_patch *old)
+ {
+-    const struct microcode_header_amd *new_header = new->mc_amd->mpb;
+-    const struct microcode_header_amd *old_header = old->mc_amd->mpb;
++    const struct microcode_header_amd *new_header = new->mpb;
++    const struct microcode_header_amd *old_header = old->mpb;
+ 
+     /* Both patches to compare are supposed to be applicable to local CPU. */
+-    ASSERT(microcode_fits(new->mc_amd) != MIS_UCODE);
+-    ASSERT(microcode_fits(old->mc_amd) != MIS_UCODE);
++    ASSERT(microcode_fits(new) != MIS_UCODE);
++    ASSERT(microcode_fits(old) != MIS_UCODE);
+ 
+     return compare_header(new_header, old_header);
+ }
+@@ -255,7 +256,7 @@ static int apply_microcode(const struct microcode_patch *patch)
+     if ( !match_cpu(patch) )
+         return -EINVAL;
+ 
+-    hdr = patch->mc_amd->mpb;
++    hdr = patch->mpb;
+ 
+     BUG_ON(local_irq_is_enabled());
+ 
+@@ -588,14 +589,7 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+     {
+         mc_amd->mpb = saved;
+         mc_amd->mpb_size = saved_size;
+-        patch = xmalloc(struct microcode_patch);
+-        if ( patch )
+-            patch->mc_amd = mc_amd;
+-        else
+-        {
+-            free_patch(mc_amd);
+-            error = -ENOMEM;
+-        }
++        patch = mc_amd;
+     }
+     else
+         free_patch(mc_amd);
+diff --git a/xen/arch/x86/microcode_intel.c b/xen/arch/x86/microcode_intel.c
+index 42fbd19..2fb9abf 100644
+--- a/xen/arch/x86/microcode_intel.c
++++ b/xen/arch/x86/microcode_intel.c
+@@ -55,11 +55,14 @@ struct microcode_header_intel {
+     unsigned int reserved[3];
+ };
+ 
+-struct microcode_intel {
++struct microcode_patch {
+     struct microcode_header_intel hdr;
+     unsigned int bits[0];
+ };
+ 
++/* Temporary, until the microcode_* structure are disentangled. */
++#define microcode_intel microcode_patch
++
+ /* microcode format is extended from prescott processors */
+ struct extended_signature {
+     unsigned int sig;
+@@ -261,12 +264,12 @@ static bool match_cpu(const struct microcode_patch *patch)
+     if ( !patch )
+         return false;
+ 
+-    return microcode_update_match(&patch->mc_intel->hdr) == NEW_UCODE;
++    return microcode_update_match(&patch->hdr) == NEW_UCODE;
+ }
+ 
+-static void free_patch(void *mc)
++static void free_patch(struct microcode_patch *patch)
+ {
+-    xfree(mc);
++    xfree(patch);
+ }
+ 
+ static enum microcode_match_result compare_patch(
+@@ -276,11 +279,10 @@ static enum microcode_match_result compare_patch(
+      * Both patches to compare are supposed to be applicable to local CPU.
+      * Just compare the revision number.
+      */
+-    ASSERT(microcode_update_match(&old->mc_intel->hdr) != MIS_UCODE);
+-    ASSERT(microcode_update_match(&new->mc_intel->hdr) != MIS_UCODE);
++    ASSERT(microcode_update_match(&old->hdr) != MIS_UCODE);
++    ASSERT(microcode_update_match(&new->hdr) != MIS_UCODE);
+ 
+-    return (new->mc_intel->hdr.rev > old->mc_intel->hdr.rev) ? NEW_UCODE
+-                                                             : OLD_UCODE;
++    return (new->hdr.rev > old->hdr.rev) ? NEW_UCODE : OLD_UCODE;
+ }
+ 
+ static int apply_microcode(const struct microcode_patch *patch)
+@@ -297,7 +299,7 @@ static int apply_microcode(const struct microcode_patch *patch)
+     if ( !match_cpu(patch) )
+         return -EINVAL;
+ 
+-    mc_intel = patch->mc_intel;
++    mc_intel = patch;
+ 
+     BUG_ON(local_irq_is_enabled());
+ 
+@@ -393,16 +395,7 @@ static struct microcode_patch *cpu_request_microcode(const void *buf,
+         error = offset;
+ 
+     if ( saved )
+-    {
+-        patch = xmalloc(struct microcode_patch);
+-        if ( patch )
+-            patch->mc_intel = saved;
+-        else
+-        {
+-            xfree(saved);
+-            error = -ENOMEM;
+-        }
+-    }
++        patch = saved;
+ 
+     if ( error && !patch )
+         patch = ERR_PTR(error);
+diff --git a/xen/include/asm-x86/microcode.h b/xen/include/asm-x86/microcode.h
+index 8082019..44ac91e 100644
+--- a/xen/include/asm-x86/microcode.h
++++ b/xen/include/asm-x86/microcode.h
+@@ -12,20 +12,15 @@ enum microcode_match_result {
+ 
+ struct cpu_signature;
+ 
+-struct microcode_patch {
+-    union {
+-        struct microcode_intel *mc_intel;
+-        struct microcode_amd *mc_amd;
+-        void *mc;
+-    };
+-};
++/* Opaque.  Internals are vendor-specific. */
++struct microcode_patch;
+ 
+ struct microcode_ops {
+     struct microcode_patch *(*cpu_request_microcode)(const void *buf,
+                                                      size_t size);
+     int (*collect_cpu_info)(struct cpu_signature *csig);
+     int (*apply_microcode)(const struct microcode_patch *patch);
+-    void (*free_patch)(void *mc);
++    void (*free_patch)(struct microcode_patch *patch);
+     bool (*match_cpu)(const struct microcode_patch *patch);
+     enum microcode_match_result (*compare_patch)(
+         const struct microcode_patch *new, const struct microcode_patch *old);
+-- 
+2.47.2
+

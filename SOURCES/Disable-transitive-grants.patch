@@ -1,0 +1,34 @@
+From bfc2ea81f613250ebe30253f4d589b308badf403 Mon Sep 17 00:00:00 2001
+Message-ID: <bfc2ea81f613250ebe30253f4d589b308badf403.1753797078.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 29 Jul 2025 15:51:12 +0200
+Subject: [PATCH] Disable transitive grants
+
+No guest uses this features, and even then, XSM SILO should make it unusable.
+It's hard asserting the security aspect of transitive grants wrt. XSM, e.g 2
+guests may be able to use it to mount a covert channel, which could be seen as
+XCP-ng vulnerability.
+
+Disable the feature by default.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/common/grant_table.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index 62a8685cd5..036f35dff5 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -183,7 +183,7 @@ static int cf_check parse_gnttab_max_maptrack_frames(const char *arg)
+ #endif
+ 
+ unsigned int __read_mostly opt_gnttab_max_version = GNTTAB_MAX_VERSION;
+-static bool __read_mostly opt_transitive_grants = true;
++static bool __read_mostly opt_transitive_grants = false;
+ #ifdef CONFIG_PV
+ static bool __ro_after_init opt_grant_transfer = true;
+ #else
+-- 
+2.50.1
+

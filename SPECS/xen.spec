@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -301,6 +301,7 @@ Patch254: vtpm-ppi-acpi-dsm.patch
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0001-x86-hvmloader-select-xen-platform-pci-MMIO-BAR-UC-or.patch
 Patch1002: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+Patch1003: Disable-transitive-grants.patch
 
 ExclusiveArch: x86_64
 
@@ -1146,6 +1147,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Jul 29 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-15.3
+- Disable transitive grants by default
+
 * Fri Jul 11 2025 Anthoine Bourgeois <anthoine.bourgeois@vates.tech> - 4.17.5-15.2
 - Backport 22650d605462 "x86/hvmloader: select xen platform pci MMIO BAR UC or WB MTRR
   cache attributes"

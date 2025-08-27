@@ -1,0 +1,71 @@
+From b569a298a6270ae04eaf433f7de9ce1f3e248e5f Mon Sep 17 00:00:00 2001
+Message-ID: <b569a298a6270ae04eaf433f7de9ce1f3e248e5f.1756287587.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Fri, 22 Aug 2025 15:43:32 +0200
+Subject: [PATCH] hvmloader: Update to SMBIOS 2.6
+
+Currently, hvmloader uses SMBIOS 2.4, however, when using OVMF, the
+SMBIOS is patched to 2.8, which has clarified the UUID format (as GUID).
+
+In Linux, if the SMBIOS version is >= 2.6, the GUID format is used, else
+(undefined as per SMBIOS spec), big endian is used (used by Xen). Therefore,
+you have a endian mismatch causing the UUIDs to mismatch in the guest.
+
+$ cat /sys/hypervisor/uuid
+e865e63f-3d30-4f0b-83e0-8fdfc1e30eb7
+$ cat /sys/devices/virtual/dmi/id/product_uuid
+3fe665e8-303d-0b4f-83e0-8fdfc1e30eb7
+$ cat /sys/devices/virtual/dmi/id/product_serial
+e865e63f-3d30-4f0b-83e0-8fdfc1e30eb7
+
+This patch updates the SMBIOS version from 2.4 to 2.6 and fixup the UUID
+written in the table; which effectively fix this endianness mismatch with
+OVMF; while the UUID displayed by Linux is still the same for SeaBIOS.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Link: https://lore.kernel.org/xen-devel/b569a298a6270ae04eaf433f7de9ce1f3e248e5f.1755870287.git.teddy.astie@vates.tech/
+---
+ tools/firmware/hvmloader/smbios.c | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/tools/firmware/hvmloader/smbios.c b/tools/firmware/hvmloader/smbios.c
+index 6bcdcc233a..f4822ae6f8 100644
+--- a/tools/firmware/hvmloader/smbios.c
++++ b/tools/firmware/hvmloader/smbios.c
+@@ -352,7 +352,7 @@ smbios_entry_point_init(void *start,
+     memcpy(ep->anchor_string, "_SM_", 4);
+     ep->length = 0x1f;
+     ep->smbios_major_version = 2;
+-    ep->smbios_minor_version = 4;
++    ep->smbios_minor_version = 6;
+     ep->max_structure_size = max_structure_size;
+     ep->entry_point_revision = 0;
+     memcpy(ep->intermediate_anchor_string, "_DMI_", 5);
+@@ -462,7 +462,23 @@ smbios_type_1_init(void *start, const char *xen_version,
+     p->version_str = 3;
+     p->serial_number_str = 4;
+ 
+-    memcpy(p->uuid, uuid, 16);
++    /*
++     * Xen uses OSF DCE UUIDs which is fully big endian, however,
++     * GUIDs (which requirement is clarified by SMBIOS >= 2.6) has the
++     * first 3 components appearing as being little endian and the rest
++     * as still being big endian.
++     */
++    /* First component */
++    for ( unsigned int i = 0; i < 4; i++ )
++        p->uuid[i] = uuid[4 - i - 1];
++    /* Second component */
++    p->uuid[4] = uuid[5];
++    p->uuid[5] = uuid[4];
++    /* Third component */
++    p->uuid[6] = uuid[7];
++    p->uuid[7] = uuid[6];
++    /* Rest */
++    memcpy(p->uuid + 8, uuid + 8, 8);
+ 
+     p->wake_up_type = 0x06; /* power switch */
+     p->sku_str = 0;
+-- 
+2.50.1
+

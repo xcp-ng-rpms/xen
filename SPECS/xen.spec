@@ -301,6 +301,7 @@ Patch254: vtpm-ppi-acpi-dsm.patch
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0001-x86-hvmloader-select-xen-platform-pci-MMIO-BAR-UC-or.patch
 Patch1002: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+Patch1003: 0001-WIP-Expose-DTS-MSR-through-platform-resource-hyperca.patch
 
 ExclusiveArch: x86_64
 
@@ -890,6 +891,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_sbindir}/xen-memshare
 %{_sbindir}/xen-mfndump
 %{_sbindir}/xen-spec-ctrl
+%{_sbindir}/xen-inteltemp
 %{_sbindir}/xen-ucode
 %{_sbindir}/xen-vmdebug
 %{_sbindir}/xen-vmtrace

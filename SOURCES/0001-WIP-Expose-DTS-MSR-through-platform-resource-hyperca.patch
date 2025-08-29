@@ -1,0 +1,168 @@
+From 7747207806d74bb886898e30426a090dda2dacaf Mon Sep 17 00:00:00 2001
+Message-ID: <7747207806d74bb886898e30426a090dda2dacaf.1756477997.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Fri, 29 Aug 2025 16:33:12 +0200
+Subject: [PATCH] WIP: Expose DTS MSR through platform resource hypercall;
+ introduce xen-inteltemp
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ tools/misc/Makefile                  |  4 ++
+ tools/misc/xen-inteltemp.c           | 91 ++++++++++++++++++++++++++++
+ xen/arch/x86/include/asm/msr-index.h |  2 +
+ xen/arch/x86/platform_hypercall.c    |  5 ++
+ 4 files changed, 102 insertions(+)
+ create mode 100644 tools/misc/xen-inteltemp.c
+
+diff --git a/tools/misc/Makefile b/tools/misc/Makefile
+index c26e544e83..6498b47ec0 100644
+--- a/tools/misc/Makefile
++++ b/tools/misc/Makefile
+@@ -25,6 +25,7 @@ INSTALL_SBIN-$(CONFIG_X86)     += xen-memshare
+ INSTALL_SBIN-$(CONFIG_X86)     += xen-spec-ctrl
+ INSTALL_SBIN-$(CONFIG_X86)     += xen-ucode
+ INSTALL_SBIN-$(CONFIG_X86)     += xen-vmtrace
++INSTALL_SBIN-$(CONFIG_X86)     += xen-inteltemp
+ INSTALL_SBIN                   += xencov
+ INSTALL_SBIN                   += xenhypfs
+ INSTALL_SBIN                   += xenlockprof
+@@ -89,6 +90,9 @@ xen-memshare: xen-memshare.o
+ xen-vmtrace: xen-vmtrace.o
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LDLIBS_libxenctrl) $(LDLIBS_libxenforeignmemory) $(APPEND_LDFLAGS)
+ 
++xen-inteltemp: xen-inteltemp.o
++	$(CC) $(LDFLAGS) -o $@ $< $(LDLIBS_libxenctrl) $(APPEND_LDFLAGS)
++
+ xen-mceinj: xen-mceinj.o
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LDLIBS_libxenctrl) $(LDLIBS_libxenguest) $(LDLIBS_libxenstore) $(APPEND_LDFLAGS)
+ 
+diff --git a/tools/misc/xen-inteltemp.c b/tools/misc/xen-inteltemp.c
+new file mode 100644
+index 0000000000..2ffe3c3e37
+--- /dev/null
++++ b/tools/misc/xen-inteltemp.c
+@@ -0,0 +1,91 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * xen-inteltemp.c
++ *
++ * Get the CPU temperature of Intel processors.
++ *
++ * Copyright 2025 Teddy Astie <teddy.astie@vates.tech>
++ */
++
++#include <stdio.h>
++#include <errno.h>
++#include <xenctrl.h>
++
++#define MSR_IA32_THERM_STATUS		  0x0000019c
++#define MSR_IA32_TEMPERATURE_TARGET   0x000001a2
++#define MSR_IA32_PACKAGE_THERM_STATUS 0x000001b1
++
++int fetch_dts_temp(xc_interface *xch, uint32_t cpu, bool package, int *temp)
++{
++    xc_resource_entry_t entries[2] = {
++        (xc_resource_entry_t){
++            .idx = package ? MSR_IA32_PACKAGE_THERM_STATUS : MSR_IA32_THERM_STATUS
++        },
++        (xc_resource_entry_t){ .idx = MSR_IA32_TEMPERATURE_TARGET },
++    };
++    struct xc_resource_op ops = {
++        .cpu = cpu,
++        .entries = entries,
++        .nr_entries = 2,
++    };
++    int tjmax;
++
++    int ret = xc_resource_op(xch, 1, &ops);
++
++    if ( ret <= 0 )
++        /* This CPU isn't online or can't query this MSR */
++        return ret ?: -EOPNOTSUPP;
++
++    if ( ret == 2 )
++        tjmax = (entries[1].val >> 16) & 0xff;
++    else
++    {
++        /*
++         * The CPU doesn't support MSR_IA32_TEMPERATURE_TARGET, we assume it's 100 which
++         * is correct aside a few selected Atom CPUs. Check coretemp source code for more
++         * information.
++         */
++        fprintf(stderr, "CPU%d doesn't support MSR_IA32_TEMPERATURE_TARGET, assume "
++               "tjmax=100°C, readings may be incorrect\n", cpu);
++        tjmax = 100;
++    }
++    
++    *temp = tjmax - ((entries[0].val >> 16) & 0xff);
++    return 0;
++}
++
++int main(void)
++{
++    int rc = 0, temp, cpu;
++    bool has_data = false;
++    xc_interface *xch = xc_interface_open(0, 0, 0);
++    xc_physinfo_t info;
++
++    if ((rc = xc_physinfo(xch, &info)) < 0)
++    {
++        perror("Getting physinfo failed");
++        return rc;
++    }
++
++    /* TODO: Do a per-socket measurement */
++    if (!fetch_dts_temp(xch, 0, true, &temp))
++    {
++        has_data = true;
++        printf("Package: %d°C\n\n", temp);
++    }
++
++    for (cpu = 0; cpu < (info.max_cpu_id + 1); cpu += info.threads_per_core)
++    {
++        if (fetch_dts_temp(xch, cpu, false, &temp))
++            continue;
++
++        has_data = true;
++        printf("CPU%d: %d°C\n", cpu, temp);
++    }
++
++    if ( !has_data )
++        printf("No data\n");
++
++    xc_interface_close(xch);
++    return 0;
++}
+\ No newline at end of file
+diff --git a/xen/arch/x86/include/asm/msr-index.h b/xen/arch/x86/include/asm/msr-index.h
+index 1a419699ec..f2bd409e14 100644
+--- a/xen/arch/x86/include/asm/msr-index.h
++++ b/xen/arch/x86/include/asm/msr-index.h
+@@ -494,6 +494,8 @@
+ #define MSR_IA32_THERM_INTERRUPT	0x0000019b
+ #define MSR_IA32_THERM_STATUS		0x0000019c
+ #define MSR_IA32_MISC_ENABLE		0x000001a0
++#define MSR_IA32_TEMPERATURE_TARGET   0x000001a2
++#define MSR_IA32_PACKAGE_THERM_STATUS 0x000001b1
+ #define MSR_IA32_MISC_ENABLE_PERF_AVAIL   (1<<7)
+ #define MSR_IA32_MISC_ENABLE_BTS_UNAVAIL  (1<<11)
+ #define MSR_IA32_MISC_ENABLE_PEBS_UNAVAIL (1<<12)
+diff --git a/xen/arch/x86/platform_hypercall.c b/xen/arch/x86/platform_hypercall.c
+index 90abd3197f..bbd72cf1e0 100644
+--- a/xen/arch/x86/platform_hypercall.c
++++ b/xen/arch/x86/platform_hypercall.c
+@@ -86,6 +86,11 @@ static bool msr_read_allowed(unsigned int msr)
+ 
+     case MSR_MCU_OPT_CTRL:
+         return cpu_has_srbds_ctrl;
++    
++    case MSR_IA32_TEMPERATURE_TARGET:
++    case MSR_IA32_THERM_STATUS:
++    case MSR_IA32_PACKAGE_THERM_STATUS:
++        return boot_cpu_data.x86_vendor == X86_VENDOR_INTEL;
+     }
+ 
+     if ( ppin_msr && msr == ppin_msr )
+-- 
+2.50.1
+

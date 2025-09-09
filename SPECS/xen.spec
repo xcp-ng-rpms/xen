@@ -34,7 +34,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.13.5
-Release: %{?xsrel}.3%{?dist}
+Release: %{?xsrel}.4%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.13.5.tar.gz
@@ -577,6 +577,11 @@ Patch1036: 0035-x86-cpu-policy-Infrastructure-for-CPUID-leaf-0x80000.patch
 Patch1037: 0036-x86-ucode-Digests-for-TSA-microcode.patch
 Patch1038: 0037-x86-idle-Rearrange-VERW-and-MONITOR-in-mwait_idle_wi.patch
 Patch1039: 0038-x86-spec-ctrl-Mitigate-Transitive-Scheduler-Attacks.patch
+
+# XSA-472
+Patch1040: xsa472-1.patch
+Patch1041: xsa472-2.patch
+Patch1042: xsa472-3.patch
 
 ExclusiveArch: x86_64
 
@@ -1419,6 +1424,9 @@ touch %{_rundir}/reboot-required.d/%{name}/%{version}-%{release}
 %{?_cov_results_package}
 
 %changelog
+* Wed Aug 27 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.13.5-9.49.4
+- Security fix for XSA-472 "Multiple vulnerabilities in the Viridian interface"
+
 * Tue Jul 22 2025 Thierry Escande <thierry.escande@vates.tech> - 4.13.5-9.49.3
 - Backport fix for XSA-471 patchset from Xen 4.17 to 4.13
 - Backport mwait-idle driver fixes (for XSA-471 patches to apply correctly)

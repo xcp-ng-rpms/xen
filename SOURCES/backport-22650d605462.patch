@@ -1,18 +1,12 @@
-From 1e94d5f3a95bc918422ea597e98aa158d3b95ac4 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>
-Date: Fri, 30 May 2025 13:54:08 +0200
-Subject: [PATCH] x86/hvmloader: select xen platform pci MMIO BAR UC or WB MTRR
- cache attribute
+From 22650d6054625be10172fe0c78b9cadd1a39bd63 Mon Sep 17 00:00:00 2001
+From: Roger Pau Monne <roger.pau@citrix.com>
+Date: Mon, 26 May 2025 13:27:45 +0200
+Subject: x86/hvmloader: select xen platform pci MMIO BAR UC or WB MTRR cache
+ attribute
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Backport notes:
-- fix offsets
-- move added lines of the CHANGELOG.md
-Backported-by: Anthoine Bourgeois <anthoine.bourgeois@vates.tech>
-
-Original commitlog:
 The Xen platform PCI device (vendor ID 0x5853) exposed to x86 HVM guests
 doesn't have the functionality of a traditional PCI device.  The exposed
 MMIO BAR is used by some guests (including Linux) as a safe place to map
@@ -66,57 +60,10 @@ Reported-by: Anthoine Bourgeois <anthoine.bourgeois@vates.tech>
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Oleksii Kurochko<oleksii.kurochko@gmail.com>
 Acked-by: Jan Beulich <jbeulich@suse.com> # hvmloader
----
-Changes since v4:
- - Rename to Xen platform PCI to avoid confusion.
- - Set hvmloader BAR default to UC.
- - Unconditionally write XS node in libxl.
- - Introduce define for Xen PCI vendor ID.
+Reviewed-by: Anthony PERARD <anthony.perard@vates.tech>
 
-Changes since v3:
- - Add changelog.
- - Assign BARs normally for xenpci if special casing fails.
-
-Changes since v2:
- - Add default value in xl.cfg.
- - List xenstore path in the pandoc file.
- - Adjust comment in hvmloader.
- - Fix commit message MIO -> MMIO.
-
-Changes since v1:
- - Leave the xenpci BAR as UC by default.
- - Introduce an option to not set it as UC.
----
- CHANGELOG.md                            |  3 ++
- docs/man/xl.cfg.5.pod.in                |  8 ++++
- docs/misc/xenstore-paths.pandoc         |  5 +++
- tools/firmware/hvmloader/config.h       |  2 +-
- tools/firmware/hvmloader/pci.c          | 52 ++++++++++++++++++++++++-
- tools/firmware/hvmloader/util.c         |  2 +-
- tools/include/libxl.h                   |  9 +++++
- tools/libs/light/libxl_create.c         |  1 +
- tools/libs/light/libxl_dom.c            |  9 +++++
- tools/libs/light/libxl_types.idl        |  1 +
- tools/xl/xl_parse.c                     |  2 +
- xen/include/public/hvm/hvm_xs_strings.h |  2 +
- 12 files changed, 92 insertions(+), 4 deletions(-)
-
-diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 75726fd9e9..148975c4e7 100644
---- a/CHANGELOG.md
-+++ b/CHANGELOG.md
-@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
-  - When building with Systemd support (./configure --enable-systemd), remove
-    libsystemd as a build dependency.  Systemd Notify support is retained, now
-    using a standalone library implementation.
-+ - Allow controlling the MTRR cache attribute of the Xen platform PCI device
-+   BAR for HVM guests, to improve performance of guests using it to map the
-+   grant table or foreign memory.
- 
- ## [4.17.3](https://xenbits.xen.org/gitweb/?p=xen.git;a=shortlog;h=RELEASE-4.17.3)
- 
 diff --git a/docs/man/xl.cfg.5.pod.in b/docs/man/xl.cfg.5.pod.in
-index bee0b9a889..ac35c8bf4c 100644
+index 17324aa0ac1a..30475b864bc4 100644
 --- a/docs/man/xl.cfg.5.pod.in
 +++ b/docs/man/xl.cfg.5.pod.in
 @@ -2205,6 +2205,14 @@ Windows L<https://xenproject.org/windows-pv-drivers/>.
@@ -135,7 +82,7 @@ index bee0b9a889..ac35c8bf4c 100644
  
  The groups of Microsoft Hyper-V (AKA viridian) compatible enlightenments
 diff --git a/docs/misc/xenstore-paths.pandoc b/docs/misc/xenstore-paths.pandoc
-index 5cd5c8a3b9..e26d123f0c 100644
+index bffb8ea5442b..3a4107a0f50a 100644
 --- a/docs/misc/xenstore-paths.pandoc
 +++ b/docs/misc/xenstore-paths.pandoc
 @@ -234,6 +234,11 @@ These xenstore values are used to override some of the default string
@@ -151,10 +98,10 @@ index 5cd5c8a3b9..e26d123f0c 100644
  
  1 to 99 OEM strings can be set in xenstore using values of the form
 diff --git a/tools/firmware/hvmloader/config.h b/tools/firmware/hvmloader/config.h
-index c82adf6dc5..f462f6cea1 100644
+index cd716bf39245..4e21468743a8 100644
 --- a/tools/firmware/hvmloader/config.h
 +++ b/tools/firmware/hvmloader/config.h
-@@ -58,7 +58,7 @@ extern uint8_t ioapic_version;
+@@ -57,7 +57,7 @@ extern uint8_t ioapic_version;
  #define ACPI_TIS_HDR_ADDRESS 0xFED40F00UL
  
  extern uint32_t pci_mem_start;
@@ -164,7 +111,7 @@ index c82adf6dc5..f462f6cea1 100644
  
  extern bool acpi_enabled;
 diff --git a/tools/firmware/hvmloader/pci.c b/tools/firmware/hvmloader/pci.c
-index c3c61ca060..6d9dfb89d8 100644
+index c3c61ca060a6..6d9dfb89d80b 100644
 --- a/tools/firmware/hvmloader/pci.c
 +++ b/tools/firmware/hvmloader/pci.c
 @@ -29,8 +29,10 @@
@@ -256,10 +203,10 @@ index c3c61ca060..6d9dfb89d8 100644
  
      if ( mmio_hole_size )
 diff --git a/tools/firmware/hvmloader/util.c b/tools/firmware/hvmloader/util.c
-index 581b35e5cf..8633a62738 100644
+index d3b3f9038e64..9b858c8721b0 100644
 --- a/tools/firmware/hvmloader/util.c
 +++ b/tools/firmware/hvmloader/util.c
-@@ -957,7 +957,7 @@ void hvmloader_acpi_build_tables(struct acpi_config *config,
+@@ -874,7 +874,7 @@ void hvmloader_acpi_build_tables(struct acpi_config *config,
          config->table_flags |= ACPI_HAS_HPET;
  
      config->pci_start = pci_mem_start;
@@ -269,10 +216,10 @@ index 581b35e5cf..8633a62738 100644
      {
          config->pci_hi_start = pci_hi_mem_start;
 diff --git a/tools/include/libxl.h b/tools/include/libxl.h
-index 2eeb22fde9..54010b7997 100644
+index a3c7efc7f261..8ee95368177a 100644
 --- a/tools/include/libxl.h
 +++ b/tools/include/libxl.h
-@@ -1409,6 +1409,15 @@ void libxl_mac_copy(libxl_ctx *ctx, libxl_mac *dst, const libxl_mac *src);
+@@ -1416,6 +1416,15 @@ void libxl_mac_copy(libxl_ctx *ctx, libxl_mac *dst, const libxl_mac *src);
   */
  #define LIBXL_HAVE_CREATEINFO_XEND_SUSPEND_EVTCHN_COMPAT
  
@@ -289,7 +236,7 @@ index 2eeb22fde9..54010b7997 100644
  void libxl_string_list_dispose(libxl_string_list *sl);
  int libxl_string_list_length(const libxl_string_list *sl);
 diff --git a/tools/libs/light/libxl_create.c b/tools/libs/light/libxl_create.c
-index dbee32b7b7..7e37d3bb71 100644
+index 6e8888f37da9..2ec10ca604a4 100644
 --- a/tools/libs/light/libxl_create.c
 +++ b/tools/libs/light/libxl_create.c
 @@ -376,6 +376,7 @@ int libxl__domain_build_info_setdefault(libxl__gc *gc,
@@ -300,12 +247,11 @@ index dbee32b7b7..7e37d3bb71 100644
          libxl_defbool_setdefault(&b_info->u.hvm.pirq,               false);
  
          libxl_defbool_setdefault(&b_info->u.hvm.spice.enable, false);
-         if (!libxl_defbool_val(b_info->u.hvm.spice.enable) &&
 diff --git a/tools/libs/light/libxl_dom.c b/tools/libs/light/libxl_dom.c
-index f6311eea6e..b46ab28294 100644
+index 7df3a5353818..7ddc1b762486 100644
 --- a/tools/libs/light/libxl_dom.c
 +++ b/tools/libs/light/libxl_dom.c
-@@ -791,6 +791,15 @@ static int hvm_build_set_xs_values(libxl__gc *gc,
+@@ -786,6 +786,15 @@ static int hvm_build_set_xs_values(libxl__gc *gc,
              goto err;
      }
  
@@ -322,7 +268,7 @@ index f6311eea6e..b46ab28294 100644
  
  err:
 diff --git a/tools/libs/light/libxl_types.idl b/tools/libs/light/libxl_types.idl
-index 82328b1414..596555c4d2 100644
+index 011d82e2cc32..9390129a513d 100644
 --- a/tools/libs/light/libxl_types.idl
 +++ b/tools/libs/light/libxl_types.idl
 @@ -628,6 +628,7 @@ libxl_domain_build_info = Struct("domain_build_info",[
@@ -334,10 +280,10 @@ index 82328b1414..596555c4d2 100644
                                         ("vendor_device",    libxl_vendor_device),
                                         # See libxl_ms_vm_genid_generate()
 diff --git a/tools/xl/xl_parse.c b/tools/xl/xl_parse.c
-index 1d8fd108af..ee85006412 100644
+index 685177a8361c..242263d06fd5 100644
 --- a/tools/xl/xl_parse.c
 +++ b/tools/xl/xl_parse.c
-@@ -2710,6 +2710,8 @@ skip_usbdev:
+@@ -2711,6 +2711,8 @@ skip_usbdev:
          xlu_cfg_replace_string (config, "soundhw", &b_info->u.hvm.soundhw, 0);
          xlu_cfg_get_defbool(config, "xen_platform_pci",
                              &b_info->u.hvm.xen_platform_pci, 0);
@@ -347,7 +293,7 @@ index 1d8fd108af..ee85006412 100644
          if(b_info->u.hvm.vnc.listen
             && b_info->u.hvm.vnc.display
 diff --git a/xen/include/public/hvm/hvm_xs_strings.h b/xen/include/public/hvm/hvm_xs_strings.h
-index e1ed078628..e977d5a8b1 100644
+index e1ed078628a0..e977d5a8b186 100644
 --- a/xen/include/public/hvm/hvm_xs_strings.h
 +++ b/xen/include/public/hvm/hvm_xs_strings.h
 @@ -14,6 +14,8 @@
@@ -359,6 +305,3 @@ index e1ed078628..e977d5a8b1 100644
  
  /* The following values allow additional ACPI tables to be added to the
   * virtual ACPI BIOS that hvmloader constructs. The values specify the guest
--- 
-2.49.0
-

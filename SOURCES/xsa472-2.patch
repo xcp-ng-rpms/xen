@@ -17,18 +17,15 @@ This is CVE-2025-58142 / part of XSA-472.
 Fixes: 26fba3c85571 ('viridian: add implementation of synthetic timers')
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+ xen/arch/x86/hvm/viridian/synic.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Backported to 8.3.
-Backport notes:
-- Minor index changes.
-
-Backported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
-Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
 diff --git a/xen/arch/x86/hvm/viridian/synic.c b/xen/arch/x86/hvm/viridian/synic.c
-index 483fa95..6eda460 100644
+index c3dc573b003d..e6cba7548f1b 100644
 --- a/xen/arch/x86/hvm/viridian/synic.c
 +++ b/xen/arch/x86/hvm/viridian/synic.c
-@@ -339,6 +339,10 @@ bool viridian_synic_deliver_timer_msg(struct vcpu *v, unsigned int sintx,
+@@ -338,6 +338,10 @@ bool viridian_synic_deliver_timer_msg(struct vcpu *v, unsigned int sintx,
          .DeliveryTime = delivery,
      };
  
@@ -39,3 +36,6 @@ index 483fa95..6eda460 100644
      /*
       * To avoid using an atomic test-and-set, and barrier before calling
       * vlapic_set_irq(), this function must be called in context of the
+-- 
+2.49.0
+

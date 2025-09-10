@@ -19,18 +19,15 @@ This is CVE-2025-27466 / part of XSA-472.
 Fixes: 386b3365221d ('viridian: use viridian_map/unmap_guest_page() for reference tsc page')
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+ xen/arch/x86/hvm/viridian/time.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Backported to 8.3.
-Backport notes:
-- Minor index changes.
-
-Backported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
-Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
 diff --git a/xen/arch/x86/hvm/viridian/time.c b/xen/arch/x86/hvm/viridian/time.c
-index b56fd67..97caf0b 100644
+index 137577384f1e..ca6d526f46b7 100644
 --- a/xen/arch/x86/hvm/viridian/time.c
 +++ b/xen/arch/x86/hvm/viridian/time.c
-@@ -27,6 +27,10 @@ static void update_reference_tsc(const struct domain *d, bool initialize)
+@@ -26,6 +26,10 @@ static void update_reference_tsc(const struct domain *d, bool initialize)
      HV_REFERENCE_TSC_PAGE *p = rt->ptr;
      uint32_t seq;
  
@@ -41,3 +38,6 @@ index b56fd67..97caf0b 100644
      if ( initialize )
          clear_page(p);
  
+-- 
+2.49.0
+

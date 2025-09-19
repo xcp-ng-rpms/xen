@@ -27,18 +27,17 @@ This is CVE-2025-58143 / part of XSA-472.
 Fixes: 386b3365221d ('viridian: use viridian_map/unmap_guest_page() for reference tsc page')
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+ xen/arch/x86/hvm/viridian/time.c        | 4 ++++
+ xen/arch/x86/hvm/viridian/viridian.c    | 2 ++
+ xen/arch/x86/include/asm/hvm/viridian.h | 1 +
+ 3 files changed, 7 insertions(+)
 
-Backported to 8.3.
-Backport notes:
-- Minor index changes.
-
-Backported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
-Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
 diff --git a/xen/arch/x86/hvm/viridian/time.c b/xen/arch/x86/hvm/viridian/time.c
-index 97caf0b..3c94fb0 100644
+index ca6d526f46b7..9311858d63c0 100644
 --- a/xen/arch/x86/hvm/viridian/time.c
 +++ b/xen/arch/x86/hvm/viridian/time.c
-@@ -109,8 +109,10 @@ static void time_ref_count_thaw(const struct domain *d)
+@@ -108,8 +108,10 @@ static void time_ref_count_thaw(const struct domain *d)
  
      trc->off = (int64_t)trc->val - trc_val(d, 0);
  
@@ -49,7 +48,7 @@ index 97caf0b..3c94fb0 100644
  }
  
  static uint64_t time_ref_count(const struct domain *d)
-@@ -332,6 +334,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
+@@ -331,6 +333,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
          if ( !(viridian_feature_mask(d) & HVMPV_reference_tsc) )
              return X86EMUL_EXCEPTION;
  
@@ -57,7 +56,7 @@ index 97caf0b..3c94fb0 100644
          viridian_unmap_guest_page(&vd->reference_tsc);
          vd->reference_tsc.msr.raw = val;
          viridian_dump_guest_page(v, "REFERENCE_TSC", &vd->reference_tsc);
-@@ -340,6 +343,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
+@@ -339,6 +342,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
              viridian_map_guest_page(d, &vd->reference_tsc);
              update_reference_tsc(d, true);
          }
@@ -66,10 +65,10 @@ index 97caf0b..3c94fb0 100644
  
      case HV_X64_MSR_TIME_REF_COUNT:
 diff --git a/xen/arch/x86/hvm/viridian/viridian.c b/xen/arch/x86/hvm/viridian/viridian.c
-index 5c0effb..f22c65d 100644
+index 7ea6c9016894..c0be24bd2210 100644
 --- a/xen/arch/x86/hvm/viridian/viridian.c
 +++ b/xen/arch/x86/hvm/viridian/viridian.c
-@@ -495,6 +495,8 @@ int viridian_domain_init(struct domain *d)
+@@ -494,6 +494,8 @@ int viridian_domain_init(struct domain *d)
      if ( !d->arch.hvm.viridian )
          return -ENOMEM;
  
@@ -79,7 +78,7 @@ index 5c0effb..f22c65d 100644
      if ( rc )
          goto fail;
 diff --git a/xen/arch/x86/include/asm/hvm/viridian.h b/xen/arch/x86/include/asm/hvm/viridian.h
-index 4c8ff6e..47c9d13 100644
+index 4c8ff6e80b6f..47c9d13841ac 100644
 --- a/xen/arch/x86/include/asm/hvm/viridian.h
 +++ b/xen/arch/x86/include/asm/hvm/viridian.h
 @@ -71,6 +71,7 @@ struct viridian_domain
@@ -90,3 +89,6 @@ index 4c8ff6e..47c9d13 100644
  };
  
  void cpuid_viridian_leaves(const struct vcpu *v, uint32_t leaf,
+-- 
+2.49.0
+

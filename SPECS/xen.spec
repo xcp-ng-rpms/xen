@@ -400,7 +400,9 @@ BuildRequires: libblkid-devel
 BuildRequires: ncurses-devel
 
 # For RomBIOS
+%ifarch x86_64
 BuildRequires: dev86
+%endif
 
 # For ocaml components
 BuildRequires: ocaml >= 4.13.1-3
@@ -471,8 +473,10 @@ License: GPLv2 and LGPLv2 and MIT
 Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
+%ifarch x86_64
 Requires: edk2
 Requires: ipxe
+%endif
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -540,6 +544,13 @@ echo "${base_cset:0:12}, pq ${pq_cset:0:12}" > .scmversion
 export XEN_TARGET_ARCH=%{_arch}
 export PYTHON="%{__python}"
 
+%ifarch x86_64
+ARCHOPTS="--with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386"
+%else
+# FIXME: to be validated
+ARCHOPTS="--with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64"
+%endif
+
 %configure --disable-qemu-traditional \
            --disable-seabios \
            --disable-stubdom \
@@ -548,7 +559,7 @@ export PYTHON="%{__python}"
            --enable-rombios \
            --enable-systemd \
            --with-xenstored=oxenstored \
-           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
+           $ARCHOPTS \
            --with-system-ipxe=/usr/share/ipxe/ipxe.bin \
            --with-system-ovmf=/usr/share/edk2/OVMF-release.fd
 
@@ -1202,6 +1213,7 @@ fi
 - /etc/rc.d/init.d is dead, long live /etc/init.d
 - Install xen.efi, replicate logic to handle xen.gz
 - Ampere MtCollins support
+- Quick tuning for aarch64 build
 
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20

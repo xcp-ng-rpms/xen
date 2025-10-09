@@ -545,7 +545,11 @@ echo "${base_cset:0:12}, pq ${pq_cset:0:12}" > .scmversion
 %build
 
 %{?_devtoolset_enable}
+%ifarch aarch64
+export XEN_TARGET_ARCH=arm64
+%else
 export XEN_TARGET_ARCH=%{_arch}
+%endif
 export PYTHON="%{__python}"
 
 %ifarch x86_64
@@ -613,7 +617,11 @@ build_xen ""           config-pvshim          build-shim
 %install
 
 %{?_devtoolset_enable}
+%ifarch aarch64
+export XEN_TARGET_ARCH=arm64
+%else
 export XEN_TARGET_ARCH=%{_arch}
+%endif
 export PYTHON="%{__python}"
 
 # The existence of this directory causes ocamlfind to put things in it

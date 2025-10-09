@@ -254,7 +254,8 @@ Patch209: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
 Patch210: quirk-hp-gen8-rmrr.patch
 Patch211: quirk-pci-phantom-function-devices.patch
 Patch212: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch213: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+# XCP-ng: this patch requires an ARM implementation
+#Patch213: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
 Patch214: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
 Patch215: 0001-efi-Workaround-page-fault-during-runtime-service.patch
 Patch216: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
@@ -1236,6 +1237,7 @@ fi
   - Oleksii's patches
   - Quick tuning for aarch64 build
   - Disable xenguest build on non-x86 for now
+  - Disable "Avoid TLB flush if grant mapped page was not accessed" optimization
 
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20

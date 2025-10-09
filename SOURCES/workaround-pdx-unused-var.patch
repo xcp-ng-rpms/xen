@@ -1,13 +1,13 @@
 diff --git a/xen/common/pdx.c b/xen/common/pdx.c
-index 480e873798..21d72cfdeb 100644
+index 480e873798..faa6dfd242 100644
 --- a/xen/common/pdx.c
 +++ b/xen/common/pdx.c
-@@ -91,7 +91,7 @@ void set_pdx_range(unsigned long smfn, unsigned long emfn)
- /* Generic PFN compression helpers. */
- static struct pfn_range {
-     unsigned long base_pfn, pages;
--} ranges[MAX_PFN_RANGES] __initdata;
-+} ranges[MAX_PFN_RANGES] __initdata __attribute__((unused));
- static unsigned int __initdata nr_ranges;
+@@ -89,7 +89,7 @@ void set_pdx_range(unsigned long smfn, unsigned long emfn)
+ #endif
  
- static bool __initdata pdx_compress = true;
+ /* Generic PFN compression helpers. */
+-static struct pfn_range {
++static __attribute__((unused)) struct pfn_range {
+     unsigned long base_pfn, pages;
+ } ranges[MAX_PFN_RANGES] __initdata;
+ static unsigned int __initdata nr_ranges;

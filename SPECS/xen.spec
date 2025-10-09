@@ -552,7 +552,7 @@ ARCHOPTS=" \
 %else
 # FIXME: to be validated
 ARCHOPTS=" \
-           --diable-rombios \
+           --disable-rombios \
            --with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64 \
 "
 %endif

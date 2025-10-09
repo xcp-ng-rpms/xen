@@ -325,6 +325,7 @@ Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
 Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
 Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch1004: wip-no-xenguest-arm.patch
 
 ExclusiveArch: x86_64 aarch64
 
@@ -1230,7 +1231,9 @@ fi
 - /etc/rc.d/init.d is dead, long live /etc/init.d
 - Install xen.efi, replicate logic to handle xen.gz
 - Ampere MtCollins support
-- Quick tuning for aarch64 build
+  - Oleksii's patches
+  - Quick tuning for aarch64 build
+  - Disable xenguest build on non-x86 for now
 
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20

@@ -1,0 +1,13 @@
+diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
+index f4a4a7a21f..a257377e32 100644
+--- a/xen/include/xen/sched.h
++++ b/xen/include/xen/sched.h
+@@ -785,7 +785,7 @@ void vcpu_end_shutdown_deferral(struct vcpu *v);
+  */
+ void __domain_crash(struct domain *d);
+ 
+-#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH)
++#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH) && defined(CONFIG_X86)
+ #define print_domain_crash(func) \
+     printk(#func " called from %pS\n", current_text_addr());
+ #else

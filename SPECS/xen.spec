@@ -326,7 +326,7 @@ Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
 Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
 Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 
-ExclusiveArch: x86_64
+ExclusiveArch: x86_64 aarch64
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
@@ -545,10 +545,16 @@ export XEN_TARGET_ARCH=%{_arch}
 export PYTHON="%{__python}"
 
 %ifarch x86_64
-ARCHOPTS="--with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386"
+ARCHOPTS=" \
+           --enable-rombios \
+           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
+"
 %else
 # FIXME: to be validated
-ARCHOPTS="--with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64"
+ARCHOPTS=" \
+           --diable-rombios \
+           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64 \
+"
 %endif
 
 %configure --disable-qemu-traditional \
@@ -556,7 +562,6 @@ ARCHOPTS="--with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64"
            --disable-stubdom \
            --disable-xsmpolicy \
            --disable-pvshim \
-           --enable-rombios \
            --enable-systemd \
            --with-xenstored=oxenstored \
            $ARCHOPTS \

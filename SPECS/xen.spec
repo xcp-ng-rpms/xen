@@ -404,6 +404,10 @@ BuildRequires: ncurses-devel
 BuildRequires: dev86
 %endif
 
+%ifarch aarch64
+BuildRequires: libfdt-devel
+%endif
+
 # For ocaml components
 BuildRequires: ocaml >= 4.13.1-3
 BuildRequires: ocaml-findlib

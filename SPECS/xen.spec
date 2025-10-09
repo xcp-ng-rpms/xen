@@ -329,6 +329,7 @@ Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 Patch1004: wip-no-xenguest-arm.patch
 Patch1005: wip-no-viridian-arm.patch
 Patch1006: workaround-current_text_addr-x86-asm.patch
+Patch1007: workaround-pdx-unused-var.patch
 
 ExclusiveArch: x86_64 aarch64
 

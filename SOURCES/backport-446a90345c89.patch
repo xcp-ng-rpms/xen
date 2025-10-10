@@ -22,11 +22,11 @@ Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Release-Acked-by: Oleksii Kurochko<oleksii.kurochko@gmail.com>
 
 diff --git a/xen/arch/x86/include/asm/irq.h b/xen/arch/x86/include/asm/irq.h
-index 207c9fede253..959270df40fb 100644
+index d3bc76806808..354868ba31ab 100644
 --- a/xen/arch/x86/include/asm/irq.h
 +++ b/xen/arch/x86/include/asm/irq.h
-@@ -136,8 +136,8 @@ void free_domain_pirqs(struct domain *d);
- int map_domain_emuirq_pirq(struct domain *d, int pirq, int irq);
+@@ -168,8 +168,8 @@ void free_domain_pirqs(struct domain *d);
+ int map_domain_emuirq_pirq(struct domain *d, int pirq, int emuirq);
  int unmap_domain_pirq_emuirq(struct domain *d, int pirq);
  
 -/* Evacuate interrupts assigned to CPUs not present in the input CPU mask. */
@@ -37,10 +37,10 @@ index 207c9fede253..959270df40fb 100644
  
  int  init_irq_data(void);
 diff --git a/xen/arch/x86/irq.c b/xen/arch/x86/irq.c
-index 0ef3a2ca375b..3e57b916db51 100644
+index e56bacc88d84..ff3ac832f4b9 100644
 --- a/xen/arch/x86/irq.c
 +++ b/xen/arch/x86/irq.c
-@@ -2599,17 +2599,21 @@ static int __init cf_check setup_dump_irqs(void)
+@@ -2590,17 +2590,21 @@ static int __init cf_check setup_dump_irqs(void)
  }
  __initcall(setup_dump_irqs);
  
@@ -65,7 +65,7 @@ index 0ef3a2ca375b..3e57b916db51 100644
          cpumask_t *affinity = this_cpu(scratch_cpumask);
  
          if ( irq == 2 )
-@@ -2653,12 +2657,6 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
+@@ -2644,12 +2648,6 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
          }
  
          if ( desc->arch.move_in_progress &&
@@ -78,7 +78,7 @@ index 0ef3a2ca375b..3e57b916db51 100644
               cpumask_test_cpu(cpu, desc->arch.old_cpu_mask) )
          {
              /*
-@@ -2700,16 +2698,17 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
+@@ -2691,16 +2689,17 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
  
          /*
           * Avoid shuffling the interrupt around as long as current target CPUs
@@ -100,7 +100,7 @@ index 0ef3a2ca375b..3e57b916db51 100644
          {
              break_affinity = true;
              cpumask_setall(affinity);
-@@ -2725,7 +2724,7 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
+@@ -2716,7 +2715,7 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
           * the interrupt, signal to check whether there are any pending vectors
           * to be handled in the local APIC after the interrupt has been moved.
           */
@@ -109,7 +109,7 @@ index 0ef3a2ca375b..3e57b916db51 100644
              check_irr = true;
  
          if ( desc->handler->set_affinity )
-@@ -2752,9 +2751,6 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
+@@ -2743,9 +2742,6 @@ void fixup_irqs(const cpumask_t *mask, bool verbose)
  
          spin_unlock(&desc->lock);
  
@@ -120,10 +120,10 @@ index 0ef3a2ca375b..3e57b916db51 100644
              printk("Cannot set affinity for IRQ%u\n", irq);
          else if ( break_affinity )
 diff --git a/xen/arch/x86/smpboot.c b/xen/arch/x86/smpboot.c
-index 1889fa2a3159..66e7564ef1d8 100644
+index 79a79c54c304..891a29fca146 100644
 --- a/xen/arch/x86/smpboot.c
 +++ b/xen/arch/x86/smpboot.c
-@@ -1291,7 +1291,7 @@ void __cpu_disable(void)
+@@ -1282,7 +1282,7 @@ void __cpu_disable(void)
  
      /* It's now safe to remove this processor from the online map */
      cpumask_clear_cpu(cpu, &cpu_online_map);

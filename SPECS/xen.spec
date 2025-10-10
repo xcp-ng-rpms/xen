@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -323,6 +323,9 @@ Patch277: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+
+Patch1002: xsa475-1.patch
+Patch1003: xsa475-2.patch
 
 ExclusiveArch: x86_64
 
@@ -1170,6 +1173,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Oct 21 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.2
+- Fixes for XSA-475 CVE-2025-58147 CVE-2025-58148
+
 * Tue Sep 09 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-20.1
 - Sync with 4.17.5-20
 - Use xsa472-[123].patch provided by XenServer

@@ -562,15 +562,20 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{?_cov_install}
 
 %files hypervisor
-/boot/%{name}-%{version}-%{hv_rel}.gz
 /boot/%{name}-%{version}-%{hv_rel}.map
+/boot/%{name}-%{version}-%{hv_rel}-d.map
+%ifarch x86_64
+/boot/%{name}-%{version}-%{hv_rel}.gz
 /boot/%{name}-%{version}-%{hv_rel}.efi
 /boot/%{name}-%{version}-%{hv_rel}.efi.map
-/boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
-/boot/%{name}-%{version}-%{hv_rel}-d.map
 /boot/%{name}-%{version}-%{hv_rel}-d.efi
 /boot/%{name}-%{version}-%{hv_rel}-d.efi.map
+%else
+/boot/%{name}-%{version}-%{hv_rel}
+/boot/%{name}-%{version}-%{hv_rel}-d
+%endif
+/boot/%{name}-%{version}-%{hv_rel}.config
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
 %license COPYING

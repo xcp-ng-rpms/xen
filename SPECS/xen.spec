@@ -556,6 +556,12 @@ install_xen -%{hv_rel}-d build-xen-debug
 # Build test case metadata
 %{__python} %{SOURCE5} -i %{buildroot}%{_libexecdir}/%{name} -o %{buildroot}%{_datadir}/xen-dom0-tests-metadata.json
 
+%ifarch aarch64
+# we don't do dom0less
+rm %{buildroot}/%{_libexecdir}/%{name}/bin/init-dom0less
+rm %{buildroot}/%{_libdir}/debug/%{_libexecdir}/%{name}/bin/init-dom0less*.debug
+%endif
+
 %{__install} -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sysconfig/kernel-xen
 %{__install} -D -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/xen/xl.conf
 %{__install} -D -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xen-tools

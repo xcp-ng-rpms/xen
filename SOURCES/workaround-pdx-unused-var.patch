@@ -1,12 +1,12 @@
 diff --git a/xen/Makefile b/xen/Makefile
-index b062e707f3..615785d936 100644
+index b062e707f3..50abee1ad5 100644
 --- a/xen/Makefile
 +++ b/xen/Makefile
 @@ -393,6 +393,7 @@ CFLAGS-$(CONFIG_CC_SPLIT_SECTIONS) += -ffunction-sections -fdata-sections
  
  CFLAGS += -nostdinc -fno-builtin -fno-common
  CFLAGS += -Werror -Wredundant-decls -Wno-pointer-arith
-+CFLAGS += -Werror=no-unused-variable
++CFLAGS += -Wno-error=unused-variable
  CFLAGS += -Wdeclaration-after-statement
  $(call cc-option-add,CFLAGS,CC,-Wvla)
  CFLAGS += -pipe -D__XEN__ -include $(srctree)/include/xen/config.h

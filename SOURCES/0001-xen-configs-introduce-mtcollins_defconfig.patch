@@ -4,11 +4,11 @@ Date: Thu, 13 Mar 2025 10:25:13 +0100
 Subject: [PATCH] xen/configs: introduce mtcollins_defconfig
 
 Signed-off-by: Super User <root@pc-11278.home>
-diff --git a/xen/arch/arm/configs/mtcollins_defconfig b/xen/arch/arm/configs/mtcollins_defconfig
+diff --git a/buildconfigs/config-mtcollins b/buildconfigs/config-mtcollins
 new file mode 100644
 index 0000000000..a13c2797a6
 --- /dev/null
-+++ b/xen/arch/arm/configs/mtcollins_defconfig
++++ b/buildconfigs/config-mtcollins
 @@ -0,0 +1,50 @@
 +CONFIG_ARM_64=y
 +CONFIG_ARM=y

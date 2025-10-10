@@ -199,8 +199,8 @@ Patch222:	vtpm-ppi-acpi-dsm.patch
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 # Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
-# Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
-# Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
+Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 # Patch1004: wip-no-xenguest-arm.patch
 # Patch1005: wip-no-viridian-arm.patch
 # Patch1006: workaround-current_text_addr-x86-asm.patch
@@ -489,10 +489,14 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
 }
 
 # Builds of Xen
+%ifarch x86_64
 build_xen -%{hv_rel}   config-release         build-xen-release
 build_xen -%{hv_rel}-d config-debug           build-xen-debug      cov
+%else
+build_xen -%{hv_rel}   config-release-mtcollins build-xen-release
+build_xen -%{hv_rel}-d config-debug-mtcollins   build-xen-debug      cov
+%endif
 build_xen ""           config-pvshim          build-shim
-
 
 %install
 

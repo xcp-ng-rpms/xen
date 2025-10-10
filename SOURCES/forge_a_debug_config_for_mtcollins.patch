@@ -1,0 +1,30 @@
+Forge a debug config for mtcollins
+
+From: Yann Dirson <yann.dirson@vates.tech>
+
+diff --git a/buildconfigs/config-mtcollins b/buildconfigs/config-debug-mtcollins
+similarity index 88%
+copy from buildconfigs/config-mtcollins
+copy to buildconfigs/config-debug-mtcollins
+index a13c2797a6..cc0e70838f 100644
+--- a/buildconfigs/config-mtcollins
++++ b/buildconfigs/config-debug-mtcollins
+@@ -28,10 +28,10 @@ CONFIG_SCHED_CREDIT=
+ #
+ # Debugging Options
+ #
+-# CONFIG_DEBUG is not set
+-# CONFIG_FRAME_POINTER is not set
+-# CONFIG_VERBOSE_DEBUG is not set
+-# CONFIG_SCRUB_DEBUG is not set
++CONFIG_DEBUG=y
++CONFIG_FRAME_POINTER=y
++CONFIG_VERBOSE_DEBUG=y
++CONFIG_SCRUB_DEBUG=y
+ #
+ 
+ CONFIG_VERBOSE_DEBUG=y
+diff --git a/buildconfigs/config-mtcollins b/buildconfigs/config-release-mtcollins
+similarity index 100%
+rename from buildconfigs/config-mtcollins
+rename to buildconfigs/config-release-mtcollins

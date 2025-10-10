@@ -104,8 +104,8 @@ Patch97:	0001-x86-hpet-Pre-cleanup.patch
 Patch98:	0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
 Patch99:	0003-x86-hpet-Post-cleanup.patch
 Patch101:	0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-# Grant perf improvements
-Patch104:	avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+# Grant perf improvements - not building on ARM
+#avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
 # Further MB2/EFI fixes
 Patch107:	0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
 Patch108:	0001-efi-Workaround-page-fault-during-runtime-service.patch
@@ -182,27 +182,27 @@ Patch200:	hvmloader-disable-pci-option-rom-loading.patch
 Patch203:	xen-force-software-vmcs-shadow.patch
 Patch204:	0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
 Patch205:	use-msr-ll-instead-of-vmcs-efer.patch
-Patch207:	revert-4a7e71aa0851-partial.patch
-Patch208:	add-pv-iommu-headers.patch
-Patch209:	add-pv-iommu-local-domain-ops.patch
-Patch210:	add-pv-iommu-foreign-support.patch
-Patch211:	upstream-pv-iommu-tools.patch
-Patch212:	Add-PV-IOMMU-elf-note.patch
+# "perf fix" + Nvidia vgpu, not building on ARM
+#revert-4a7e71aa0851-partial.patch
+#add-pv-iommu-headers.patch
+#add-pv-iommu-local-domain-ops.patch
+#add-pv-iommu-foreign-support.patch
+#upstream-pv-iommu-tools.patch
+#Add-PV-IOMMU-elf-note.patch
 # Intel GVT-g debt
-Patch215:	allow-rombios-pci-config-on-any-host-bridge.patch
-Patch216:	gvt-g-hvmloader+rombios.patch
+Patch216:	allow-rombios-pci-config-on-any-host-bridge.patch
+Patch217:	gvt-g-hvmloader+rombios.patch
 # Live microcode loading additions
-Patch219:	xen-spec-ctrl-utility.patch
+Patch220:	xen-spec-ctrl-utility.patch
 # vTPM support
-Patch222:	vtpm-ppi-acpi-dsm.patch
+Patch223:	vtpm-ppi-acpi-dsm.patch
 # ARM Ampere MtCollins
-Patch225:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
-Patch226:	0001-xen-configs-introduce-mtcollins_defconfig.patch
-Patch227:	forge_a_debug_config_for_mtcollins.patch
-Patch228:	patch_wip-no-xenguest-arm.patch
-Patch229:	patch_wip-no-viridian-arm.patch
-Patch230:	patch_workaround-current_text_addr-x86-asm.patch
-Patch231:	revert_xen-gnttab__avoid_tlb_flush_if_grant_mapped_page_was_not_accessed.patch
+Patch226:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch227:	0001-xen-configs-introduce-mtcollins_defconfig.patch
+Patch228:	forge_a_debug_config_for_mtcollins.patch
+Patch229:	patch_wip-no-xenguest-arm.patch
+Patch230:	patch_wip-no-viridian-arm.patch
+Patch231:	patch_workaround-current_text_addr-x86-asm.patch
 Patch232:	arm-build.patch
 
 # # XCP-ng patches

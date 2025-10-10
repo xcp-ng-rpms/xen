@@ -668,7 +668,9 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_includedir}/%{name}/physdev.h
 %{_includedir}/%{name}/platform.h
 %{_includedir}/%{name}/pmu.h
+%ifarch x86_64
 %{_includedir}/%{name}/pv-iommu.h
+%endif
 %{_includedir}/%{name}/sched.h
 %{_includedir}/%{name}/sys/evtchn.h
 %{_includedir}/%{name}/sys/gntalloc.h

@@ -1048,12 +1048,12 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %files dom0-tests
 %exclude %{_libexecdir}/%{name}/bin/depriv-fd-checker
-%{_libexecdir}/%{name}/bin/test-cpu-policy
 %{_libexecdir}/%{name}/bin/test-paging-mempool
 %{_libexecdir}/%{name}/bin/test-resource
-%{_libexecdir}/%{name}/bin/test-tsx
 %{_libexecdir}/%{name}/bin/test-xenstore
 %ifarch x86_64
+%{_libexecdir}/%{name}/bin/test-cpu-policy
+%{_libexecdir}/%{name}/bin/test-tsx
 %{_libexecdir}/%{name}/bin/test_x86_emulator
 %endif
 %{_datadir}/xen-dom0-tests-metadata.json

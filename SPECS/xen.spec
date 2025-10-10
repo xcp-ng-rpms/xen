@@ -536,7 +536,7 @@ install_xen () { # $1=vendorversion $2=outdir
 %ifarch x86_64
     %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
 %else
-    %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
+    %{__install} -p -D -m 644 xen/$2/xen        %{buildroot}/boot/xen-%{version}$1
 %endif
     %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config

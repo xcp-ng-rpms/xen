@@ -1,0 +1,12 @@
+diff --git a/xen/arch/arm/include/asm/event.h b/xen/arch/arm/include/asm/event.h
+index b14c166ad6..78f85ec183 100644
+--- a/xen/arch/arm/include/asm/event.h
++++ b/xen/arch/arm/include/asm/event.h
+@@ -2,6 +2,7 @@
+ #define __ASM_EVENT_H__
+ 
+ #include <asm/domain.h>
++#include <xen/sched.h>
+ 
+ void vcpu_kick(struct vcpu *v);
+ void vcpu_mark_events_pending(struct vcpu *v);

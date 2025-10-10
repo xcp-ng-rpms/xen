@@ -203,6 +203,7 @@ Patch228:	patch_wip-no-xenguest-arm.patch
 Patch229:	patch_wip-no-viridian-arm.patch
 Patch230:	patch_workaround-current_text_addr-x86-asm.patch
 Patch231:	revert_xen-gnttab__avoid_tlb_flush_if_grant_mapped_page_was_not_accessed.patch
+Patch232:	arm-build.patch
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch

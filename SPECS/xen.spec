@@ -936,7 +936,9 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/xenfsimage/iso9660/fsimage.so
 %{_libdir}/xenfsimage/reiserfs/fsimage.so
 %{_libdir}/xenfsimage/ufs/fsimage.so
+%ifarch x86_64
 %{_libdir}/xenfsimage/xfs/fsimage.so
+%endif
 %{_libdir}/xenfsimage/zfs/fsimage.so
 
 %files dom0-libs-devel

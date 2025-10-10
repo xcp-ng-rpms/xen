@@ -1109,7 +1109,7 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Fri Oct 20 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.1
+* Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.1
 - Merge former xcpng-8.3 and ydi/9 work
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2

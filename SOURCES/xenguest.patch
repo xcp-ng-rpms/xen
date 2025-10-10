@@ -1,5 +1,5 @@
 diff --git a/tools/Makefile b/tools/Makefile
-index 4906fdbc237c..bbb7df5b619d 100644
+index 7d17211782ec..15454ee7aaaf 100644
 --- a/tools/Makefile
 +++ b/tools/Makefile
 @@ -287,3 +287,7 @@ subtree-force-update-all:
@@ -793,10 +793,10 @@ index 000000000000..c45f59e52b9c
 + */
 diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
 new file mode 100644
-index 000000000000..2a614ac4c426
+index 000000000000..7b651d5ca2ca
 --- /dev/null
 +++ b/tools/xenguest/xenguest_stubs.c
-@@ -0,0 +1,1825 @@
+@@ -0,0 +1,1817 @@
 +/*
 + * Copyright (C) 2006-2009 Citrix Systems Inc.
 + *
@@ -884,7 +884,6 @@ index 000000000000..2a614ac4c426
 +    unsigned cores_per_socket;
 +    unsigned x87_fip_width;
 +    int64_t timeoffset;
-+    uint64_t mmio_size;
 +};
 +
 +char *xenstore_getsv(const char *fmt, va_list ap)
@@ -1098,6 +1097,16 @@ index 000000000000..2a614ac4c426
 +    if ( get_vm_featureset(hvm) )
 +        goto out;
 +
++    /*
++     * If nested-virt is opted in to, set both VMX and SVM.  One (or
++     * both) will be filtered out later depending on hardware support.
++     */
++    if ( f->nested_virt )
++    {
++        set_bit(X86_FEATURE_VMX, featureset);
++        set_bit(X86_FEATURE_SVM, featureset);
++    }
++
 +    if ( !f->nx )
 +        clear_bit(X86_FEATURE_NX, featureset);
 +
@@ -1180,7 +1189,6 @@ index 000000000000..2a614ac4c426
 +    f->vcpus_current = xenstore_get("platform/vcpu/current");
 +    f->vcpu_weight = xenstore_get("platform/vcpu/weight");
 +    f->vcpu_cap = xenstore_get("platform/vcpu/cap");
-+    f->nx       = xenstore_get("platform/nx");
 +    f->viridian = xenstore_get("platform/viridian");
 +
 +    f->viridian_time_ref_count = xenstore_get("platform/viridian_time_ref_count");
@@ -1205,8 +1213,10 @@ index 000000000000..2a614ac4c426
 +
 +    f->apic     = xenstore_get("platform/apic");
 +    f->pae      = xenstore_get("platform/pae");
++    f->nx       = xenstore_get("platform/nx");
 +    f->tsc_mode = xenstore_get("platform/tsc_mode");
 +    f->x87_fip_width = xenstore_get("platform/x87-fip-width");
++    f->nested_virt = xenstore_get("platform/nested-virt");
 +    f->nomigrate = xenstore_get("platform/nomigrate");
 +
 +    if ( f->dominfo.flags & XEN_DOMINF_hvm_guest )
@@ -1223,16 +1233,6 @@ index 000000000000..2a614ac4c426
 +         */
 +        f->cores_per_socket = cps;
 +    }
-+
-+    /*
-+     * Follow 'nested-virt' if present.  Fall back to checking
-+     * 'exp-nested-hvm' for compatibility.
-+     */
-+    tmp = xenstore_gets("platform/nested-virt");
-+    f->nested_virt = tmp
-+        ? xenstore_get("platform/nested-virt")
-+        : xenstore_get("platform/exp-nested-hvm");
-+    free(tmp);
 +
 +    /* Nested virt doesn't currently work with migration. */
 +    if ( f->nested_virt )
@@ -1262,7 +1262,6 @@ index 000000000000..2a614ac4c426
 +        sscanf(tmp, "%" PRId64, &f->timeoffset);
 +        free(tmp);
 +    }
-+    f->mmio_size = xenstore_get("platform/mmio_hole_size");
 +
 +    xg_info("Domain Properties: Type %s, hap %u\n",
 +            (f->dominfo.flags & XEN_DOMINF_hvm_guest) ? "HVM" : "PV",
@@ -1275,8 +1274,8 @@ index 000000000000..2a614ac4c426
 +            f->nx, f->pae, f->cores_per_socket, f->x87_fip_width, f->nested_virt);
 +    xg_info("apic: %d acpi: %d acpi_s4: %d acpi_s3: %d tsc_mode: %d hpet: %d\n",
 +            f->apic, f->acpi, f->acpi_s4, f->acpi_s3, f->tsc_mode, f->hpet);
-+    xg_info("nomigrate %d, timeoffset %" PRId64 " mmio_hole_size %#" PRIx64 "\n",
-+            f->nomigrate, f->timeoffset, f->mmio_size);
++    xg_info("nomigrate %d, timeoffset %" PRId64 "\n",
++            f->nomigrate, f->timeoffset);
 +    xg_info("viridian: %d, time_ref_count: %d, reference_tsc: %d "
 +            "hcall_remote_tlb_flush: %d apic_assist: %d "
 +            "crash_ctl: %d stimer: %d hcall_ipi: %d\n",
@@ -2002,7 +2001,7 @@ index 000000000000..2a614ac4c426
 +#define VRAM_RESERVED_SIZE 0x1000000lu
 +
 +int hvm_build_setup_mem(struct xc_dom_image *dom, uint64_t max_mem_mib,
-+                        uint64_t max_start_mib, uint64_t min_mmio_hole)
++                        uint64_t max_start_mib)
 +{
 +    uint64_t lowmem_end, highmem_start, highmem_end, mmio_start, mmio_size;
 +    uint64_t mmio_total = HVM_BELOW_4G_MMIO_LENGTH;
@@ -2073,11 +2072,7 @@ index 000000000000..2a614ac4c426
 +
 +    lowmem_end  = max_mem_mib << 20;
 +    highmem_end = highmem_start = 1ull << 32;
-+    /*
-+     * Use the externally provide size as a minimum boundary, expand it if
-+     * necessary for correct guest operation based on assigned devices.
-+     */
-+    mmio_size   = max_t(uint64_t, HVM_BELOW_4G_MMIO_LENGTH, min_mmio_hole);
++    mmio_size   = HVM_BELOW_4G_MMIO_LENGTH;
 +
 +    if ( opt_vgpu )
 +    {
@@ -2086,11 +2081,9 @@ index 000000000000..2a614ac4c426
 +         * as the existing NVIDIA drivers are unable to handle
 +         * 64-bit BARs properly.
 +         */
-+        xg_info("NVIDIA vGPU plugged in. Add extra 0x%llx to MMIO hole\n",
-+                HVM_BELOW_4G_MMIO_LENGTH);
-+        mmio_total += HVM_BELOW_4G_MMIO_LENGTH;
-+        if ( mmio_size < HVM_BELOW_4G_MMIO_LENGTH * 2 )
-+            mmio_size = HVM_BELOW_4G_MMIO_LENGTH * 2;
++        xg_info("NVIDIA vGPU plugged in. Add extra 0x%lx to MMIO hole\n", mmio_size);
++        mmio_total += mmio_size;
++        mmio_size <<= 1;
 +    }
 +
 +    if ( allow_memory_relocate )
@@ -2414,8 +2407,7 @@ index 000000000000..2a614ac4c426
 +    }
 +    else /* HVM */
 +    {
-+        r = hvm_build_setup_mem(dom, mem_max_mib, mem_start_mib,
-+                                f.mmio_size);
++        r = hvm_build_setup_mem(dom, mem_max_mib, mem_start_mib);
 +        if ( r )
 +            failwith_oss_xc("hvm_build_setup_mem");
 +    }
@@ -3053,7 +3045,7 @@ index 000000000000..a8d9b113f463
 +}
 diff --git a/tools/xenguest/xg_internal.h b/tools/xenguest/xg_internal.h
 new file mode 100644
-index 000000000000..d45d390c8949
+index 000000000000..bc2c7873f255
 --- /dev/null
 +++ b/tools/xenguest/xg_internal.h
 @@ -0,0 +1,130 @@
@@ -3071,7 +3063,7 @@ index 000000000000..d45d390c8949
 +#include <xenctrl.h>
 +#include <xenguest.h>
 +#include <xenstore.h>
-+#include <xen-tools/libs.h>
++#include <xen-tools/common-macros.h>
 +
 +#include <xc_bitops.h>
 +

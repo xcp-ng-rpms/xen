@@ -20,7 +20,7 @@ Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Release-Acked-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
 
 diff --git a/xen/drivers/passthrough/vtd/intremap.c b/xen/drivers/passthrough/vtd/intremap.c
-index b4432a949029..043cf48cb40b 100644
+index 233db5cb64de..820616a8de93 100644
 --- a/xen/drivers/passthrough/vtd/intremap.c
 +++ b/xen/drivers/passthrough/vtd/intremap.c
 @@ -184,49 +184,26 @@ bool __init cf_check intel_iommu_supports_eim(void)
@@ -94,9 +94,9 @@ index b4432a949029..043cf48cb40b 100644
      update_irte(iommu, iremap_entry, &new_ire, !init && !masked);
      iommu_sync_cache(iremap_entry, sizeof(*iremap_entry));
      iommu_flush_iec_index(iommu, 0, index);
-@@ -448,35 +424,12 @@ void cf_check io_apic_write_remap_rte(
-     struct IO_xAPIC_route_entry new_rte = { .raw = rte };
-     struct IO_xAPIC_route_entry old_rte = { };
+@@ -447,38 +423,15 @@ void cf_check io_apic_write_remap_rte(
+ {
+     struct IO_xAPIC_route_entry old_rte = {}, new_rte;
      struct vtd_iommu *iommu = ioapic_to_iommu(IO_APIC_ID(apic));
 -    bool masked = true;
      int rc;
@@ -116,6 +116,9 @@ index b4432a949029..043cf48cb40b 100644
 -        }
 -    }
 -
+     /* Not the initializer, for old gcc to cope. */
+     new_rte.raw = rte;
+ 
      rc = ioapic_rte_to_remap_entry(iommu, apic, pin, &old_rte, new_rte);
      if ( rc )
 -    {
@@ -127,7 +130,7 @@ index b4432a949029..043cf48cb40b 100644
 -        }
          return;
 -    }
-+    
++
      /* old_rte will contain the updated IO-APIC RTE on success. */
      __ioapic_write_entry(apic, pin, true, old_rte);
  }

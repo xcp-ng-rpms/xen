@@ -7,6 +7,10 @@
 # the Release field if it weren't for the %%{xsrel} automagic.
 %global hv_rel 1
 
+# WTF: for some reason in Alma10 this tries to mangle a non-existing
+# ./tools/qemu-xen/meson/test ... thinking it is named "configure" !?
+%define _lto_cflags ""
+
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
 %{!?package_speccommit: %global package_speccommit ???}

@@ -559,7 +559,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %ifarch aarch64
 # we don't do dom0less
 rm %{buildroot}/%{_libexecdir}/%{name}/bin/init-dom0less
-rm %{buildroot}/%{_libdir}/debug/%{_libexecdir}/%{name}/bin/init-dom0less*.debug
+rm %{buildroot}/usr/lib/debug/%{_libexecdir}/%{name}/bin/init-dom0less*.debug
 %endif
 
 %{__install} -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sysconfig/kernel-xen

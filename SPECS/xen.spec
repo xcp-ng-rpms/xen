@@ -485,7 +485,7 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     [ -n "$1" ] && ver="XEN_VENDORVERSION=$1"
     [ -n "$4" ] && cov="%{?_cov_wrap}"
 
-    mk="$cov %{make_build} -C xen $ver O=$3 CONFIG_XEN_INSTALL_SUFFIX=.gz"
+    mk="$cov %{make_build} -C xen $ver O=$3"
 
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
@@ -533,12 +533,18 @@ cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
 
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
+%ifarch x86_64
     %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
+%else
+    %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
+%endif
     %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
     %{__install} -p -D -m 644 xen/$2/xen-syms   %{buildroot}/boot/xen-syms-%{version}$1
+%ifarch x86_64
     %{__install} -p -D -m 644 xen/$2/xen.efi     %{buildroot}/boot/xen-%{version}$1.efi
     %{__install} -p -D -m 644 xen/$2/xen.efi.map %{buildroot}/boot/xen-%{version}$1.efi.map
+%endif
 }
 install_xen -%{hv_rel}   build-xen-release
 install_xen -%{hv_rel}-d build-xen-debug

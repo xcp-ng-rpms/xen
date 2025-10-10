@@ -1,3 +1,7 @@
+patch wip-no-xenguest-arm.patch
+
+From: Yann Dirson <yann.dirson@vates.tech>
+
 diff --git a/tools/Makefile b/tools/Makefile
 index 4048db6306..9d68f75b9f 100644
 --- a/tools/Makefile

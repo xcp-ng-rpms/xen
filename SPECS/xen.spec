@@ -195,15 +195,18 @@ Patch216:	gvt-g-hvmloader+rombios.patch
 Patch219:	xen-spec-ctrl-utility.patch
 # vTPM support
 Patch222:	vtpm-ppi-acpi-dsm.patch
+# ARM Ampere MtCollins
+Patch225:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch226:	0001-xen-configs-introduce-mtcollins_defconfig.patch
+Patch227:	forge_a_debug_config_for_mtcollins.patch
+Patch228:	patch_wip-no-xenguest-arm.patch
+Patch229:	patch_wip-no-viridian-arm.patch
+Patch230:	patch_workaround-current_text_addr-x86-asm.patch
+Patch231:	revert_xen-gnttab__avoid_tlb_flush_if_grant_mapped_page_was_not_accessed.patch
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 # Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
-Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
-Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
-# Patch1004: wip-no-xenguest-arm.patch
-# Patch1005: wip-no-viridian-arm.patch
-# Patch1006: workaround-current_text_addr-x86-asm.patch
 # Patch1007: workaround-pdx-unused-var.patch
 
 ExclusiveArch: x86_64 aarch64

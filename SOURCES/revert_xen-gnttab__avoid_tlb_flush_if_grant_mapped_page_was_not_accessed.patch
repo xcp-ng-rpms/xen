@@ -1,0 +1,272 @@
+Revert "xen/gnttab: Avoid TLB flush if grant mapped page was not accessed"
+
+From: Yann Dirson <yann.dirson@vates.tech>
+
+This reverts commit 57c50f2631f44450ff3eac70951f67b5e8ca9d1e.
+
+diff --git a/xen/arch/x86/include/asm/grant_table.h b/xen/arch/x86/include/asm/grant_table.h
+index dbb011f972..5c23cec90c 100644
+--- a/xen/arch/x86/include/asm/grant_table.h
++++ b/xen/arch/x86/include/asm/grant_table.h
+@@ -25,11 +25,11 @@ static inline int create_grant_host_mapping(uint64_t addr, mfn_t frame,
+ 
+ static inline int replace_grant_host_mapping(uint64_t addr, mfn_t frame,
+                                              uint64_t new_addr,
+-                                             unsigned int flags, int *page_accessed)
++                                             unsigned int flags)
+ {
+     if ( paging_mode_external(current->domain) )
+         return replace_grant_p2m_mapping(addr, frame, new_addr, flags);
+-    return replace_grant_pv_mapping(addr, frame, new_addr, flags, page_accessed);
++    return replace_grant_pv_mapping(addr, frame, new_addr, flags);
+ }
+ 
+ #define gnttab_set_frame_gfn(gt, st, idx, gfn, mfn)                      \
+diff --git a/xen/arch/x86/include/asm/pv/grant_table.h b/xen/arch/x86/include/asm/pv/grant_table.h
+index 004cd7396c..88f36c6595 100644
+--- a/xen/arch/x86/include/asm/pv/grant_table.h
++++ b/xen/arch/x86/include/asm/pv/grant_table.h
+@@ -15,7 +15,7 @@
+ int create_grant_pv_mapping(uint64_t addr, mfn_t frame,
+                             unsigned int flags, unsigned int cache_flags);
+ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+-                             uint64_t new_addr, unsigned int flags, int *page_accessed);
++                             uint64_t new_addr, unsigned int flags);
+ 
+ #else
+ 
+@@ -29,7 +29,7 @@ static inline int create_grant_pv_mapping(uint64_t addr, mfn_t frame,
+ }
+ 
+ static inline int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+-                                           uint64_t new_addr, unsigned int flags, int *page_accessed)
++                                           uint64_t new_addr, unsigned int flags)
+ {
+     return GNTST_general_error;
+ }
+diff --git a/xen/arch/x86/pv/grant_table.c b/xen/arch/x86/pv/grant_table.c
+index 510b151409..247436a015 100644
+--- a/xen/arch/x86/pv/grant_table.c
++++ b/xen/arch/x86/pv/grant_table.c
+@@ -20,7 +20,7 @@ static unsigned int grant_to_pte_flags(unsigned int grant_flags,
+                                        unsigned int cache_flags)
+ {
+     unsigned int pte_flags =
+-        _PAGE_PRESENT | _PAGE_GNTTAB | _PAGE_NX;
++        _PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_DIRTY | _PAGE_GNTTAB | _PAGE_NX;
+ 
+     if ( grant_flags & GNTMAP_application_map )
+         pte_flags |= _PAGE_USER;
+@@ -186,8 +186,7 @@ static bool steal_linear_address(unsigned long linear, l1_pgentry_t *out)
+  * only when !(flags & GNTMAP_contains_pte).
+  */
+ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+-                             uint64_t new_addr, unsigned int flags,
+-                             int *page_accessed)
++                             uint64_t new_addr, unsigned int flags)
+ {
+     struct vcpu *curr = current;
+     struct domain *currd = curr->domain;
+@@ -288,12 +287,12 @@ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+     }
+ 
+     if ( unlikely((l1e_get_flags(ol1e) ^ grant_pte_flags) &
+-                  ~(_PAGE_AVAIL | PAGE_CACHE_ATTRS | _PAGE_ACCESSED | _PAGE_DIRTY)) )
++                  ~(_PAGE_AVAIL | PAGE_CACHE_ATTRS)) )
+         gdprintk(XENLOG_WARNING,
+                  "PTE flags %x for %"PRIx64" don't match grant (%x)\n",
+                  l1e_get_flags(ol1e), addr, grant_pte_flags);
+ 
+-    if ( _update_intpte(&pl1e->l1, &ol1e.l1, nl1e.l1, gl1mfn, curr, 0, 1) )
++    if ( UPDATE_ENTRY(l1, pl1e, ol1e, nl1e, gl1mfn, curr, 0) )
+     {
+         /*
+          * Generally, replace_grant_pv_mapping() is used to destroy mappings
+@@ -305,17 +304,6 @@ int replace_grant_pv_mapping(uint64_t addr, mfn_t frame,
+          * checking here.
+          */
+         rc = GNTST_okay;
+-
+-        /*
+-         * Calculate a synthetic _PAGE_ACCESSED bit, which controls whether
+-         * the TLB flush is performed or skipped for grant unmap.
+-         *
+-         * It is not safe to skip the TLB flush if:
+-         *  - This is a remap rather than an unmap operation.
+-         *  - The page has actually been accessed by hardware.
+-         */
+-        *page_accessed = (l1e_get_flags(nl1e) & _PAGE_PRESENT ||
+-                          l1e_get_flags(ol1e) & _PAGE_ACCESSED);
+     }
+ 
+  out_unlock:
+diff --git a/xen/arch/x86/pv/mm.h b/xen/arch/x86/pv/mm.h
+index ca6adb8096..4564cab9fc 100644
+--- a/xen/arch/x86/pv/mm.h
++++ b/xen/arch/x86/pv/mm.h
+@@ -66,14 +66,13 @@ static inline intpte_t paging_cmpxchg_guest_entry(
+  * How to write an entry to the guest pagetables.
+  * Returns false for failure (pointer not valid), true for success.
+  */
+-static inline bool _update_intpte(intpte_t *p, intpte_t *old, intpte_t new,
+-                                  mfn_t mfn, struct vcpu *v,
+-                                  bool preserve_ad, bool use_cmpxchg)
++static inline bool update_intpte(intpte_t *p, intpte_t old, intpte_t new,
++                                 mfn_t mfn, struct vcpu *v, bool preserve_ad)
+ {
+     bool rv = true;
+ 
+ #ifndef PTE_UPDATE_WITH_CMPXCHG
+-    if ( !preserve_ad && !use_cmpxchg )
++    if ( !preserve_ad )
+         paging_write_guest_entry(v, p, new, mfn);
+     else
+ #endif
+@@ -83,28 +82,22 @@ static inline bool _update_intpte(intpte_t *p, intpte_t *old, intpte_t new,
+             intpte_t _new = new, t;
+ 
+             if ( preserve_ad )
+-                _new |= *old & (_PAGE_ACCESSED | _PAGE_DIRTY);
++                _new |= old & (_PAGE_ACCESSED | _PAGE_DIRTY);
+ 
+-            t = paging_cmpxchg_guest_entry(v, p, *old, _new, mfn);
++            t = paging_cmpxchg_guest_entry(v, p, old, _new, mfn);
+ 
+-            if ( t == *old )
++            if ( t == old )
+                 break;
+ 
+             /* Allowed to change in Accessed/Dirty flags only. */
+-            BUG_ON((t ^ *old) & ~(intpte_t)(_PAGE_ACCESSED|_PAGE_DIRTY));
++            BUG_ON((t ^ old) & ~(intpte_t)(_PAGE_ACCESSED|_PAGE_DIRTY));
+ 
+-            *old = t;
++            old = t;
+         }
+     }
+     return rv;
+ }
+ 
+-static inline bool update_intpte(intpte_t *p, intpte_t old, intpte_t new,
+-                                 mfn_t mfn, struct vcpu *v, bool preserve_ad)
+-{
+-    return _update_intpte(p, &old, new, mfn, v, preserve_ad, false);
+-}
+-
+ /*
+  * Macro that wraps the appropriate type-changes around update_intpte().
+  * Arguments are: type, ptr, old, new, mfn, vcpu
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index 023910d6b2..d186385991 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -261,7 +261,6 @@ struct gnttab_unmap_common {
+ 
+     /* Return */
+     int16_t status;
+-    int page_accessed;
+ 
+     /* Shared state beteen *_unmap and *_unmap_complete */
+     uint16_t done;
+@@ -270,12 +269,6 @@ struct gnttab_unmap_common {
+     grant_ref_t ref;
+ };
+ 
+-#ifndef NDEBUG
+-atomic_t grant_unmap_tlb_flush_avoided;
+-atomic_t grant_unmap_tlb_flush_done;
+-atomic_t grant_unmap_operations;
+-#endif
+-
+ /* Number of unmap operations that are done between each tlb flush */
+ #define GNTTAB_UNMAP_BATCH_SIZE 32
+ 
+@@ -1339,10 +1332,7 @@ map_grant_ref(
+  undo_out:
+     if ( host_map_created )
+     {
+-        int page_accessed;
+-
+-        replace_grant_host_mapping(op->host_addr, mfn, 0, op->flags,
+-                                   &page_accessed);
++        replace_grant_host_mapping(op->host_addr, mfn, 0, op->flags);
+         gnttab_flush_tlb(ld);
+     }
+ 
+@@ -1411,8 +1401,6 @@ unmap_common(
+     ld = current->domain;
+     lgt = ld->grant_table;
+ 
+-    op->page_accessed = 1;
+-
+     if ( unlikely(op->handle >= lgt->maptrack_limit) )
+     {
+         gdprintk(XENLOG_INFO, "Bad d%d handle %#x\n",
+@@ -1515,7 +1503,7 @@ unmap_common(
+     {
+         if ( (rc = replace_grant_host_mapping(op->host_addr,
+                                               op->mfn, op->new_addr,
+-                                              flags, &op->page_accessed)) < 0 )
++                                              flags)) < 0 )
+             goto act_release_out;
+ 
+         map->flags &= ~GNTMAP_host_map;
+@@ -1692,42 +1680,28 @@ static long
+ gnttab_unmap_grant_ref(
+     XEN_GUEST_HANDLE_PARAM(gnttab_unmap_grant_ref_t) uop, unsigned int count)
+ {
+-    int i, c, partial_done, done = 0, grant_map_accessed = 0;
++    int i, c, partial_done, done = 0;
+     struct gnttab_unmap_grant_ref op;
+     struct gnttab_unmap_common common[GNTTAB_UNMAP_BATCH_SIZE];
+ 
+-#ifndef NDEBUG
+-    atomic_inc(&grant_unmap_operations);
+-#endif
+     while ( count != 0 )
+     {
+         c = min(count, (unsigned int)GNTTAB_UNMAP_BATCH_SIZE);
+         partial_done = 0;
+-        grant_map_accessed = 0;
+ 
+         for ( i = 0; i < c; i++ )
+         {
+             if ( unlikely(__copy_from_guest(&op, uop, 1)) )
+                 goto fault;
+             unmap_grant_ref(&op, &common[i]);
+-            grant_map_accessed |= common[i].page_accessed;
+             ++partial_done;
+             if ( unlikely(__copy_field_to_guest(uop, &op, status)) )
+                 goto fault;
+             guest_handle_add_offset(uop, 1);
+         }
+ 
+-        if ( grant_map_accessed || !is_hardware_domain(current->domain) )
+-        {
+-            gnttab_flush_tlb(current->domain);
+-#ifndef NDEBUG
+-            atomic_inc(&grant_unmap_tlb_flush_done);
+-        }
+-        else
+-        {
+-            atomic_inc(&grant_unmap_tlb_flush_avoided);
+-#endif
+-        }
++        gnttab_flush_tlb(current->domain);
++
+         for ( i = 0; i < partial_done; i++ )
+             unmap_common_complete(&common[i]);
+ 
+@@ -4386,12 +4360,6 @@ static void cf_check gnttab_usage_print_all(unsigned char key)
+ 
+     rcu_read_unlock(&domlist_read_lock);
+ 
+-#ifndef NDEBUG
+-    printk("Grant unmap tlb flush performed %i\n", atomic_read(&grant_unmap_tlb_flush_done));
+-    printk("Grant unmap tlb flush avoided %i\n", atomic_read(&grant_unmap_tlb_flush_avoided));
+-    printk("Grant unmap operations %i\n", atomic_read(&grant_unmap_operations));
+-#endif
+-
+     printk("%s ] done\n", __func__);
+ }
+ 

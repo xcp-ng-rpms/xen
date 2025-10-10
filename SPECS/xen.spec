@@ -1053,7 +1053,9 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/bin/test-resource
 %{_libexecdir}/%{name}/bin/test-tsx
 %{_libexecdir}/%{name}/bin/test-xenstore
+%ifarch x86_64
 %{_libexecdir}/%{name}/bin/test_x86_emulator
+%endif
 %{_datadir}/xen-dom0-tests-metadata.json
 
 %files lp-devel_%{version}_%{release}

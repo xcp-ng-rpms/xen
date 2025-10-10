@@ -44,6 +44,158 @@ Source2: xl.conf
 Source3: logrotate-xen-tools
 Source5: gen_test_metadata.py
 
+# patches from xen.pg:
+# awk '/^([^#]+)(#.*)?/ {printf "Patch%d:\t%s\n", NR, $1}; /^#/ {print}' < .git/patches/patches/series
+
+################################################################################
+# XenServer build system integration
+#
+Patch39:	build-tweaks.patch
+Patch40:	autoconf-libjson.patch
+Patch42:	configure-build.patch
+Patch43:	xenserver-configuration.patch
+Patch44:	coverity-model.patch
+################################################################################
+# Upstream patches
+#
+# Naming scheme: backport-<12 digit SHA>.patch # [*] <UTC TIMESTAMP> - <Commit subject>
+#   A '*' indicates a patch which should be suggested for backport upstream
+# Patches from staging-4.19
+Patch53:	backport-3a9e5a93e6ed.patch
+Patch54:	backport-60573721c5f8.patch
+Patch55:	backport-fbe3ec72dc0d.patch
+Patch56:	backport-c41c22bf8e9f.patch
+Patch57:	backport-0a14438052e6.patch
+Patch58:	backport-816235e311e1.patch
+Patch59:	backport-1b88dc9afcac.patch
+Patch60:	backport-71d626f2f7da.patch
+Patch61:	backport-4abf7f1d6174.patch
+Patch62:	backport-4df28706ad87.patch
+Patch63:	backport-49c3324f3737.patch
+Patch64:	backport-457b9e11fa13.patch
+Patch65:	backport-ebc8b4a4508a.patch
+Patch66:	backport-46e3e9d73983.patch
+Patch67:	backport-e801a86d5eb2.patch
+Patch68:	backport-30aadc8dbc9a.patch
+Patch69:	backport-eae35da8f4c4.patch
+Patch70:	backport-93302bb88855.patch
+# Patches from staging, 4.20 dev cycle
+Patch73:	backport-b25b28ede1cb.patch
+Patch74:	backport-cc47813c4a2c.patch
+Patch75:	backport-5246924acf79.patch
+Patch76:	backport-8d336fcb6ea6.patch
+Patch77:	backport-3a28da8f4daf.patch
+Patch78:	backport-a184ac74f5e0.patch
+Patch79:	backport-dcbf8210f3f3.patch
+Patch80:	backport-2f413e22fa5e.patch
+Patch81:	backport-848b6bc8c9f3.patch
+Patch82:	backport-3fc44151d83d.patch
+Patch83:	backport-a2bbb140be9d.patch
+Patch84:	backport-446a90345c89.patch
+################################################################################
+# Patches for upstream
+#
+# vPIT servies v1
+Patch91:	0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch93:	quirk-hp-gen8-rmrr.patch
+Patch94:	quirk-pci-phantom-function-devices.patch
+# Hpet improvements v5
+Patch97:	0001-x86-hpet-Pre-cleanup.patch
+Patch98:	0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+Patch99:	0003-x86-hpet-Post-cleanup.patch
+Patch101:	0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+# Grant perf improvements
+Patch104:	avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+# Further MB2/EFI fixes
+Patch107:	0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch108:	0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch110:	0001-x86-HVM-Avoid-cache-flush-operations-during-hvm_load.patch
+Patch111:	0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch113:	livepatch-ignore-duplicate-new.patch
+# Reduce use of __LINE__
+Patch116:	0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch117:	0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+# btrfs support for PV guests
+Patch120:	pygrub-Ignore-GRUB2-if-statements.patch
+Patch121:	libfsimage-Add-support-for-btrfs.patch
+Patch123:	quiet-broke-irq-affinity.patch
+# AVX-512
+Patch126:	xen-hide-AVX512-on-SKX-by-default.patch
+# memory scrubbing
+Patch129:	0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+# Reduce PCI config reads
+Patch132:	vpci-drop-const.patch
+Patch133:	pci-cache-memory-decode-bit.patch
+Patch134:	pci-cache-msi-x-enabled-bit.patch
+################################################################################
+# Un-upstreamable patches
+#
+Patch139:	xen-tweak-cmdline-defaults.patch
+Patch140:	xen-tweak-debug-overhead.patch
+Patch141:	tweak-iommu-policy.patch
+Patch142:	tweak-sc-policy.patch
+Patch143:	disable-core-parking.patch
+Patch144:	remove-info-leak.patch
+Patch146:	0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch148:	0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+# This will need to use Flask, when Flask is suitably ready
+Patch151:	hitachi-driver-domain-ssid.patch
+# Adds install/uninstall targets for test_x86_emulator
+Patch154:	install_targets_for_test_x86_emulator.patch
+################################################################################
+# Technical debt
+#
+# xen debt
+Patch161:	xen-define-offsets-for-kdump.patch
+Patch162:	xen-scheduler-auto-privdom-weight.patch
+Patch163:	xen-hvm-disable-tsc-ramping.patch
+Patch164:	xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch165:	i8259-timers-pick-online-vcpu.patch
+# libxc debt
+Patch168:	revert-ca2eee92df44.patch
+Patch169:	libxc-cpuid-cores_per_socket.patch
+Patch170:	libxc-cpu-clear-deps.patch
+Patch171:	libxc-cpu-policies.patch
+Patch172:	max-featureset-compat.patch
+# pygrub debt
+Patch175:	pygrub-add-disk-as-extra-group.patch
+Patch176:	pygrub-add-default-and-extra-args.patch
+Patch177:	pygrub-always-boot-default.patch
+Patch178:	pygrub-friendly-no-fs.patch
+Patch179:	pygrub-default-xenmobile-kernel.patch
+Patch180:	pygrub-blacklist-support.patch
+# BIOS debt
+Patch183:	oem-bios-xensource.patch
+# misc debt
+Patch186:	misc-log-guest-consoles.patch
+# mixed between components
+Patch189:	mixed-domain-runstates.patch
+Patch190:	xenguest.patch
+Patch191:	xen-vmdebug.patch
+Patch193:	oxenstore-censor-sensitive-data.patch
+Patch194:	oxenstore-large-packets.patch
+# vGPU
+Patch197:	nvidia-vga.patch
+# workspace pod debt
+Patch200:	hvmloader-disable-pci-option-rom-loading.patch
+# Nested virt tweaking knobs
+Patch203:	xen-force-software-vmcs-shadow.patch
+Patch204:	0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch205:	use-msr-ll-instead-of-vmcs-efer.patch
+Patch207:	revert-4a7e71aa0851-partial.patch
+Patch208:	add-pv-iommu-headers.patch
+Patch209:	add-pv-iommu-local-domain-ops.patch
+Patch210:	add-pv-iommu-foreign-support.patch
+Patch211:	upstream-pv-iommu-tools.patch
+Patch212:	Add-PV-IOMMU-elf-note.patch
+# Intel GVT-g debt
+Patch215:	allow-rombios-pci-config-on-any-host-bridge.patch
+Patch216:	gvt-g-hvmloader+rombios.patch
+# Live microcode loading additions
+Patch219:	xen-spec-ctrl-utility.patch
+# vTPM support
+Patch222:	vtpm-ppi-acpi-dsm.patch
+
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 # Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch

@@ -789,8 +789,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 %exclude %{_sysconfdir}/%{name}/xlexample.pvlinux
 %config %{_sysconfdir}/xen/xl.conf
 %{_bindir}/vchan-socket-proxy
+%ifarch x86_64
 %{_bindir}/xen-cpuid
 %{_bindir}/xen-detect
+%endif
 %{_bindir}/xenalyze
 %{_bindir}/xencov_split
 
@@ -815,20 +817,22 @@ install_xen -%{hv_rel}-d build-xen-debug
 %endif
 
 %{_libexecdir}/%{name}/bin/convert-legacy-stream
+%ifarch x86_64
 %{_libexecdir}/%{name}/bin/init-xenstore-domain
-%{_libexecdir}/%{name}/bin/libxl-save-helper
 %{_libexecdir}/%{name}/bin/lsevtchn
-%{_libexecdir}/%{name}/bin/pygrub
 %{_libexecdir}/%{name}/bin/readnotes
+%{_libexecdir}/%{name}/bin/xenguest
+%{_libexecdir}/%{name}/bin/xenpaging
+%{_libexecdir}/%{name}/boot/hvmloader
+%endif
+%{_libexecdir}/%{name}/bin/libxl-save-helper
+%{_libexecdir}/%{name}/bin/pygrub
 %{_libexecdir}/%{name}/bin/verify-stream-v2
 %{_libexecdir}/%{name}/bin/xen-9pfsd
 %{_libexecdir}/%{name}/bin/xen-init-dom0
 %{_libexecdir}/%{name}/bin/xenconsole
 %{_libexecdir}/%{name}/bin/xenctx
 %{_libexecdir}/%{name}/bin/xendomains
-%{_libexecdir}/%{name}/bin/xenguest
-%{_libexecdir}/%{name}/bin/xenpaging
-%{_libexecdir}/%{name}/boot/hvmloader
 %{_libexecdir}/%{name}/boot/xen-shim
 %{_sbindir}/flask-get-bool
 %{_sbindir}/flask-getenforce
@@ -836,23 +840,25 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_sbindir}/flask-loadpolicy
 %{_sbindir}/flask-set-bool
 %{_sbindir}/flask-setenforce
-%{_sbindir}/gdbsx
 %{_sbindir}/oxenstored
 %{_sbindir}/xen-access
 %{_sbindir}/xen-diag
+%ifarch x86_64
+%{_sbindir}/gdbsx
 %{_sbindir}/xen-hptool
 %{_sbindir}/xen-hvmcrash
 %{_sbindir}/xen-hvmctx
 %{_sbindir}/xen-kdd
-%{_sbindir}/xen-livepatch
 %{_sbindir}/xen-lowmemd
 %{_sbindir}/xen-mceinj
 %{_sbindir}/xen-memshare
 %{_sbindir}/xen-mfndump
 %{_sbindir}/xen-spec-ctrl
 %{_sbindir}/xen-ucode
-%{_sbindir}/xen-vmdebug
 %{_sbindir}/xen-vmtrace
+%endif
+%{_sbindir}/xen-livepatch
+%{_sbindir}/xen-vmdebug
 %{_sbindir}/xenbaked
 %{_sbindir}/xenconsoled
 %{_sbindir}/xencov

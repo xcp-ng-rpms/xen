@@ -436,6 +436,8 @@ export XEN_TARGET_ARCH=%{_arch}
 %endif
 export PYTHON="%{__python}"
 
+export CONFIG_XEN_INSTALL_SUFFIX=.gz
+
 %ifarch x86_64
 ARCHOPTS=" \
            --enable-rombios \
@@ -511,6 +513,8 @@ export XEN_TARGET_ARCH=arm64
 export XEN_TARGET_ARCH=%{_arch}
 %endif
 export PYTHON="%{__python}"
+
+export CONFIG_XEN_INSTALL_SUFFIX=.gz
 
 # The existence of this directory causes ocamlfind to put things in it
 mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs

@@ -324,6 +324,10 @@ Patch277: vtpm-ppi-acpi-dsm.patch
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
 
+# ARM xenctrl stubs - are only needed as a dependency of xapi, not necessarily
+# during the hypervisor build itself
+Patch1002: 0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

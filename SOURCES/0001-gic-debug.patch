@@ -1,0 +1,28 @@
+From c89ea22edbd9a616cd36d71ce57501dbaa0c23ff Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Tue, 21 Oct 2025 14:01:09 +0100
+Subject: [PATCH] gic debug
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ xen/arch/arm/gic-v3.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/xen/arch/arm/gic-v3.c b/xen/arch/arm/gic-v3.c
+index cd3e1acf79..b46036e4dc 100644
+--- a/xen/arch/arm/gic-v3.c
++++ b/xen/arch/arm/gic-v3.c
+@@ -1592,9 +1592,13 @@ gic_acpi_parse_madt_cpu(struct acpi_subtable_header *header,
+     struct acpi_madt_generic_interrupt *processor =
+                container_of(header, struct acpi_madt_generic_interrupt, header);
+ 
++    printk("%s: 1\n", __func__);
++
+     if ( BAD_MADT_GICC_ENTRY(processor, end) )
+         return -EINVAL;
+ 
++    printk("%s: 1\n", __func__);
++
+     /* Read from APIC table and fill up the GIC variables */
+     if ( !cpu_base_assigned )
+     {

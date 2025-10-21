@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.2%{?dist}
+Release: %{?xsrel}.0.ydi.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -1139,9 +1139,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.2
+* Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.3
 - Merge former xcpng-8.3 and ydi/9 work
 - ARM boot debug traces
+- Change early-uart address to the AmpereOne one
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

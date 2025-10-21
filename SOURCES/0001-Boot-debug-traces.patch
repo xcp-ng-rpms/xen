@@ -48,7 +48,7 @@ index 3ac6cd522b..e9fe24069c 100644
      /*
       * The Dom0 kernel can be loaded from the configuration file or by the
       * device tree through the efi_check_dt_boot function, in this stage
-@@ -1520,30 +1528,52 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
+@@ -1520,28 +1528,48 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
           (status = shim_lock->Verify(kernel.ptr, kernel.size)) != EFI_SUCCESS )
          PrintErrMesg(L"Dom0 kernel image could not be verified", status);
  
@@ -96,11 +96,7 @@ index 3ac6cd522b..e9fe24069c 100644
 +
      efi_exit_boot(ImageHandle, SystemTable);
  
-+    PrintStr(L"14\r\n");
-+
      efi_arch_post_exit_boot(); /* Doesn't return. */
- }
- 
 -- 
 2.47.3
 

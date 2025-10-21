@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.1%{?dist}
+Release: %{?xsrel}.0.ydi.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -204,6 +204,7 @@ Patch229:	patch_wip-no-xenguest-arm.patch
 Patch230:	patch_wip-no-viridian-arm.patch
 Patch231:	patch_workaround-current_text_addr-x86-asm.patch
 Patch232:	arm-build.patch
+Patch233:       0001-Boot-debug-traces.patch
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
@@ -1138,8 +1139,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.1
+* Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.2
 - Merge former xcpng-8.3 and ydi/9 work
+- ARM boot debug traces
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

@@ -1,0 +1,106 @@
+From 0606a0ae51325b37fbcfbcb61dcdc6a8ecc5f2da Mon Sep 17 00:00:00 2001
+Message-ID: <0606a0ae51325b37fbcfbcb61dcdc6a8ecc5f2da.1761036555.git.yann.dirson@vates.tech>
+From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+Date: Tue, 21 Oct 2025 10:47:58 +0200
+Subject: [XEN PATCH] Boot debug traces
+To: xen-devel@lists.xenproject.org
+
+---
+ xen/common/efi/boot.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
+index 3ac6cd522b..e9fe24069c 100644
+--- a/xen/common/efi/boot.c
++++ b/xen/common/efi/boot.c
+@@ -1362,12 +1362,16 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
+ 
+     efi_arch_relocate_image(0);
+ 
++    PrintStr(L"0\r\n");
++
+     if ( use_cfg_file )
+     {
+         EFI_FILE_HANDLE dir_handle;
+         EFI_HANDLE gop_handle;
+         UINTN depth, cols, rows;
+ 
++        PrintStr(L"1\r\n");
++
+         cols = rows = depth = 0;
+ 
+         if ( StdOut->QueryMode(StdOut, StdOut->Mode->Mode,
+@@ -1498,6 +1502,8 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
+         }
+     }
+ 
++    PrintStr(L"2\r\n");
++
+     /* Get the number of boot modules specified on the DT or an error (<0) */
+     dt_modules_found = efi_check_dt_boot(loaded_image);
+ 
+@@ -1509,6 +1515,8 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
+     if ( !dt_modules_found && !kernel.ptr )
+         blexit(L"No initial domain kernel specified.");
+ 
++    PrintStr(L"3\r\n");
++
+     /*
+      * The Dom0 kernel can be loaded from the configuration file or by the
+      * device tree through the efi_check_dt_boot function, in this stage
+@@ -1520,30 +1528,52 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
+          (status = shim_lock->Verify(kernel.ptr, kernel.size)) != EFI_SUCCESS )
+         PrintErrMesg(L"Dom0 kernel image could not be verified", status);
+ 
++    PrintStr(L"4\r\n");
++
+     efi_arch_edd();
+ 
++    PrintStr(L"5\r\n");
++
+     efi_arch_cpu();
+ 
++    PrintStr(L"6\r\n");
++
+     efi_tables();
+ 
++    PrintStr(L"7\r\n");
++
+     /* Collect PCI ROM contents. */
+     setup_efi_pci();
+ 
++    PrintStr(L"8\r\n");
++
+     /* Get snapshot of variable store parameters. */
+     efi_variables();
+ 
++    PrintStr(L"9\r\n");
++
+     /* Collect Apple device properties, if any. */
+     efi_get_apple_properties();
+ 
++    PrintStr(L"10\r\n");
++
+     efi_arch_memory_setup();
+ 
++    PrintStr(L"11\r\n");
++
+     if ( gop )
+         efi_set_gop_mode(gop, gop_mode);
+ 
++    PrintStr(L"12\r\n");
++
+     efi_relocate_esrt(SystemTable);
+ 
++    PrintStr(L"13\r\n");
++
+     efi_exit_boot(ImageHandle, SystemTable);
+ 
++    PrintStr(L"14\r\n");
++
+     efi_arch_post_exit_boot(); /* Doesn't return. */
+ }
+ 
+-- 
+2.47.3
+

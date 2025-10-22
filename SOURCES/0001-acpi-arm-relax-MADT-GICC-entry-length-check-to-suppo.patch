@@ -1,0 +1,74 @@
+From 7236cd0adc9eee980e63846615975027b3a901fb Mon Sep 17 00:00:00 2001
+From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+Date: Wed, 22 Oct 2025 11:07:17 +0200
+Subject: [PATCH] acpi/arm: relax MADT GICC entry length check to support newer
+ ACPI revisions
+
+Newer ACPI revisions define the MADT GICC entry with Length = 82 bytes [1].
+The current BAD_MADT_GICC_ENTRY() check rejects entries whose length does not
+match the known values, which leads to:
+  GICv3: No valid GICC entries exist.
+as observed on the AmpereOne platform.
+
+To fix this, import the logic from import from Linux commit 9eb1c92:
+  The BAD_MADT_GICC_ENTRY check is a little too strict because
+  it rejects MADT entries that don't match the currently known
+  lengths. We should remove this restriction to avoid problems
+  if the table length changes. Future code which might depend on
+  additional fields should be written to validate those fields
+  before using them, rather than trying to globally check
+  known MADT version lengths.
+
+  Link: https://lkml.kernel.org/r/20181012192937.3819951-1-jeremy.linton@arm.com
+  Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+  [lorenzo.pieralisi@arm.com: added MADT macro comments]
+  Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+  Acked-by: Sudeep Holla <sudeep.holla@arm.com>
+  Cc: Will Deacon <will.deacon@arm.com>
+  Cc: Catalin Marinas <catalin.marinas@arm.com>
+  Cc: Al Stone <ahs3@redhat.com>
+  Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+  Signed-off-by: Will Deacon <will.deacon@arm.com>
+
+[1] https://uefi.org/specs/ACPI/6.6/05_ACPI_Software_Programming_Model.html#gic-cpu-interface-gicc-structure
+
+Reported-By: Yann Dirson <yann.dirson@vates.tech>
+Co-developed-by: Yann Sionneau <yann.sionneau@vates.tech>
+Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+---
+ xen/arch/arm/include/asm/acpi.h | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/xen/arch/arm/include/asm/acpi.h b/xen/arch/arm/include/asm/acpi.h
+index 13756dd341..a626de3aec 100644
+--- a/xen/arch/arm/include/asm/acpi.h
++++ b/xen/arch/arm/include/asm/acpi.h
+@@ -57,9 +57,22 @@ paddr_t acpi_get_table_offset(struct membank tbl_add[], EFI_MEM_RES index);
+ #define ACPI_MADT_GICC_LENGTH	\
+     (acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
+ 
+-#define BAD_MADT_GICC_ENTRY(entry, end)						\
+-    (!(entry) || (unsigned long)(entry) + sizeof(*(entry)) > (end) ||	\
+-     (entry)->header.length != ACPI_MADT_GICC_LENGTH)
++/*
++ * MADT GICC minimum length refers to the MADT GICC structure table length as
++ * defined in the earliest ACPI version supported on arm64, ie ACPI 5.1.
++ *
++ * The efficiency_class member was added to the
++ * struct acpi_madt_generic_interrupt to represent the MADT GICC structure
++ * "Processor Power Efficiency Class" field, added in ACPI 6.0 whose offset
++ * is therefore used to delimit the MADT GICC structure minimum length
++ * appropriately.
++ */
++#define ACPI_MADT_GICC_MIN_LENGTH   ACPI_OFFSET( \
++    struct acpi_madt_generic_interrupt, efficiency_class)
++
++#define BAD_MADT_GICC_ENTRY(entry, end) \
++    (!(entry) || (entry)->header.length < ACPI_MADT_GICC_MIN_LENGTH || \
++    (unsigned long)(entry) + (entry)->header.length > (end))
+ 
+ #ifdef CONFIG_ACPI
+ extern bool acpi_disabled;
+-- 
+2.43.0
+

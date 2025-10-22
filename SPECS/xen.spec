@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.6%{?dist}
+Release: %{?xsrel}.0.ydi.9%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -207,6 +207,7 @@ Patch232:	arm-build.patch
 Patch233:       0001-Boot-debug-traces.patch
 Patch234:       0001-git-diff.patch
 Patch235:       0001-gic-debug.patch
+Patch236:	0001-acpi-arm-relax-MADT-GICC-entry-length-check-to-suppo.patch
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
@@ -1147,6 +1148,7 @@ fi
 - Change early-uart address to the AmpereOne one
 - ACPI boot debug traces
 - GIV debug traces
+- Fix GICC MADT acpi entry length checking
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

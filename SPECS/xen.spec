@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -326,6 +326,9 @@ Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
 
 Patch1002: xsa475-1.patch
 Patch1003: xsa475-2.patch
+
+# SMBIOS 2.6 patches
+Patch1004: 0001-hvmloader-Update-to-SMBIOS-2.6.patch
 
 ExclusiveArch: x86_64
 
@@ -1173,6 +1176,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Oct 27 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.3
+- Update SMBIOS version to 2.6 and fix UUID endianness issues.
+
 * Tue Oct 21 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.2
 - Fixes for XSA-475 CVE-2025-58147 CVE-2025-58148
 

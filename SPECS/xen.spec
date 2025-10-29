@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.14%{?dist}
+Release: %{?xsrel}.0.ydi.15%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -209,6 +209,7 @@ Patch234:       0001-git-diff.patch
 Patch235:       0001-gic-debug.patch
 Patch236:	0001-acpi-arm-relax-MADT-GICC-entry-length-check-to-suppo.patch
 Patch237:	0001-Add-debug-traces-to-DOM0-loading.patch
+Patch238:       0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch

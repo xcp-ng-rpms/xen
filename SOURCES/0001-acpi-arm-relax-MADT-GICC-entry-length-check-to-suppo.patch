@@ -35,15 +35,13 @@ To fix this, import the logic from import from Linux commit 9eb1c92:
 Reported-By: Yann Dirson <yann.dirson@vates.tech>
 Co-developed-by: Yann Sionneau <yann.sionneau@vates.tech>
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- xen/arch/arm/include/asm/acpi.h | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
-
 diff --git a/xen/arch/arm/include/asm/acpi.h b/xen/arch/arm/include/asm/acpi.h
-index 13756dd341..a626de3aec 100644
+index 13756dd341..a99c1095cd 100644
 --- a/xen/arch/arm/include/asm/acpi.h
 +++ b/xen/arch/arm/include/asm/acpi.h
-@@ -57,9 +57,22 @@ paddr_t acpi_get_table_offset(struct membank tbl_add[], EFI_MEM_RES index);
+@@ -55,11 +55,24 @@ paddr_t acpi_get_table_offset(struct membank tbl_add[], EFI_MEM_RES index);
+ 
+ /* Macros for consistency checks of the GICC subtable of MADT */
  #define ACPI_MADT_GICC_LENGTH	\
 -    (acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
 +    (82)
@@ -70,6 +68,3 @@ index 13756dd341..a626de3aec 100644
  
  #ifdef CONFIG_ACPI
  extern bool acpi_disabled;
--- 
-2.43.0
-

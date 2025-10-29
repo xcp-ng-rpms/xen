@@ -5,7 +5,7 @@ Subject: [PATCH] common/page_alloc: don't idle scrub before microcode update
 
 Signed-off-by: Sergey Dyasli <sergey.dyasli@citrix.com>
 diff --git a/xen/arch/x86/setup.c b/xen/arch/x86/setup.c
-index 979aec26b4de..d7c499d03554 100644
+index 979aec26b4..d7c499d035 100644
 --- a/xen/arch/x86/setup.c
 +++ b/xen/arch/x86/setup.c
 @@ -2006,6 +2006,10 @@ void asmlinkage __init noreturn __start_xen(unsigned long mbi_p)
@@ -20,7 +20,7 @@ index 979aec26b4de..d7c499d03554 100644
      if ( num_parked )
          printk(XENLOG_INFO "Parked %u CPUs\n", num_parked);
 diff --git a/xen/common/page_alloc.c b/xen/common/page_alloc.c
-index 054b7edb3989..57329d0eb51e 100644
+index 054b7edb39..57329d0eb5 100644
 --- a/xen/common/page_alloc.c
 +++ b/xen/common/page_alloc.c
 @@ -1288,6 +1288,13 @@ bool scrub_free_pages(void)
@@ -38,7 +38,7 @@ index 054b7edb3989..57329d0eb51e 100644
      if ( node == NUMA_NO_NODE )
          return false;
 diff --git a/xen/include/xen/kernel.h b/xen/include/xen/kernel.h
-index f5b93a861dcd..1a3db7d85c9d 100644
+index bc2440b5f9..b0a7e6ddf0 100644
 --- a/xen/include/xen/kernel.h
 +++ b/xen/include/xen/kernel.h
 @@ -118,6 +118,7 @@ extern enum system_state {

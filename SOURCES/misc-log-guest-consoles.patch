@@ -15,7 +15,7 @@ Date:   Tue Jul 2 18:47:25 2013 +0100
     functionality upstream.
 
 diff --git a/docs/misc/xenstore-paths.pandoc b/docs/misc/xenstore-paths.pandoc
-index a604f6b1c69c..ee696e2b5df5 100644
+index a604f6b1c6..ee696e2b5d 100644
 --- a/docs/misc/xenstore-paths.pandoc
 +++ b/docs/misc/xenstore-paths.pandoc
 @@ -611,6 +611,21 @@ The time which the guest was started in SECONDS.MICROSECONDS format
@@ -41,7 +41,7 @@ index a604f6b1c69c..ee696e2b5df5 100644
  
  ### libxl Specific Paths
 diff --git a/tools/console/daemon/io.c b/tools/console/daemon/io.c
-index bb739bdb8c89..f4e366ade04f 100644
+index bb739bdb8c..f4e366ade0 100644
 --- a/tools/console/daemon/io.c
 +++ b/tools/console/daemon/io.c
 @@ -145,8 +145,12 @@ struct domain {
@@ -189,7 +189,7 @@ index bb739bdb8c89..f4e366ade04f 100644
   * Local variables:
   *  mode: C
 diff --git a/tools/console/daemon/io.h b/tools/console/daemon/io.h
-index d016addac896..b31a9bc2be7d 100644
+index d016addac8..b31a9bc2be 100644
 --- a/tools/console/daemon/io.h
 +++ b/tools/console/daemon/io.h
 @@ -21,5 +21,6 @@
@@ -200,7 +200,7 @@ index d016addac896..b31a9bc2be7d 100644
  
  #endif
 diff --git a/tools/console/daemon/main.c b/tools/console/daemon/main.c
-index aac7233a48c9..28165d61dfcd 100644
+index aac7233a48..28165d61df 100644
 --- a/tools/console/daemon/main.c
 +++ b/tools/console/daemon/main.c
 @@ -204,6 +204,8 @@ int main(int argc, char **argv)

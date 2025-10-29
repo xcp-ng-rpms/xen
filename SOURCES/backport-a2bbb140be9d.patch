@@ -15,10 +15,10 @@ Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Release-Acked-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
 
 diff --git a/xen/drivers/passthrough/vtd/iommu.c b/xen/drivers/passthrough/vtd/iommu.c
-index b0963bfcf74e..9d7a9977a6a6 100644
+index 2b13bfb41e..45ac0f832a 100644
 --- a/xen/drivers/passthrough/vtd/iommu.c
 +++ b/xen/drivers/passthrough/vtd/iommu.c
-@@ -1695,15 +1695,9 @@ static int domain_context_mapping(struct domain *domain, u8 devfn,
+@@ -1692,15 +1692,9 @@ static int domain_context_mapping(struct domain *domain, u8 devfn,
          break;
      }
  
@@ -38,7 +38,7 @@ index b0963bfcf74e..9d7a9977a6a6 100644
      switch ( pdev->type )
      {
 diff --git a/xen/drivers/passthrough/vtd/vtd.h b/xen/drivers/passthrough/vtd/vtd.h
-index 8aeff8c1f287..b95124517bd3 100644
+index cb2df76eed..43f06a353d 100644
 --- a/xen/drivers/passthrough/vtd/vtd.h
 +++ b/xen/drivers/passthrough/vtd/vtd.h
 @@ -28,9 +28,8 @@

@@ -6,7 +6,7 @@ Factor clear_deep_deps() out of xc_cpuid_apply_policy() so it can be reused.
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 
 diff --git a/tools/libs/guest/xg_cpuid_x86.c b/tools/libs/guest/xg_cpuid_x86.c
-index 83cbaedad1c9..d30b3a85d9eb 100644
+index 83cbaedad1..d30b3a85d9 100644
 --- a/tools/libs/guest/xg_cpuid_x86.c
 +++ b/tools/libs/guest/xg_cpuid_x86.c
 @@ -36,6 +36,41 @@ enum {

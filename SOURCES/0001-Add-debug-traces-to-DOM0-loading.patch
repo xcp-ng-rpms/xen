@@ -4,10 +4,6 @@ Date: Wed, 22 Oct 2025 14:36:28 +0200
 Subject: [PATCH] Add debug traces to DOM0 loading
 
 Signed-off-by: Yann Sionneau <yann.sionneau@vates.tech>
----
- xen/arch/arm/kernel.c | 49 +++++++++++++++++++++++++++++++++++--------
- 1 file changed, 40 insertions(+), 9 deletions(-)
-
 diff --git a/xen/arch/arm/kernel.c b/xen/arch/arm/kernel.c
 index 674388fa11..adc29668e3 100644
 --- a/xen/arch/arm/kernel.c
@@ -125,6 +121,3 @@ index 674388fa11..adc29668e3 100644
      return rc;
  }
  
--- 
-2.43.0
-

@@ -3,7 +3,7 @@ Permit overly large xenbus packets
 This reverts XSA-420
 
 diff --git a/tools/ocaml/libs/xb/partial.ml b/tools/ocaml/libs/xb/partial.ml
-index 0e6532807d19..84517bfe0d75 100644
+index 0e6532807d..84517bfe0d 100644
 --- a/tools/ocaml/libs/xb/partial.ml
 +++ b/tools/ocaml/libs/xb/partial.ml
 @@ -27,6 +27,8 @@ external header_size: unit -> int = "stub_header_size"
@@ -36,7 +36,7 @@ index 0e6532807d19..84517bfe0d75 100644
  let to_complete pkt =
    pkt.len - (Buffer.length pkt.buf)
 diff --git a/tools/ocaml/libs/xb/partial.mli b/tools/ocaml/libs/xb/partial.mli
-index b9216018f517..26f7cc3cb18e 100644
+index b9216018f5..26f7cc3cb1 100644
 --- a/tools/ocaml/libs/xb/partial.mli
 +++ b/tools/ocaml/libs/xb/partial.mli
 @@ -8,6 +8,7 @@ type pkt = {
@@ -48,7 +48,7 @@ index b9216018f517..26f7cc3cb18e 100644
  val xenstore_rel_path_max : int
  val of_string : string -> pkt
 diff --git a/tools/ocaml/xenstored/xenstored.ml b/tools/ocaml/xenstored/xenstored.ml
-index 1aaa3e995e1f..e43e74661059 100644
+index 84dee622ea..666c6ffcde 100644
 --- a/tools/ocaml/xenstored/xenstored.ml
 +++ b/tools/ocaml/xenstored/xenstored.ml
 @@ -358,6 +358,9 @@ let tweak_gc () =

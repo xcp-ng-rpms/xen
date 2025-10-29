@@ -7,7 +7,7 @@ No functional change.
 
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/tools/tests/vpci/emul.h b/tools/tests/vpci/emul.h
-index da446bba86b4..8447c09995bb 100644
+index da446bba86..8447c09995 100644
 --- a/tools/tests/vpci/emul.h
 +++ b/tools/tests/vpci/emul.h
 @@ -53,7 +53,7 @@ struct vcpu
@@ -20,7 +20,7 @@ index da446bba86b4..8447c09995bb 100644
  typedef bool spinlock_t;
  #define spin_lock_init(l) (*(l) = false)
 diff --git a/tools/tests/vpci/main.c b/tools/tests/vpci/main.c
-index 33223db3eb77..fedded31613f 100644
+index 33223db3eb..fedded3161 100644
 --- a/tools/tests/vpci/main.c
 +++ b/tools/tests/vpci/main.c
 @@ -23,7 +23,7 @@ static struct vpci vpci;
@@ -69,10 +69,10 @@ index 33223db3eb77..fedded31613f 100644
  {
      struct mask_data *md = data;
 diff --git a/xen/drivers/vpci/header.c b/xen/drivers/vpci/header.c
-index ef6c965c081c..68711e82212c 100644
+index 1f48f2aac6..7c8e5dc833 100644
 --- a/xen/drivers/vpci/header.c
 +++ b/xen/drivers/vpci/header.c
-@@ -520,7 +520,7 @@ static int modify_bars(const struct pci_dev *pdev, uint16_t cmd, bool rom_only)
+@@ -529,7 +529,7 @@ static int modify_bars(const struct pci_dev *pdev, uint16_t cmd, bool rom_only)
  }
  
  static void cf_check cmd_write(
@@ -81,7 +81,7 @@ index ef6c965c081c..68711e82212c 100644
  {
      struct vpci_header *header = data;
  
-@@ -561,7 +561,7 @@ static uint32_t cf_check guest_cmd_read(
+@@ -570,7 +570,7 @@ static uint32_t cf_check guest_cmd_read(
  }
  
  static void cf_check bar_write(
@@ -90,7 +90,7 @@ index ef6c965c081c..68711e82212c 100644
  {
      struct vpci_bar *bar = data;
      bool hi = false;
-@@ -612,7 +612,7 @@ static void cf_check bar_write(
+@@ -621,7 +621,7 @@ static void cf_check bar_write(
      pci_conf_write32(pdev->sbdf, reg, val);
  }
  
@@ -99,7 +99,7 @@ index ef6c965c081c..68711e82212c 100644
                                           unsigned int reg, uint32_t val,
                                           void *data)
  {
-@@ -676,7 +676,7 @@ static uint32_t cf_check guest_mem_bar_read(const struct pci_dev *pdev,
+@@ -685,7 +685,7 @@ static uint32_t cf_check guest_mem_bar_read(const struct pci_dev *pdev,
  }
  
  static void cf_check rom_write(
@@ -109,7 +109,7 @@ index ef6c965c081c..68711e82212c 100644
      struct vpci_header *header = &pdev->vpci->header;
      struct vpci_bar *rom = data;
 diff --git a/xen/drivers/vpci/msi.c b/xen/drivers/vpci/msi.c
-index dd6620ec5674..8363c5597258 100644
+index dd6620ec56..8363c55972 100644
 --- a/xen/drivers/vpci/msi.c
 +++ b/xen/drivers/vpci/msi.c
 @@ -35,7 +35,7 @@ static uint32_t cf_check control_read(
@@ -158,7 +158,7 @@ index dd6620ec5674..8363c5597258 100644
      struct vpci_msi *msi = data;
      uint32_t dmask = msi->mask ^ val;
 diff --git a/xen/drivers/vpci/msix.c b/xen/drivers/vpci/msix.c
-index fbe710ab92ef..89d88aa0a065 100644
+index fbe710ab92..89d88aa0a0 100644
 --- a/xen/drivers/vpci/msix.c
 +++ b/xen/drivers/vpci/msix.c
 @@ -71,7 +71,7 @@ static void update_entry(struct vpci_msix_entry *entry,
@@ -171,7 +171,7 @@ index fbe710ab92ef..89d88aa0a065 100644
      struct vpci_msix *msix = data;
      bool new_masked = val & PCI_MSIX_FLAGS_MASKALL;
 diff --git a/xen/drivers/vpci/vpci.c b/xen/drivers/vpci/vpci.c
-index 1e6aa5d799b9..e5cf7b1feb3a 100644
+index 1e6aa5d799..e5cf7b1feb 100644
 --- a/xen/drivers/vpci/vpci.c
 +++ b/xen/drivers/vpci/vpci.c
 @@ -198,7 +198,7 @@ static uint32_t cf_check vpci_ignored_read(
@@ -211,7 +211,7 @@ index 1e6aa5d799b9..e5cf7b1feb3a 100644
      unsigned int data_offset = 0;
  
 diff --git a/xen/include/xen/vpci.h b/xen/include/xen/vpci.h
-index da8d0f41e6f4..8f3d89833602 100644
+index da8d0f41e6..8f3d898336 100644
 --- a/xen/include/xen/vpci.h
 +++ b/xen/include/xen/vpci.h
 @@ -10,7 +10,7 @@

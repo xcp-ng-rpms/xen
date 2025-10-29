@@ -4,10 +4,6 @@ Date: Tue, 21 Oct 2025 14:01:09 +0100
 Subject: [PATCH] gic debug
 
 Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
----
- xen/arch/arm/gic-v3.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
 diff --git a/xen/arch/arm/gic-v3.c b/xen/arch/arm/gic-v3.c
 index cd3e1acf79..b46036e4dc 100644
 --- a/xen/arch/arm/gic-v3.c

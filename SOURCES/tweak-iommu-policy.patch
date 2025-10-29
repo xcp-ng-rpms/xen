@@ -1,5 +1,5 @@
 diff --git a/xen/drivers/passthrough/amd/iommu_init.c b/xen/drivers/passthrough/amd/iommu_init.c
-index 6c0dc2d5cb69..abdaf6e3bb23 100644
+index d899f58a38..d99f65b783 100644
 --- a/xen/drivers/passthrough/amd/iommu_init.c
 +++ b/xen/drivers/passthrough/amd/iommu_init.c
 @@ -1353,7 +1353,7 @@ static bool __init amd_sp5100_erratum28(void)
@@ -23,7 +23,7 @@ index 6c0dc2d5cb69..abdaf6e3bb23 100644
      /* We implies no IOMMU if ACPI indicates no MSI. */
      if ( unlikely(acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_MSI) )
 diff --git a/xen/drivers/passthrough/vtd/quirks.c b/xen/drivers/passthrough/vtd/quirks.c
-index 8b238ae7dc34..7f17c5cad79d 100644
+index 8b238ae7dc..7f17c5cad7 100644
 --- a/xen/drivers/passthrough/vtd/quirks.c
 +++ b/xen/drivers/passthrough/vtd/quirks.c
 @@ -355,15 +355,15 @@ static void __init tylersburg_intremap_quirk(void)

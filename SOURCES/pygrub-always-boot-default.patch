@@ -3,7 +3,7 @@ Pygrub extensions for XenServer:
  - always boot 'xenkernel' and 'xeninitrd' if they exist
 
 diff --git a/tools/pygrub/src/pygrub b/tools/pygrub/src/pygrub
-index f2ce39100e21..926737754a19 100755
+index f2ce39100e..926737754a 100755
 --- a/tools/pygrub/src/pygrub
 +++ b/tools/pygrub/src/pygrub
 @@ -1061,6 +1061,27 @@ if __name__ == "__main__":

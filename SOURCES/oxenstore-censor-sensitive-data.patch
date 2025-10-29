@@ -1,7 +1,7 @@
 CA-136105: Elide Windows clipboard content in xenstore logs
 
 diff --git a/tools/ocaml/xenstored/logging.ml b/tools/ocaml/xenstored/logging.ml
-index 0c525d6ff71e..c0c763c369da 100644
+index 0c525d6ff7..c0c763c369 100644
 --- a/tools/ocaml/xenstored/logging.ml
 +++ b/tools/ocaml/xenstored/logging.ml
 @@ -286,14 +286,26 @@ let init_access_log post_rotate = match !access_log_destination with

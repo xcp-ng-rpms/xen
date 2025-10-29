@@ -25,7 +25,7 @@ Signed-off-by: Matthew Barnes <matthew.barnes@cloud.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 
 diff --git a/xen/arch/x86/genapic/bigsmp.c b/xen/arch/x86/genapic/bigsmp.c
-index e97e4453a033..b2e721845275 100644
+index e97e4453a0..b2e7218452 100644
 --- a/xen/arch/x86/genapic/bigsmp.c
 +++ b/xen/arch/x86/genapic/bigsmp.c
 @@ -46,5 +46,11 @@ static int __init cf_check probe_bigsmp(void)
@@ -42,7 +42,7 @@ index e97e4453a033..b2e721845275 100644
 +	.send_IPI_self = send_IPI_self_legacy
  };
 diff --git a/xen/arch/x86/genapic/default.c b/xen/arch/x86/genapic/default.c
-index a968836a1878..59c79afdb8fa 100644
+index a968836a18..59c79afdb8 100644
 --- a/xen/arch/x86/genapic/default.c
 +++ b/xen/arch/x86/genapic/default.c
 @@ -16,5 +16,11 @@
@@ -59,7 +59,7 @@ index a968836a1878..59c79afdb8fa 100644
 +	.send_IPI_self = send_IPI_self_legacy
  };
 diff --git a/xen/arch/x86/genapic/delivery.c b/xen/arch/x86/genapic/delivery.c
-index d1f99bf6834a..3def78f380d3 100644
+index d1f99bf683..3def78f380 100644
 --- a/xen/arch/x86/genapic/delivery.c
 +++ b/xen/arch/x86/genapic/delivery.c
 @@ -19,16 +19,6 @@ void cf_check init_apic_ldr_flat(void)
@@ -80,7 +80,7 @@ index d1f99bf6834a..3def78f380d3 100644
   * PHYSICAL DELIVERY MODE (unicast to physical APIC IDs).
   */
 diff --git a/xen/arch/x86/include/asm/genapic.h b/xen/arch/x86/include/asm/genapic.h
-index 970df8ffe0a4..474248b20922 100644
+index 970df8ffe0..474248b209 100644
 --- a/xen/arch/x86/include/asm/genapic.h
 +++ b/xen/arch/x86/include/asm/genapic.h
 @@ -42,29 +42,11 @@ extern const struct genapic apic_bigsmp;

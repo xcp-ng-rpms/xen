@@ -4,15 +4,11 @@ Date: Wed, 29 Oct 2025 08:25:36 +0000
 Subject: [PATCH] tools/ocaml: Provide ARM implementations of xenctrl stubs
 
 Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
----
- tools/ocaml/libs/xc/xenctrl_stubs.c | 30 ++++++++++++++++++++++++++++-
- 1 file changed, 29 insertions(+), 1 deletion(-)
-
 diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
-index c6da9bb091..76bffd695d 100644
+index 1c7939c326..ba1c873a65 100644
 --- a/tools/ocaml/libs/xc/xenctrl_stubs.c
 +++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
-@@ -249,8 +249,27 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+@@ -243,8 +243,27 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
  	arch_domconfig = Field(VAL_ARCH, 0);
  	switch ( Tag_val(VAL_ARCH) )
  	{
@@ -41,7 +37,7 @@ index c6da9bb091..76bffd695d 100644
  		break;
  
  	case 1: /* X86 - emulation flags in the block */
-@@ -302,6 +321,12 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+@@ -296,6 +315,12 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
  	result = xc_domain_create(xch, &domid, &cfg);
  	caml_leave_blocking_section();
  
@@ -54,7 +50,7 @@ index c6da9bb091..76bffd695d 100644
  	if (result < 0)
  		failwith_xc(xch);
  
-@@ -1394,6 +1419,9 @@ CAMLprim value stub_xc_get_cpu_featureset(value xch_val, value idx)
+@@ -1416,6 +1441,9 @@ CAMLprim value stub_xc_get_cpu_featureset(value xch_val, value idx)
  		for (i = 0; i < len; ++i)
  			Store_field(bitmap_val, i, caml_copy_int64(fs[i]));
  	}

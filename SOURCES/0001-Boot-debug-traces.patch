@@ -5,12 +5,8 @@ Date: Tue, 21 Oct 2025 10:47:58 +0200
 Subject: [XEN PATCH] Boot debug traces
 To: xen-devel@lists.xenproject.org
 
----
- xen/common/efi/boot.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
-
 diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
-index 3ac6cd522b..e9fe24069c 100644
+index 3ac6cd522b..c9efb7ce63 100644
 --- a/xen/common/efi/boot.c
 +++ b/xen/common/efi/boot.c
 @@ -1362,12 +1362,16 @@ void EFIAPI __init noreturn efi_start(EFI_HANDLE ImageHandle,
@@ -97,6 +93,3 @@ index 3ac6cd522b..e9fe24069c 100644
      efi_exit_boot(ImageHandle, SystemTable);
  
      efi_arch_post_exit_boot(); /* Doesn't return. */
--- 
-2.47.3
-

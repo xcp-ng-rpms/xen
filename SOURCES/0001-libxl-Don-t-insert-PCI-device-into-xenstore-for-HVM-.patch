@@ -9,7 +9,7 @@ conflicts with QEMU.
 
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/tools/libs/light/libxl_pci.c b/tools/libs/light/libxl_pci.c
-index f4c4f175454d..d91fbdc5e08a 100644
+index 96cb4da079..9a326ef86d 100644
 --- a/tools/libs/light/libxl_pci.c
 +++ b/tools/libs/light/libxl_pci.c
 @@ -1413,6 +1413,7 @@ static void pci_add_dm_done(libxl__egc *egc,

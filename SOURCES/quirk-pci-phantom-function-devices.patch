@@ -2,10 +2,10 @@ Add PCI phantom functions to Xen based on PCI vendor + device ID.
 
 The list of devices to quirk has been taken from Linux kernel quirk list
 diff --git a/xen/drivers/passthrough/pci.c b/xen/drivers/passthrough/pci.c
-index ae620b300726..dfafeea8d6ce 100644
+index 4d06e5d3f9..5ab16c7a4c 100644
 --- a/xen/drivers/passthrough/pci.c
 +++ b/xen/drivers/passthrough/pci.c
-@@ -1134,6 +1134,63 @@ void pci_check_disable_device(u16 seg, u8 bus, u8 devfn)
+@@ -1140,6 +1140,63 @@ void pci_check_disable_device(u16 seg, u8 bus, u8 devfn)
      pci_conf_write16(pdev->sbdf, PCI_COMMAND, cword & ~PCI_COMMAND_MASTER);
  }
  
@@ -69,7 +69,7 @@ index ae620b300726..dfafeea8d6ce 100644
  /*
   * scan pci devices to add all existed PCI devices to alldevs_list,
   * and setup pci hierarchy in array bus2bridge.
-@@ -1156,6 +1213,8 @@ static int __init cf_check _scan_pci_devices(struct pci_seg *pseg, void *arg)
+@@ -1162,6 +1219,8 @@ static int __init cf_check _scan_pci_devices(struct pci_seg *pseg, void *arg)
                      continue;
                  }
  

@@ -1,5 +1,5 @@
 diff --git a/xen/common/sched/credit.c b/xen/common/sched/credit.c
-index 020f44595ed0..2f9227861271 100644
+index 020f44595e..2f92278612 100644
 --- a/xen/common/sched/credit.c
 +++ b/xen/common/sched/credit.c
 @@ -230,6 +230,7 @@ struct csched_private {

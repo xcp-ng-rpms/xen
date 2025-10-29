@@ -1,5 +1,5 @@
 diff --git a/tools/Makefile b/tools/Makefile
-index 7d17211782ec..15454ee7aaaf 100644
+index 7d17211782..15454ee7aa 100644
 --- a/tools/Makefile
 +++ b/tools/Makefile
 @@ -287,3 +287,7 @@ subtree-force-update-all:
@@ -12,7 +12,7 @@ index 7d17211782ec..15454ee7aaaf 100644
 +SUBDIRS-y += xenguest
 diff --git a/tools/xenguest/.gitignore b/tools/xenguest/.gitignore
 new file mode 100644
-index 000000000000..d9cef6c5b469
+index 0000000000..d9cef6c5b4
 --- /dev/null
 +++ b/tools/xenguest/.gitignore
 @@ -0,0 +1,3 @@
@@ -21,7 +21,7 @@ index 000000000000..d9cef6c5b469
 +*dsdt*
 diff --git a/tools/xenguest/Makefile b/tools/xenguest/Makefile
 new file mode 100644
-index 000000000000..791a0288398a
+index 0000000000..791a028839
 --- /dev/null
 +++ b/tools/xenguest/Makefile
 @@ -0,0 +1,45 @@
@@ -72,7 +72,7 @@ index 000000000000..791a0288398a
 +-include $(DEPS)
 diff --git a/tools/xenguest/acpi-utils.h b/tools/xenguest/acpi-utils.h
 new file mode 100644
-index 000000000000..44b7a11abf6e
+index 0000000000..44b7a11abf
 --- /dev/null
 +++ b/tools/xenguest/acpi-utils.h
 @@ -0,0 +1,13 @@
@@ -91,7 +91,7 @@ index 000000000000..44b7a11abf6e
 +#endif /* LIBACPI_UTILS_H */
 diff --git a/tools/xenguest/xenguest.c b/tools/xenguest/xenguest.c
 new file mode 100644
-index 000000000000..c45f59e52b9c
+index 0000000000..c45f59e52b
 --- /dev/null
 +++ b/tools/xenguest/xenguest.c
 @@ -0,0 +1,696 @@
@@ -793,7 +793,7 @@ index 000000000000..c45f59e52b9c
 + */
 diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
 new file mode 100644
-index 000000000000..7b651d5ca2ca
+index 0000000000..7b651d5ca2
 --- /dev/null
 +++ b/tools/xenguest/xenguest_stubs.c
 @@ -0,0 +1,1817 @@
@@ -2616,7 +2616,7 @@ index 000000000000..7b651d5ca2ca
 + */
 diff --git a/tools/xenguest/xg_emu.c b/tools/xenguest/xg_emu.c
 new file mode 100644
-index 000000000000..a8d9b113f463
+index 0000000000..a8d9b113f4
 --- /dev/null
 +++ b/tools/xenguest/xg_emu.c
 @@ -0,0 +1,423 @@
@@ -3045,7 +3045,7 @@ index 000000000000..a8d9b113f463
 +}
 diff --git a/tools/xenguest/xg_internal.h b/tools/xenguest/xg_internal.h
 new file mode 100644
-index 000000000000..bc2c7873f255
+index 0000000000..bc2c7873f2
 --- /dev/null
 +++ b/tools/xenguest/xg_internal.h
 @@ -0,0 +1,130 @@

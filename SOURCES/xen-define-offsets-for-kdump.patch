@@ -2,10 +2,10 @@ Cause to be defined all those extra Xen symbol offsets that kdump needs
 to navigate its way around a memory image.
 
 diff --git a/xen/Makefile b/xen/Makefile
-index 0a942894dde2..91e1fe13a615 100644
+index df5319fdee..7259193b56 100644
 --- a/xen/Makefile
 +++ b/xen/Makefile
-@@ -650,7 +650,9 @@ cscope:
+@@ -651,7 +651,9 @@ cscope:
  
  .PHONY: _MAP
  _MAP: $(TARGET)
@@ -17,7 +17,7 @@ index 0a942894dde2..91e1fe13a615 100644
  %.o %.i %.s: %.c tools_fixdep FORCE
  	$(Q)$(MAKE) $(build)=$(*D) $(*D)/$(@F)
 diff --git a/xen/arch/x86/x86_64/asm-offsets.c b/xen/arch/x86/x86_64/asm-offsets.c
-index 630bdc39451d..5ba8836af10b 100644
+index 630bdc3945..5ba8836af1 100644
 --- a/xen/arch/x86/x86_64/asm-offsets.c
 +++ b/xen/arch/x86/x86_64/asm-offsets.c
 @@ -15,6 +15,10 @@

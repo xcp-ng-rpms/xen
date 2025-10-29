@@ -15,7 +15,7 @@ Acked-by: Christian Lindig <christian.lindig@cloud.com>
 Reviewed-by: Edwin Török <edwin.torok@cloud.com>
 
 diff --git a/tools/ocaml/Makefile.rules b/tools/ocaml/Makefile.rules
-index 678bbc046ff6..d043263921cf 100644
+index 678bbc046f..d043263921 100644
 --- a/tools/ocaml/Makefile.rules
 +++ b/tools/ocaml/Makefile.rules
 @@ -40,13 +40,14 @@ ALL_OCAML_OBJS ?= $(OBJS)
@@ -36,7 +36,7 @@ index 678bbc046ff6..d043263921cf 100644
  
  clean: $(CLEAN_HOOKS)
 diff --git a/tools/ocaml/common.make b/tools/ocaml/common.make
-index cecfc5b6b8c8..c7eefceeb42b 100644
+index cecfc5b6b8..c7eefceeb4 100644
 --- a/tools/ocaml/common.make
 +++ b/tools/ocaml/common.make
 @@ -17,5 +17,3 @@ OCAMLCFLAGS += -g $(OCAMLINCLUDE) -w F -warn-error F

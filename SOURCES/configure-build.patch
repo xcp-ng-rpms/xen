@@ -4,7 +4,7 @@ Most notibly, the cached results of the xs-reconfigure.sh script.
 
 diff --git a/.config b/.config
 new file mode 100644
-index 000000000000..55447cd7033f
+index 0000000000..55447cd703
 --- /dev/null
 +++ b/.config
 @@ -0,0 +1,11 @@
@@ -21,7 +21,7 @@ index 000000000000..55447cd7033f
 +override CONFIG_REMUS_NETBUF := n
 diff --git a/buildconfigs/config-debug b/buildconfigs/config-debug
 new file mode 100644
-index 000000000000..a763e0e638bd
+index 0000000000..a763e0e638
 --- /dev/null
 +++ b/buildconfigs/config-debug
 @@ -0,0 +1,173 @@
@@ -200,7 +200,7 @@ index 000000000000..a763e0e638bd
 +# end of Debugging Options
 diff --git a/buildconfigs/config-pvshim b/buildconfigs/config-pvshim
 new file mode 100644
-index 000000000000..70c331ac15cc
+index 0000000000..70c331ac15
 --- /dev/null
 +++ b/buildconfigs/config-pvshim
 @@ -0,0 +1,157 @@
@@ -363,7 +363,7 @@ index 000000000000..70c331ac15cc
 +# end of Debugging Options
 diff --git a/buildconfigs/config-release b/buildconfigs/config-release
 new file mode 100644
-index 000000000000..cd80369cface
+index 0000000000..cd80369cfa
 --- /dev/null
 +++ b/buildconfigs/config-release
 @@ -0,0 +1,173 @@
@@ -542,7 +542,7 @@ index 000000000000..cd80369cface
 +# end of Debugging Options
 diff --git a/config/Docs.mk b/config/Docs.mk
 new file mode 100644
-index 000000000000..49616fab6910
+index 0000000000..49616fab69
 --- /dev/null
 +++ b/config/Docs.mk
 @@ -0,0 +1,9 @@
@@ -557,7 +557,7 @@ index 000000000000..49616fab6910
 +PERL                := /usr/bin/perl
 diff --git a/config/Paths.mk b/config/Paths.mk
 new file mode 100644
-index 000000000000..cf158f7ea7ec
+index 0000000000..cf158f7ea7
 --- /dev/null
 +++ b/config/Paths.mk
 @@ -0,0 +1,59 @@
@@ -622,7 +622,7 @@ index 000000000000..cf158f7ea7ec
 +PKG_INSTALLDIR           := ${libdir}/pkgconfig
 diff --git a/config/Stubdom.mk b/config/Stubdom.mk
 new file mode 100644
-index 000000000000..a8bb1d3147d3
+index 0000000000..a8bb1d3147
 --- /dev/null
 +++ b/config/Stubdom.mk
 @@ -0,0 +1,45 @@
@@ -673,7 +673,7 @@ index 000000000000..a8bb1d3147d3
 +TPMEMU_URL          := $(XEN_EXTFILES_URL)
 diff --git a/config/Tools.mk b/config/Tools.mk
 new file mode 100644
-index 000000000000..81946579063b
+index 0000000000..8194657906
 --- /dev/null
 +++ b/config/Tools.mk
 @@ -0,0 +1,71 @@
@@ -750,14 +750,14 @@ index 000000000000..81946579063b
 +CONFIG_PV_SHIM      := n
 diff --git a/config/Toplevel.mk b/config/Toplevel.mk
 new file mode 100644
-index 000000000000..ced7d97a4c27
+index 0000000000..ced7d97a4c
 --- /dev/null
 +++ b/config/Toplevel.mk
 @@ -0,0 +1 @@
 +SUBSYSTEMS               :=  xen tools docs
 diff --git a/tools/config.h b/tools/config.h
 new file mode 100644
-index 000000000000..5e5ab49acca9
+index 0000000000..5e5ab49acc
 --- /dev/null
 +++ b/tools/config.h
 @@ -0,0 +1,175 @@
@@ -937,7 +937,7 @@ index 000000000000..5e5ab49acca9
 +/* Define for large files, on AIX-style hosts. */
 +/* #undef _LARGE_FILES */
 diff --git a/tools/ocaml/xenstored/oxenstored.conf.in b/tools/ocaml/xenstored/oxenstored.conf.in
-index 9d034e744b4b..824681655585 100644
+index 9d034e744b..8246816555 100644
 --- a/tools/ocaml/xenstored/oxenstored.conf.in
 +++ b/tools/ocaml/xenstored/oxenstored.conf.in
 @@ -56,9 +56,9 @@ perms-watch-activate = true
@@ -969,7 +969,7 @@ index 9d034e744b4b..824681655585 100644
  # Define the interval in seconds, set to negative to disable.
 diff --git a/tools/ocaml/xenstored/paths.ml b/tools/ocaml/xenstored/paths.ml
 new file mode 100644
-index 000000000000..0aa29967660e
+index 0000000000..0aa2996766
 --- /dev/null
 +++ b/tools/ocaml/xenstored/paths.ml
 @@ -0,0 +1,4 @@
@@ -979,7 +979,7 @@ index 000000000000..0aa29967660e
 +let xen_run_stored = "/var/run/xenstored"
 diff --git a/xs-reconfigure.sh b/xs-reconfigure.sh
 new file mode 100755
-index 000000000000..17d7e521c79f
+index 0000000000..17d7e521c7
 --- /dev/null
 +++ b/xs-reconfigure.sh
 @@ -0,0 +1,24 @@

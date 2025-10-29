@@ -1,5 +1,5 @@
 diff --git a/tools/include/xenctrl.h b/tools/include/xenctrl.h
-index 9ceca0cffc2f..f3f8b77be653 100644
+index 9ceca0cffc..f3f8b77be6 100644
 --- a/tools/include/xenctrl.h
 +++ b/tools/include/xenctrl.h
 @@ -1855,7 +1855,8 @@ int xc_cpuid_apply_policy(xc_interface *xch,
@@ -13,7 +13,7 @@ index 9ceca0cffc2f..f3f8b77be653 100644
  int xc_mca_op(xc_interface *xch, struct xen_mc *mc);
  int xc_mca_op_inject_v2(xc_interface *xch, unsigned int flags,
 diff --git a/tools/libs/guest/xg_cpuid_x86.c b/tools/libs/guest/xg_cpuid_x86.c
-index 1b844879cfac..83cbaedad1c9 100644
+index 1b844879cf..83cbaedad1 100644
 --- a/tools/libs/guest/xg_cpuid_x86.c
 +++ b/tools/libs/guest/xg_cpuid_x86.c
 @@ -576,7 +576,7 @@ static int xc_msr_policy(xc_interface *xch, domid_t domid,
@@ -73,10 +73,10 @@ index 1b844879cfac..83cbaedad1c9 100644
  
      nr_leaves = ARRAY_SIZE(p->leaves);
 diff --git a/tools/libs/light/libxl_cpuid.c b/tools/libs/light/libxl_cpuid.c
-index 6d23880a897c..42d555719ea9 100644
+index f738e17b19..17e5094c6c 100644
 --- a/tools/libs/light/libxl_cpuid.c
 +++ b/tools/libs/light/libxl_cpuid.c
-@@ -512,7 +512,7 @@ int libxl__cpuid_legacy(libxl_ctx *ctx, uint32_t domid, bool restore,
+@@ -513,7 +513,7 @@ int libxl__cpuid_legacy(libxl_ctx *ctx, uint32_t domid, bool restore,
              info->tsc_mode == LIBXL_TSC_MODE_ALWAYS_EMULATE);
  
      r = xc_cpuid_apply_policy(ctx->xch, domid, restore, NULL, 0,

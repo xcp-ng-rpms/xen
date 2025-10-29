@@ -20,7 +20,7 @@ Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Release-Acked-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
 
 diff --git a/xen/drivers/passthrough/vtd/intremap.c b/xen/drivers/passthrough/vtd/intremap.c
-index 233db5cb64de..820616a8de93 100644
+index 233db5cb64..820616a8de 100644
 --- a/xen/drivers/passthrough/vtd/intremap.c
 +++ b/xen/drivers/passthrough/vtd/intremap.c
 @@ -184,49 +184,26 @@ bool __init cf_check intel_iommu_supports_eim(void)
@@ -36,21 +36,21 @@ index 233db5cb64de..820616a8de93 100644
  static void update_irte(struct vtd_iommu *iommu, struct iremap_entry *entry,
                          const struct iremap_entry *new_ire, bool atomic)
  {
--    ASSERT(spin_is_locked(&iommu->intremap.lock));
 +    __uint128_t ret;
 +    struct iremap_entry old_ire;
++
+     ASSERT(spin_is_locked(&iommu->intremap.lock));
  
 -    if ( cpu_has_cx16 )
 -    {
 -        __uint128_t ret;
 -        struct iremap_entry old_ire;
-+    ASSERT(spin_is_locked(&iommu->intremap.lock));
- 
--        old_ire = *entry;
--        ret = cmpxchg16b(entry, &old_ire, new_ire);
 +    old_ire = *entry;
 +    ret = cmpxchg16b(entry, &old_ire, new_ire);
  
+-        old_ire = *entry;
+-        ret = cmpxchg16b(entry, &old_ire, new_ire);
+-
 -        /*
 -         * In the above, we use cmpxchg16 to atomically update the 128-bit
 -         * IRTE, and the hardware cannot update the IRTE behind us, so

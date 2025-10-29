@@ -5,7 +5,7 @@
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 1
+%global hv_rel 0
 
 # WTF: for some reason in Alma10 this tries to mangle a non-existing
 # ./tools/qemu-xen/meson/test ... thinking it is named "configure" !?
@@ -34,8 +34,8 @@
 
 Summary: Xen is a virtual machine monitor
 Name:    xen
-Version: 4.19.1
-Release: %{?xsrel}.0.ydi.15%{?dist}
+Version: 4.19.3
+Release: %{?xsrel}.0.ydi.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -61,24 +61,24 @@ Patch44:	coverity-model.patch
 # Naming scheme: backport-<12 digit SHA>.patch # [*] <UTC TIMESTAMP> - <Commit subject>
 #   A '*' indicates a patch which should be suggested for backport upstream
 # Patches from staging-4.19
-Patch53:	backport-3a9e5a93e6ed.patch
-Patch54:	backport-60573721c5f8.patch
-Patch55:	backport-fbe3ec72dc0d.patch
-Patch56:	backport-c41c22bf8e9f.patch
-Patch57:	backport-0a14438052e6.patch
-Patch58:	backport-816235e311e1.patch
-Patch59:	backport-1b88dc9afcac.patch
-Patch60:	backport-71d626f2f7da.patch
-Patch61:	backport-4abf7f1d6174.patch
-Patch62:	backport-4df28706ad87.patch
-Patch63:	backport-49c3324f3737.patch
-Patch64:	backport-457b9e11fa13.patch
-Patch65:	backport-ebc8b4a4508a.patch
-Patch66:	backport-46e3e9d73983.patch
-Patch67:	backport-e801a86d5eb2.patch
-Patch68:	backport-30aadc8dbc9a.patch
-Patch69:	backport-eae35da8f4c4.patch
-Patch70:	backport-93302bb88855.patch
+#backport-3a9e5a93e6ed.patch #   2024-12-16 12:32:19 - x86emul: MOVBE requires a memory operand
+#backport-60573721c5f8.patch #   2024-12-16 12:33:07 - libs/guest: Fix migration compatibility with a security-patched Xen 4.13
+#backport-fbe3ec72dc0d.patch #   2024-12-16 12:33:17 - tools/ocaml: Specify rpath correctly for ocamlmklib
+#backport-c41c22bf8e9f.patch #   2024-12-17 11:46:29 - x86/io-apic: prevent early exit from i8259 loop detection
+#backport-0a14438052e6.patch #   2025-01-21 08:17:44 - tools/xg: increase LZMA_BLOCK_SIZE for uncompressing the kernel
+#backport-816235e311e1.patch #   2025-01-21 08:18:08 - x86/spec-ctrl: Support for SRSO_U/S_NO and SRSO_MSR_FIX
+#backport-1b88dc9afcac.patch #   2025-01-21 08:18:42 - x86/traps: Rework LER initialisation and support Zen5/Diamond Rapids
+#backport-71d626f2f7da.patch #   2025-01-21 08:19:14 - x86/amd: Misc setup for Fam1Ah processors
+#backport-4abf7f1d6174.patch #   2025-01-21 08:19:39 - x86emul: VCVT{,U}DQ2PD ignores embedded rounding
+#backport-4df28706ad87.patch #   2025-01-21 08:19:56 - x86emul: correct put_fpu()'s segment selector handling
+#backport-49c3324f3737.patch #   2025-02-17 12:20:14 - x86/iommu: check for CMPXCHG16B when enabling IOMMU
+#backport-457b9e11fa13.patch #   2025-02-17 12:20:38 - iommu/amd: atomically update IRTE
+#backport-ebc8b4a4508a.patch #   2025-02-17 12:22:24 - radix-tree: purge node allocation override hooks
+#backport-46e3e9d73983.patch #   2025-02-17 12:23:00 - radix-tree: introduce RADIX_TREE{,_INIT}()
+#backport-e801a86d5eb2.patch #   2025-02-17 12:23:27 - x86/shutdown: offline APs with interrupts disabled on all CPUs
+#backport-30aadc8dbc9a.patch #   2025-02-17 12:23:50 - x86/smp: perform disabling on interrupts ahead of AP shutdown
+#backport-eae35da8f4c4.patch #   2025-02-17 12:24:03 - x86/pci: disable MSI(-X) on all devices at shutdown
+#backport-93302bb88855.patch #   2025-02-17 12:24:23 - x86/iommu: disable interrupts at shutdown
 # Patches from staging, 4.20 dev cycle
 Patch73:	backport-b25b28ede1cb.patch
 Patch74:	backport-cc47813c4a2c.patch
@@ -101,8 +101,8 @@ Patch93:	quirk-hp-gen8-rmrr.patch
 Patch94:	quirk-pci-phantom-function-devices.patch
 # Hpet improvements v5
 Patch97:	0001-x86-hpet-Pre-cleanup.patch
-Patch98:	0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
-Patch99:	0003-x86-hpet-Post-cleanup.patch
+#0002-x86-hpet-Use-singe-apic-vector-rather-than-irq_descs.patch
+#0003-x86-hpet-Post-cleanup.patch
 Patch101:	0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
 # Grant perf improvements - not building on ARM
 #avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
@@ -136,7 +136,7 @@ Patch141:	tweak-iommu-policy.patch
 Patch142:	tweak-sc-policy.patch
 Patch143:	disable-core-parking.patch
 Patch144:	remove-info-leak.patch
-Patch146:	0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+#0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
 Patch148:	0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
 # This will need to use Flask, when Flask is suitably ready
 Patch151:	hitachi-driver-domain-ssid.patch
@@ -169,7 +169,7 @@ Patch183:	oem-bios-xensource.patch
 # misc debt
 Patch186:	misc-log-guest-consoles.patch
 # mixed between components
-Patch189:	mixed-domain-runstates.patch
+Patch189:	collect_domain_runstate_information_in_the_hypervisor,_and_export_through_a_domctl_operation.patch
 Patch190:	xenguest.patch
 Patch191:	xen-vmdebug.patch
 Patch193:	oxenstore-censor-sensitive-data.patch
@@ -204,12 +204,15 @@ Patch229:	patch_wip-no-xenguest-arm.patch
 Patch230:	patch_wip-no-viridian-arm.patch
 Patch231:	patch_workaround-current_text_addr-x86-asm.patch
 Patch232:	arm-build.patch
-Patch233:       0001-Boot-debug-traces.patch
-Patch234:       0001-git-diff.patch
-Patch235:       0001-gic-debug.patch
+Patch233:	0001-Boot-debug-traces.patch
+Patch234:	acpi-debug.patch
+Patch235:	0001-gic-debug.patch
 Patch236:	0001-acpi-arm-relax-MADT-GICC-entry-length-check-to-suppo.patch
 Patch237:	0001-Add-debug-traces-to-DOM0-loading.patch
-Patch238:       0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch238:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+################################################################################
+# Debugging patches
+#
 
 # # XCP-ng patches
 # Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
@@ -1144,6 +1147,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Oct 29 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.1
+- Upgrade to 4.19.3
+
 * Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.6
 - Merge former xcpng-8.3 and ydi/9 work
 - ARM boot debug traces

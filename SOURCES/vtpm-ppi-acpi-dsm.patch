@@ -7,7 +7,7 @@ found in qemu.git:hw/acpi/tpm.c (tpm_build_ppi_acpi()).
 
 Signed-off-by: Anthony PERARD <anthony.perard@citrix.com>
 diff --git a/tools/libacpi/ssdt_tpm2.asl b/tools/libacpi/ssdt_tpm2.asl
-index e0f0ccd9c517..aa73ff2a8c4a 100644
+index e0f0ccd9c5..aa73ff2a8c 100644
 --- a/tools/libacpi/ssdt_tpm2.asl
 +++ b/tools/libacpi/ssdt_tpm2.asl
 @@ -19,9 +19,186 @@ DefinitionBlock ("SSDT_TPM2.aml", "SSDT", 2, "Xen", "HVM", 0)

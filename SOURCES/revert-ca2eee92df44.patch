@@ -1,5 +1,5 @@
 diff --git a/tools/libs/guest/xg_cpuid_x86.c b/tools/libs/guest/xg_cpuid_x86.c
-index 263a9d4787b6..1b844879cfac 100644
+index 263a9d4787..1b844879cf 100644
 --- a/tools/libs/guest/xg_cpuid_x86.c
 +++ b/tools/libs/guest/xg_cpuid_x86.c
 @@ -728,59 +728,19 @@ int xc_cpuid_apply_policy(xc_interface *xch, uint32_t domid, bool restore,

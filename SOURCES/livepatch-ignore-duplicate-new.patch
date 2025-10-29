@@ -7,7 +7,7 @@ live patches will only ever be built against the hypervisor (and not
 another live patch), it should be safe to ignore these errors.
 
 diff --git a/xen/common/livepatch.c b/xen/common/livepatch.c
-index 6ce77bf021b7..5c973d4ce33d 100644
+index 6ce77bf021..5c973d4ce3 100644
 --- a/xen/common/livepatch.c
 +++ b/xen/common/livepatch.c
 @@ -1048,9 +1048,6 @@ static int build_symbol_table(struct payload *payload,

@@ -11,15 +11,11 @@ Signed-off-by: Rahul Singh <rahul.singh@arm.com>
 
 Upstream-Status: Submitted [https://lists.xenproject.org/archives/html/xen-devel/2022-04/msg02238.html]
 Signed-off-by: Kamil Dziezyk <kamil.dziezyk@arm.com>
----
- xen/arch/arm/acpi/domain_build.c | 40 ++++++++++++++++++++++++++++++++
- 1 file changed, 40 insertions(+)
-
 diff --git a/xen/arch/arm/acpi/domain_build.c b/xen/arch/arm/acpi/domain_build.c
-index bbdc90f92c..ec0b5b261f 100644
+index 2ce75543d0..e43d999d86 100644
 --- a/xen/arch/arm/acpi/domain_build.c
 +++ b/xen/arch/arm/acpi/domain_build.c
-@@ -14,6 +14,7 @@
+@@ -15,6 +15,7 @@
  #include <xen/acpi.h>
  #include <xen/event.h>
  #include <xen/iocap.h>
@@ -27,7 +23,7 @@ index bbdc90f92c..ec0b5b261f 100644
  #include <xen/device_tree.h>
  #include <xen/libfdt/libfdt.h>
  #include <acpi/actables.h>
-@@ -30,6 +31,7 @@ static int __init acpi_iomem_deny_access(struct domain *d)
+@@ -31,6 +32,7 @@ static int __init acpi_iomem_deny_access(struct domain *d)
  {
      acpi_status status;
      struct acpi_table_spcr *spcr = NULL;
@@ -35,7 +31,7 @@ index bbdc90f92c..ec0b5b261f 100644
      unsigned long mfn;
      int rc;
  
-@@ -55,6 +57,44 @@ static int __init acpi_iomem_deny_access(struct domain *d)
+@@ -56,6 +58,44 @@ static int __init acpi_iomem_deny_access(struct domain *d)
          printk("Failed to get SPCR table, Xen console may be unavailable\n");
      }
  
@@ -80,6 +76,3 @@ index bbdc90f92c..ec0b5b261f 100644
      /* Deny MMIO access for GIC regions */
      return gic_iomem_deny_access(d);
  }
--- 
-2.17.1
-

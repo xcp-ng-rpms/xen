@@ -24,7 +24,7 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/tools/firmware/hvmloader/Makefile b/tools/firmware/hvmloader/Makefile
-index 84cba171cd6b..c7bc4006578a 100644
+index 84cba171cd..c7bc400657 100644
 --- a/tools/firmware/hvmloader/Makefile
 +++ b/tools/firmware/hvmloader/Makefile
 @@ -25,7 +25,7 @@ ld-option = $(shell if $(LD) -v $(1) >/dev/null 2>&1; then echo y; else echo n;
@@ -37,7 +37,7 @@ index 84cba171cd6b..c7bc4006578a 100644
  # We mustn't use tools-only public interfaces.
  CFLAGS += -D__XEN_INTERFACE_VERSION__=__XEN_LATEST_INTERFACE_VERSION__
 diff --git a/tools/firmware/hvmloader/smp.c b/tools/firmware/hvmloader/smp.c
-index 5d46eee1c5f4..1b940cefd071 100644
+index 5d46eee1c5..1b940cefd0 100644
 --- a/tools/firmware/hvmloader/smp.c
 +++ b/tools/firmware/hvmloader/smp.c
 @@ -31,7 +31,7 @@

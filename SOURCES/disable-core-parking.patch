@@ -7,7 +7,7 @@ prevent these issues, but add a command-line switch ("core_parking") to
 re-enable if needed.
 
 diff --git a/xen/arch/x86/platform_hypercall.c b/xen/arch/x86/platform_hypercall.c
-index 95467b88ab64..49f26d73694a 100644
+index 95467b88ab..49f26d7369 100644
 --- a/xen/arch/x86/platform_hypercall.c
 +++ b/xen/arch/x86/platform_hypercall.c
 @@ -9,6 +9,7 @@

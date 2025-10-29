@@ -21,7 +21,7 @@ Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/xen/arch/x86/domctl.c b/xen/arch/x86/domctl.c
-index 8066f28e9d55..ecdab90aea7e 100644
+index 8066f28e9d..ecdab90aea 100644
 --- a/xen/arch/x86/domctl.c
 +++ b/xen/arch/x86/domctl.c
 @@ -1129,6 +1129,7 @@ long arch_do_domctl(
@@ -50,7 +50,7 @@ index 8066f28e9d55..ecdab90aea7e 100644
              }
  
 diff --git a/xen/arch/x86/hvm/hvm.c b/xen/arch/x86/hvm/hvm.c
-index fbca7e49495a..d0e5c92a97d9 100644
+index fbca7e4949..d0e5c92a97 100644
 --- a/xen/arch/x86/hvm/hvm.c
 +++ b/xen/arch/x86/hvm/hvm.c
 @@ -1535,10 +1535,17 @@ static int cf_check hvm_load_cpu_msrs(struct domain *d, hvm_domain_context_t *h)

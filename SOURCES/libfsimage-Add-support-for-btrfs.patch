@@ -14,7 +14,7 @@ with compression (zlib and lzo).
 
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/tools/libfsimage/Makefile b/tools/libfsimage/Makefile
-index da0decac1604..e20809454874 100644
+index da0decac16..e208094548 100644
 --- a/tools/libfsimage/Makefile
 +++ b/tools/libfsimage/Makefile
 @@ -1,7 +1,7 @@
@@ -28,7 +28,7 @@ index da0decac1604..e20809454874 100644
      SUBDIRS-y += ext2fs-lib
 diff --git a/tools/libfsimage/btrfs/Makefile b/tools/libfsimage/btrfs/Makefile
 new file mode 100644
-index 000000000000..d40b5e3c37ac
+index 0000000000..d40b5e3c37
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/Makefile
 @@ -0,0 +1,30 @@
@@ -64,7 +64,7 @@ index 000000000000..d40b5e3c37ac
 +include $(XEN_ROOT)/tools/libfsimage/Rules.mk
 diff --git a/tools/libfsimage/btrfs/bitops.h b/tools/libfsimage/btrfs/bitops.h
 new file mode 100644
-index 000000000000..5b35f9fc5213
+index 0000000000..5b35f9fc52
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/bitops.h
 @@ -0,0 +1,224 @@
@@ -294,7 +294,7 @@ index 000000000000..5b35f9fc5213
 +#endif
 diff --git a/tools/libfsimage/btrfs/btrfs-list.h b/tools/libfsimage/btrfs/btrfs-list.h
 new file mode 100644
-index 000000000000..b4066cdd381b
+index 0000000000..b4066cdd38
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/btrfs-list.h
 @@ -0,0 +1,176 @@
@@ -476,7 +476,7 @@ index 000000000000..b4066cdd381b
 +#endif
 diff --git a/tools/libfsimage/btrfs/commands.h b/tools/libfsimage/btrfs/commands.h
 new file mode 100644
-index 000000000000..7daf8365c5ab
+index 0000000000..7daf8365c5
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/commands.h
 @@ -0,0 +1,132 @@
@@ -614,7 +614,7 @@ index 000000000000..7daf8365c5ab
 +#endif
 diff --git a/tools/libfsimage/btrfs/crc32c.c b/tools/libfsimage/btrfs/crc32c.c
 new file mode 100644
-index 000000000000..eacabda24b0b
+index 0000000000..eacabda24b
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/crc32c.c
 @@ -0,0 +1,222 @@
@@ -842,7 +842,7 @@ index 000000000000..eacabda24b0b
 +}
 diff --git a/tools/libfsimage/btrfs/crc32c.h b/tools/libfsimage/btrfs/crc32c.h
 new file mode 100644
-index 000000000000..01af0affce34
+index 0000000000..01af0affce
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/crc32c.h
 @@ -0,0 +1,31 @@
@@ -879,7 +879,7 @@ index 000000000000..01af0affce34
 +#endif
 diff --git a/tools/libfsimage/btrfs/ctree.c b/tools/libfsimage/btrfs/ctree.c
 new file mode 100644
-index 000000000000..becbda82b5c9
+index 0000000000..becbda82b5
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/ctree.c
 @@ -0,0 +1,2939 @@
@@ -3824,7 +3824,7 @@ index 000000000000..becbda82b5c9
 +}
 diff --git a/tools/libfsimage/btrfs/ctree.h b/tools/libfsimage/btrfs/ctree.h
 new file mode 100644
-index 000000000000..5a5b20c8d7c9
+index 0000000000..5a5b20c8d7
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/ctree.h
 @@ -0,0 +1,2568 @@
@@ -6398,7 +6398,7 @@ index 000000000000..5a5b20c8d7c9
 +#endif
 diff --git a/tools/libfsimage/btrfs/dir-item.c b/tools/libfsimage/btrfs/dir-item.c
 new file mode 100644
-index 000000000000..da5db05566bc
+index 0000000000..da5db05566
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/dir-item.c
 @@ -0,0 +1,349 @@
@@ -6753,7 +6753,7 @@ index 000000000000..da5db05566bc
 +}
 diff --git a/tools/libfsimage/btrfs/disk-io.c b/tools/libfsimage/btrfs/disk-io.c
 new file mode 100644
-index 000000000000..897d93f85b72
+index 0000000000..897d93f85b
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/disk-io.c
 @@ -0,0 +1,1777 @@
@@ -8536,7 +8536,7 @@ index 000000000000..897d93f85b72
 +}
 diff --git a/tools/libfsimage/btrfs/disk-io.h b/tools/libfsimage/btrfs/disk-io.h
 new file mode 100644
-index 000000000000..0640211588c7
+index 0000000000..0640211588
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/disk-io.h
 @@ -0,0 +1,166 @@
@@ -8708,7 +8708,7 @@ index 000000000000..0640211588c7
 +#endif
 diff --git a/tools/libfsimage/btrfs/extent-cache.c b/tools/libfsimage/btrfs/extent-cache.c
 new file mode 100644
-index 000000000000..aa62dd014722
+index 0000000000..aa62dd0147
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/extent-cache.c
 @@ -0,0 +1,339 @@
@@ -9053,7 +9053,7 @@ index 000000000000..aa62dd014722
 +}
 diff --git a/tools/libfsimage/btrfs/extent-cache.h b/tools/libfsimage/btrfs/extent-cache.h
 new file mode 100644
-index 000000000000..f68e16465ad3
+index 0000000000..f68e16465a
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/extent-cache.h
 @@ -0,0 +1,119 @@
@@ -9178,7 +9178,7 @@ index 000000000000..f68e16465ad3
 +#endif
 diff --git a/tools/libfsimage/btrfs/extent-tree.c b/tools/libfsimage/btrfs/extent-tree.c
 new file mode 100644
-index 000000000000..5cea870636d8
+index 0000000000..5cea870636
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/extent-tree.c
 @@ -0,0 +1,4120 @@
@@ -13304,7 +13304,7 @@ index 000000000000..5cea870636d8
 +}
 diff --git a/tools/libfsimage/btrfs/extent_io.c b/tools/libfsimage/btrfs/extent_io.c
 new file mode 100644
-index 000000000000..7825e4adf5d3
+index 0000000000..7825e4adf5
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/extent_io.c
 @@ -0,0 +1,893 @@
@@ -14203,7 +14203,7 @@ index 000000000000..7825e4adf5d3
 +}
 diff --git a/tools/libfsimage/btrfs/extent_io.h b/tools/libfsimage/btrfs/extent_io.h
 new file mode 100644
-index 000000000000..57f57adcfeac
+index 0000000000..57f57adcfe
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/extent_io.h
 @@ -0,0 +1,157 @@
@@ -14366,7 +14366,7 @@ index 000000000000..57f57adcfeac
 +#endif
 diff --git a/tools/libfsimage/btrfs/file-item.c b/tools/libfsimage/btrfs/file-item.c
 new file mode 100644
-index 000000000000..d75a4304f527
+index 0000000000..d75a4304f5
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/file-item.c
 @@ -0,0 +1,485 @@
@@ -14857,7 +14857,7 @@ index 000000000000..d75a4304f527
 +}
 diff --git a/tools/libfsimage/btrfs/free-space-cache.c b/tools/libfsimage/btrfs/free-space-cache.c
 new file mode 100644
-index 000000000000..325067b9a7ad
+index 0000000000..325067b9a7
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/free-space-cache.c
 @@ -0,0 +1,877 @@
@@ -15740,7 +15740,7 @@ index 000000000000..325067b9a7ad
 +}
 diff --git a/tools/libfsimage/btrfs/free-space-cache.h b/tools/libfsimage/btrfs/free-space-cache.h
 new file mode 100644
-index 000000000000..fd25513d25a1
+index 0000000000..fd25513d25
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/free-space-cache.h
 @@ -0,0 +1,60 @@
@@ -15806,7 +15806,7 @@ index 000000000000..fd25513d25a1
 +#endif
 diff --git a/tools/libfsimage/btrfs/fsys_btrfs.c b/tools/libfsimage/btrfs/fsys_btrfs.c
 new file mode 100644
-index 000000000000..9b385f0cc8fc
+index 0000000000..9b385f0cc8
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/fsys_btrfs.c
 @@ -0,0 +1,862 @@
@@ -16674,7 +16674,7 @@ index 000000000000..9b385f0cc8fc
 +}
 diff --git a/tools/libfsimage/btrfs/hash.h b/tools/libfsimage/btrfs/hash.h
 new file mode 100644
-index 000000000000..34b3b6d07d6e
+index 0000000000..34b3b6d07d
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/hash.h
 @@ -0,0 +1,26 @@
@@ -16706,7 +16706,7 @@ index 000000000000..34b3b6d07d6e
 +#endif
 diff --git a/tools/libfsimage/btrfs/inode-item.c b/tools/libfsimage/btrfs/inode-item.c
 new file mode 100644
-index 000000000000..410d6e14711a
+index 0000000000..410d6e1471
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/inode-item.c
 @@ -0,0 +1,458 @@
@@ -17170,7 +17170,7 @@ index 000000000000..410d6e14711a
 +}
 diff --git a/tools/libfsimage/btrfs/inode.c b/tools/libfsimage/btrfs/inode.c
 new file mode 100644
-index 000000000000..4aadc0d5740e
+index 0000000000..4aadc0d574
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/inode.c
 @@ -0,0 +1,534 @@
@@ -17710,7 +17710,7 @@ index 000000000000..4aadc0d5740e
 +}
 diff --git a/tools/libfsimage/btrfs/internal.h b/tools/libfsimage/btrfs/internal.h
 new file mode 100644
-index 000000000000..58e90b51e3fc
+index 0000000000..58e90b51e3
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/internal.h
 @@ -0,0 +1,40 @@
@@ -17756,7 +17756,7 @@ index 000000000000..58e90b51e3fc
 +#endif
 diff --git a/tools/libfsimage/btrfs/ioctl.h b/tools/libfsimage/btrfs/ioctl.h
 new file mode 100644
-index 000000000000..98022fe7a18b
+index 0000000000..98022fe7a1
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/ioctl.h
 @@ -0,0 +1,727 @@
@@ -18489,7 +18489,7 @@ index 000000000000..98022fe7a18b
 +#endif
 diff --git a/tools/libfsimage/btrfs/kerncompat.h b/tools/libfsimage/btrfs/kerncompat.h
 new file mode 100644
-index 000000000000..87a3f60935bf
+index 0000000000..87a3f60935
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/kerncompat.h
 @@ -0,0 +1,358 @@
@@ -18853,7 +18853,7 @@ index 000000000000..87a3f60935bf
 +#endif
 diff --git a/tools/libfsimage/btrfs/list.h b/tools/libfsimage/btrfs/list.h
 new file mode 100644
-index 000000000000..df48227dfe95
+index 0000000000..df48227dfe
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/list.h
 @@ -0,0 +1,484 @@
@@ -19343,7 +19343,7 @@ index 000000000000..df48227dfe95
 +#endif
 diff --git a/tools/libfsimage/btrfs/print-tree.h b/tools/libfsimage/btrfs/print-tree.h
 new file mode 100644
-index 000000000000..1cef6695cd3f
+index 0000000000..1cef6695cd
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/print-tree.h
 @@ -0,0 +1,25 @@
@@ -19374,7 +19374,7 @@ index 000000000000..1cef6695cd3f
 +#endif
 diff --git a/tools/libfsimage/btrfs/radix-tree.h b/tools/libfsimage/btrfs/radix-tree.h
 new file mode 100644
-index 000000000000..3aefdc81fe15
+index 0000000000..3aefdc81fe
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/radix-tree.h
 @@ -0,0 +1,94 @@
@@ -19474,7 +19474,7 @@ index 000000000000..3aefdc81fe15
 +#endif /* _LINUX_RADIX_TREE_H */
 diff --git a/tools/libfsimage/btrfs/raid6.c b/tools/libfsimage/btrfs/raid6.c
 new file mode 100644
-index 000000000000..8744d0f36145
+index 0000000000..8744d0f361
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/raid6.c
 @@ -0,0 +1,108 @@
@@ -19588,7 +19588,7 @@ index 000000000000..8744d0f36145
 +
 diff --git a/tools/libfsimage/btrfs/rbtree-utils.c b/tools/libfsimage/btrfs/rbtree-utils.c
 new file mode 100644
-index 000000000000..1218e9d1719e
+index 0000000000..1218e9d171
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/rbtree-utils.c
 @@ -0,0 +1,80 @@
@@ -19674,7 +19674,7 @@ index 000000000000..1218e9d1719e
 +}
 diff --git a/tools/libfsimage/btrfs/rbtree-utils.h b/tools/libfsimage/btrfs/rbtree-utils.h
 new file mode 100644
-index 000000000000..6e71ef3259de
+index 0000000000..6e71ef3259
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/rbtree-utils.h
 @@ -0,0 +1,51 @@
@@ -19731,7 +19731,7 @@ index 000000000000..6e71ef3259de
 +#endif
 diff --git a/tools/libfsimage/btrfs/rbtree.c b/tools/libfsimage/btrfs/rbtree.c
 new file mode 100644
-index 000000000000..f942e47cb7b3
+index 0000000000..f942e47cb7
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/rbtree.c
 @@ -0,0 +1,547 @@
@@ -20284,7 +20284,7 @@ index 000000000000..f942e47cb7b3
 +}
 diff --git a/tools/libfsimage/btrfs/rbtree.h b/tools/libfsimage/btrfs/rbtree.h
 new file mode 100644
-index 000000000000..567e11eaf0dc
+index 0000000000..567e11eaf0
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/rbtree.h
 @@ -0,0 +1,117 @@
@@ -20407,7 +20407,7 @@ index 000000000000..567e11eaf0dc
 +#endif	/* _LINUX_RBTREE_H */
 diff --git a/tools/libfsimage/btrfs/rbtree_augmented.h b/tools/libfsimage/btrfs/rbtree_augmented.h
 new file mode 100644
-index 000000000000..d154f9bad2e4
+index 0000000000..d154f9bad2
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/rbtree_augmented.h
 @@ -0,0 +1,248 @@
@@ -20661,7 +20661,7 @@ index 000000000000..d154f9bad2e4
 +#endif	/* _LINUX_RBTREE_AUGMENTED_H */
 diff --git a/tools/libfsimage/btrfs/repair.c b/tools/libfsimage/btrfs/repair.c
 new file mode 100644
-index 000000000000..58fdfba7dd8d
+index 0000000000..58fdfba7dd
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/repair.c
 @@ -0,0 +1,48 @@
@@ -20715,7 +20715,7 @@ index 000000000000..58fdfba7dd8d
 +
 diff --git a/tools/libfsimage/btrfs/repair.h b/tools/libfsimage/btrfs/repair.h
 new file mode 100644
-index 000000000000..25d3849c26c8
+index 0000000000..25d3849c26
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/repair.h
 @@ -0,0 +1,32 @@
@@ -20753,7 +20753,7 @@ index 000000000000..25d3849c26c8
 +#endif
 diff --git a/tools/libfsimage/btrfs/root-tree.c b/tools/libfsimage/btrfs/root-tree.c
 new file mode 100644
-index 000000000000..6ab46eacc03e
+index 0000000000..6ab46eacc0
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/root-tree.c
 @@ -0,0 +1,190 @@
@@ -20949,7 +20949,7 @@ index 000000000000..6ab46eacc03e
 +}
 diff --git a/tools/libfsimage/btrfs/transaction.h b/tools/libfsimage/btrfs/transaction.h
 new file mode 100644
-index 000000000000..e014ba2d536c
+index 0000000000..e014ba2d53
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/transaction.h
 @@ -0,0 +1,62 @@
@@ -21017,7 +21017,7 @@ index 000000000000..e014ba2d536c
 +#endif
 diff --git a/tools/libfsimage/btrfs/utils.c b/tools/libfsimage/btrfs/utils.c
 new file mode 100644
-index 000000000000..8ecf5a39a0ad
+index 0000000000..8ecf5a39a0
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/utils.c
 @@ -0,0 +1,3240 @@
@@ -24263,7 +24263,7 @@ index 000000000000..8ecf5a39a0ad
 +}
 diff --git a/tools/libfsimage/btrfs/utils.h b/tools/libfsimage/btrfs/utils.h
 new file mode 100644
-index 000000000000..ac1ccc65ec02
+index 0000000000..ac1ccc65ec
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/utils.h
 @@ -0,0 +1,340 @@
@@ -24609,7 +24609,7 @@ index 000000000000..ac1ccc65ec02
 +#endif
 diff --git a/tools/libfsimage/btrfs/volumes.c b/tools/libfsimage/btrfs/volumes.c
 new file mode 100644
-index 000000000000..29e054b8a178
+index 0000000000..29e054b8a1
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/volumes.c
 @@ -0,0 +1,2132 @@
@@ -26747,7 +26747,7 @@ index 000000000000..29e054b8a178
 +}
 diff --git a/tools/libfsimage/btrfs/volumes.h b/tools/libfsimage/btrfs/volumes.h
 new file mode 100644
-index 000000000000..b2be08fbf019
+index 0000000000..b2be08fbf0
 --- /dev/null
 +++ b/tools/libfsimage/btrfs/volumes.h
 @@ -0,0 +1,227 @@

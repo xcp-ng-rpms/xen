@@ -6,7 +6,7 @@ Signed-off-by: Sergey Dyasli <sergey.dyasli@citrix.com>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 
 diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
-index 52caad51627e..f07bd36cdb7f 100644
+index c594f05ea9..e91e7aa5e0 100644
 --- a/xen/arch/x86/cpu-policy.c
 +++ b/xen/arch/x86/cpu-policy.c
 @@ -46,6 +46,8 @@ static const struct feature_name {
@@ -40,7 +40,7 @@ index 52caad51627e..f07bd36cdb7f 100644
      } while ( *ss );
  
 diff --git a/xen/arch/x86/include/asm/cpuid.h b/xen/arch/x86/include/asm/cpuid.h
-index b32ba0bbfe5c..412376cf1833 100644
+index b32ba0bbfe..412376cf18 100644
 --- a/xen/arch/x86/include/asm/cpuid.h
 +++ b/xen/arch/x86/include/asm/cpuid.h
 @@ -10,6 +10,8 @@
@@ -53,7 +53,7 @@ index b32ba0bbfe5c..412376cf1833 100644
  
  /*
 diff --git a/xen/arch/x86/setup.c b/xen/arch/x86/setup.c
-index 2148dde05f38..979aec26b4de 100644
+index 2148dde05f..979aec26b4 100644
 --- a/xen/arch/x86/setup.c
 +++ b/xen/arch/x86/setup.c
 @@ -1914,6 +1914,18 @@ void asmlinkage __init noreturn __start_xen(unsigned long mbi_p)

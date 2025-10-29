@@ -2,7 +2,7 @@ Don't adjust guest tsc to make it match the value the tsc should have
 had when a timer interrupt was supposed to be delivered.
 
 diff --git a/xen/arch/x86/hvm/hvm.c b/xen/arch/x86/hvm/hvm.c
-index d0e5c92a97d9..e5880de95083 100644
+index d0e5c92a97..e5880de950 100644
 --- a/xen/arch/x86/hvm/hvm.c
 +++ b/xen/arch/x86/hvm/hvm.c
 @@ -656,6 +656,8 @@ int hvm_domain_initialise(struct domain *d,

@@ -13,7 +13,7 @@ EPT sharing is turned off.
 
 Signed-off-by: Paul Durrant <paul.durrant@citrix.com>
 diff --git a/xen/arch/x86/mm/paging.c b/xen/arch/x86/mm/paging.c
-index dd47bde5ce40..ad31e65000fa 100644
+index dd47bde5ce..ad31e65000 100644
 --- a/xen/arch/x86/mm/paging.c
 +++ b/xen/arch/x86/mm/paging.c
 @@ -205,7 +205,7 @@ static int paging_log_dirty_enable(struct domain *d)
@@ -26,10 +26,10 @@ index dd47bde5ce40..ad31e65000fa 100644
          /*
           * Refuse to turn on global log-dirty mode
 diff --git a/xen/drivers/passthrough/x86/iommu.c b/xen/drivers/passthrough/x86/iommu.c
-index 8b1e0596b84a..47c90139b8c3 100644
+index 67f025c1ec..2d58ab4848 100644
 --- a/xen/drivers/passthrough/x86/iommu.c
 +++ b/xen/drivers/passthrough/x86/iommu.c
-@@ -792,8 +792,7 @@ bool arch_iommu_use_permitted(const struct domain *d)
+@@ -779,8 +779,7 @@ bool arch_iommu_use_permitted(const struct domain *d)
      return d == dom_io ||
             (likely(!mem_sharing_enabled(d)) &&
              likely(!mem_paging_enabled(d)) &&

@@ -27,7 +27,7 @@ injected.
 
 Signed-off-by: Roger Pau MonnÃ© <roger.pau@citrix.com>
 diff --git a/xen/arch/x86/hvm/vpt.c b/xen/arch/x86/hvm/vpt.c
-index e1d6845a2844..fd02e4ed80ad 100644
+index e1d6845a28..fd02e4ed80 100644
 --- a/xen/arch/x86/hvm/vpt.c
 +++ b/xen/arch/x86/hvm/vpt.c
 @@ -371,59 +371,59 @@ int pt_update_irq(struct vcpu *v)

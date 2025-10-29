@@ -1,5 +1,5 @@
 diff --git a/tools/firmware/hvmloader/pci.c b/tools/firmware/hvmloader/pci.c
-index c3c61ca060a6..b51734ee6a7b 100644
+index c3c61ca060..b51734ee6a 100644
 --- a/tools/firmware/hvmloader/pci.c
 +++ b/tools/firmware/hvmloader/pci.c
 @@ -188,7 +188,12 @@ void pci_setup(void)

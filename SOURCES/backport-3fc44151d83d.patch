@@ -17,7 +17,7 @@ Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Release-Acked-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
 
 diff --git a/xen/drivers/passthrough/amd/iommu_map.c b/xen/drivers/passthrough/amd/iommu_map.c
-index 1f0e4167566b..dde393645a62 100644
+index 1f0e416756..dde393645a 100644
 --- a/xen/drivers/passthrough/amd/iommu_map.c
 +++ b/xen/drivers/passthrough/amd/iommu_map.c
 @@ -167,15 +167,14 @@ int amd_iommu_set_root_page_table(struct amd_iommu_dte *dte,
@@ -85,10 +85,10 @@ index 1f0e4167566b..dde393645a62 100644
  
          return ret;
 diff --git a/xen/drivers/passthrough/vtd/iommu.c b/xen/drivers/passthrough/vtd/iommu.c
-index 3daedc4f5593..b0963bfcf74e 100644
+index f28de36458..2b13bfb41e 100644
 --- a/xen/drivers/passthrough/vtd/iommu.c
 +++ b/xen/drivers/passthrough/vtd/iommu.c
-@@ -1485,7 +1485,7 @@ int domain_context_mapping_one(
+@@ -1482,7 +1482,7 @@ int domain_context_mapping_one(
  {
      struct domain_iommu *hd = dom_iommu(domain);
      struct context_entry *context, *context_entries, lctxt;
@@ -97,7 +97,7 @@ index 3daedc4f5593..b0963bfcf74e 100644
      uint64_t maddr;
      uint16_t seg = iommu->drhd->segment, prev_did = 0;
      struct domain *prev_dom = NULL;
-@@ -1583,55 +1583,23 @@ int domain_context_mapping_one(
+@@ -1580,55 +1580,23 @@ int domain_context_mapping_one(
          ASSERT(!context_fault_disable(lctxt));
      }
  
@@ -168,7 +168,7 @@ index 3daedc4f5593..b0963bfcf74e 100644
      }
  
      iommu_sync_cache(context, sizeof(struct context_entry));
-@@ -2702,12 +2670,7 @@ static int __init cf_check vtd_setup(void)
+@@ -2699,12 +2667,7 @@ static int __init cf_check vtd_setup(void)
              iommu_intremap = iommu_intremap_off;
  
  #ifndef iommu_intpost

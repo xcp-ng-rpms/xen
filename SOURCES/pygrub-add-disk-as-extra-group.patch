@@ -6,7 +6,7 @@ that additional group in order to read the disks.
 
 Signed-off-by: Alejandro Vallejo <alejandro.vallejo@cloud.com>
 diff --git a/tools/pygrub/src/pygrub b/tools/pygrub/src/pygrub
-index 9d51f96070d9..d1d7eee328f2 100755
+index 9d51f96070..d1d7eee328 100755
 --- a/tools/pygrub/src/pygrub
 +++ b/tools/pygrub/src/pygrub
 @@ -17,6 +17,7 @@ from __future__ import print_function

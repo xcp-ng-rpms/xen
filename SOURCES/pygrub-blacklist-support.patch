@@ -1,5 +1,5 @@
 diff --git a/tools/pygrub/setup.py b/tools/pygrub/setup.py
-index be5d3ffd041b..c165661979d6 100644
+index be5d3ffd04..c165661979 100644
 --- a/tools/pygrub/setup.py
 +++ b/tools/pygrub/setup.py
 @@ -27,5 +27,8 @@ setup(name='pygrub',
@@ -13,7 +13,7 @@ index be5d3ffd041b..c165661979d6 100644
 +        ]
        )
 diff --git a/tools/pygrub/src/pygrub b/tools/pygrub/src/pygrub
-index 00ad3193e4a0..9397fc468a9b 100755
+index 00ad3193e4..9397fc468a 100755
 --- a/tools/pygrub/src/pygrub
 +++ b/tools/pygrub/src/pygrub
 @@ -31,6 +31,8 @@ import grub.GrubConf

@@ -17,7 +17,7 @@ conditionals, ignore them.
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/tools/pygrub/examples/sles-12-sp1.grub2 b/tools/pygrub/examples/sles-12-sp1.grub2
 new file mode 100644
-index 000000000000..4f04ae6ab9ec
+index 0000000000..4f04ae6ab9
 --- /dev/null
 +++ b/tools/pygrub/examples/sles-12-sp1.grub2
 @@ -0,0 +1,215 @@
@@ -238,7 +238,7 @@ index 000000000000..4f04ae6ab9ec
 +### END /etc/grub.d/90_persistent ###
 diff --git a/tools/pygrub/examples/ubuntu-12.04-lts.grub2 b/tools/pygrub/examples/ubuntu-12.04-lts.grub2
 new file mode 100644
-index 000000000000..59cb27807345
+index 0000000000..59cb278073
 --- /dev/null
 +++ b/tools/pygrub/examples/ubuntu-12.04-lts.grub2
 @@ -0,0 +1,166 @@
@@ -409,7 +409,7 @@ index 000000000000..59cb27807345
 +fi
 +### END /etc/grub.d/41_custom ###
 diff --git a/tools/pygrub/src/GrubConf.py b/tools/pygrub/src/GrubConf.py
-index 73f1bbed2f54..fc1be76fac9c 100644
+index 580c9628ca..bd3e9975e8 100644
 --- a/tools/pygrub/src/GrubConf.py
 +++ b/tools/pygrub/src/GrubConf.py
 @@ -380,6 +380,7 @@ class Grub2ConfigFile(_GrubConfigFile):

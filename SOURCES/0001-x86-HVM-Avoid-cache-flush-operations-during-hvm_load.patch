@@ -16,7 +16,7 @@ seconds.
 
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/xen/arch/x86/hvm/mtrr.c b/xen/arch/x86/hvm/mtrr.c
-index 4620ed427cba..7de24f494ca1 100644
+index 4620ed427c..7de24f494c 100644
 --- a/xen/arch/x86/hvm/mtrr.c
 +++ b/xen/arch/x86/hvm/mtrr.c
 @@ -44,6 +44,8 @@ static const uint8_t mm_type_tbl[MTRR_NUM_TYPES][X86_NUM_MT] = {
@@ -39,7 +39,7 @@ index 4620ed427cba..7de24f494ca1 100644
           d->vcpu && d->vcpu[0] )
      {
 diff --git a/xen/arch/x86/hvm/save.c b/xen/arch/x86/hvm/save.c
-index 8ab64057064e..859fa281bf64 100644
+index 8ab6405706..859fa281bf 100644
 --- a/xen/arch/x86/hvm/save.c
 +++ b/xen/arch/x86/hvm/save.c
 @@ -319,6 +319,8 @@ int hvm_load(struct domain *d, bool real, hvm_domain_context_t *h)
@@ -114,7 +114,7 @@ index 8ab64057064e..859fa281bf64 100644
  
  int _hvm_init_entry(struct hvm_domain_context *h, uint16_t tc, uint16_t inst,
 diff --git a/xen/arch/x86/include/asm/mtrr.h b/xen/arch/x86/include/asm/mtrr.h
-index 36dac0a775a3..b57209708008 100644
+index 48b59d2620..e42b26d68f 100644
 --- a/xen/arch/x86/include/asm/mtrr.h
 +++ b/xen/arch/x86/include/asm/mtrr.h
 @@ -48,6 +48,15 @@ struct mtrr_state {

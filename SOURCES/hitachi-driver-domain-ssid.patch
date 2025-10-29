@@ -1,5 +1,5 @@
 diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
-index f0698793b2a2..50f789610022 100644
+index f0698793b2..50f7896100 100644
 --- a/xen/include/xen/sched.h
 +++ b/xen/include/xen/sched.h
 @@ -549,6 +549,9 @@ struct domain
@@ -13,7 +13,7 @@ index f0698793b2a2..50f789610022 100644
      /* Control-plane tools handle for this domain. */
      xen_domain_handle_t handle;
 diff --git a/xen/xsm/silo.c b/xen/xsm/silo.c
-index b89b36428784..14ff6a634d97 100644
+index b89b364287..14ff6a634d 100644
 --- a/xen/xsm/silo.c
 +++ b/xen/xsm/silo.c
 @@ -20,6 +20,20 @@

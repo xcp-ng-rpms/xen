@@ -10,7 +10,7 @@ address instead.
 
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
-index 2dcd1d1a4f8a..f0698793b2a2 100644
+index 2dcd1d1a4f..f0698793b2 100644
 --- a/xen/include/xen/sched.h
 +++ b/xen/include/xen/sched.h
 @@ -801,11 +801,19 @@ void vcpu_end_shutdown_deferral(struct vcpu *v);

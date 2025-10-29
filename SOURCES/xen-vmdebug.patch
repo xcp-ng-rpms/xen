@@ -6,7 +6,7 @@ Subject: [PATCH] xen-vmdebug - a developer tool for poking virtual machines
 Supports:
  - get/set HVM parameters
 diff --git a/tools/Makefile b/tools/Makefile
-index bbb7df5b619d..4048db63063f 100644
+index 15454ee7aa..2aa38020ad 100644
 --- a/tools/Makefile
 +++ b/tools/Makefile
 @@ -291,3 +291,4 @@ subtree-force-update-all:
@@ -16,7 +16,7 @@ index bbb7df5b619d..4048db63063f 100644
 +SUBDIRS-y += vmdebug
 diff --git a/tools/vmdebug/Makefile b/tools/vmdebug/Makefile
 new file mode 100644
-index 000000000000..df1188592751
+index 0000000000..df11885927
 --- /dev/null
 +++ b/tools/vmdebug/Makefile
 @@ -0,0 +1,32 @@
@@ -54,7 +54,7 @@ index 000000000000..df1188592751
 +
 diff --git a/tools/vmdebug/cmdtable.c b/tools/vmdebug/cmdtable.c
 new file mode 100644
-index 000000000000..d4f3b2db0160
+index 0000000000..d4f3b2db01
 --- /dev/null
 +++ b/tools/vmdebug/cmdtable.c
 @@ -0,0 +1,39 @@
@@ -99,7 +99,7 @@ index 000000000000..d4f3b2db0160
 + */
 diff --git a/tools/vmdebug/hvmparam.c b/tools/vmdebug/hvmparam.c
 new file mode 100644
-index 000000000000..8220852ba1b7
+index 0000000000..8220852ba1
 --- /dev/null
 +++ b/tools/vmdebug/hvmparam.c
 @@ -0,0 +1,222 @@
@@ -327,7 +327,7 @@ index 000000000000..8220852ba1b7
 + */
 diff --git a/tools/vmdebug/lazy.c b/tools/vmdebug/lazy.c
 new file mode 100644
-index 000000000000..0f0db4ab242e
+index 0000000000..0f0db4ab24
 --- /dev/null
 +++ b/tools/vmdebug/lazy.c
 @@ -0,0 +1,37 @@
@@ -370,7 +370,7 @@ index 000000000000..0f0db4ab242e
 + */
 diff --git a/tools/vmdebug/main.c b/tools/vmdebug/main.c
 new file mode 100644
-index 000000000000..ca2caba1f38c
+index 0000000000..ca2caba1f3
 --- /dev/null
 +++ b/tools/vmdebug/main.c
 @@ -0,0 +1,162 @@
@@ -538,7 +538,7 @@ index 000000000000..ca2caba1f38c
 + */
 diff --git a/tools/vmdebug/vmdebug.h b/tools/vmdebug/vmdebug.h
 new file mode 100644
-index 000000000000..02b575a4b3d9
+index 0000000000..02b575a4b3
 --- /dev/null
 +++ b/tools/vmdebug/vmdebug.h
 @@ -0,0 +1,44 @@

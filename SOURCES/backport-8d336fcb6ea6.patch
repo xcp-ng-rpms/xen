@@ -9,7 +9,7 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Acked-by: Christian Lindig <christian.lindig@cloud.com>
 
 diff --git a/tools/ocaml/libs/xc/Makefile b/tools/ocaml/libs/xc/Makefile
-index 1d9fecb06ef2..cdf4d01dac52 100644
+index 1d9fecb06e..cdf4d01dac 100644
 --- a/tools/ocaml/libs/xc/Makefile
 +++ b/tools/ocaml/libs/xc/Makefile
 @@ -2,7 +2,7 @@ OCAML_TOPLEVEL=$(CURDIR)/../..
@@ -22,7 +22,7 @@ index 1d9fecb06ef2..cdf4d01dac52 100644
  OCAMLINCLUDE += -I ../mmap -I ../eventchn
  
 diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
-index c6da9bb09137..7d188bc8f3fb 100644
+index c6da9bb091..7d188bc8f3 100644
 --- a/tools/ocaml/libs/xc/xenctrl_stubs.c
 +++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
 @@ -25,6 +25,8 @@
@@ -61,7 +61,7 @@ index c6da9bb09137..7d188bc8f3fb 100644
  }
 diff --git a/tools/ocaml/libs/xen-caml-compat.h b/tools/ocaml/libs/xen-caml-compat.h
 new file mode 100644
-index 000000000000..14aede21284d
+index 0000000000..14aede2128
 --- /dev/null
 +++ b/tools/ocaml/libs/xen-caml-compat.h
 @@ -0,0 +1,23 @@

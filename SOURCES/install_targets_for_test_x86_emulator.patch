@@ -6,7 +6,7 @@ install/uninstall rules
 Signed-off-by: Alejandro Vallejo <alejandro.vallejo@cloud.com>
 
 diff --git a/tools/tests/x86_emulator/Makefile b/tools/tests/x86_emulator/Makefile
-index 834b2112e7fe..30edf7e0185d 100644
+index 834b2112e7..30edf7e018 100644
 --- a/tools/tests/x86_emulator/Makefile
 +++ b/tools/tests/x86_emulator/Makefile
 @@ -269,8 +269,15 @@ clean:

@@ -8,7 +8,7 @@ hypercall (issued by another task).  Handle this by retrying the op.
 
 Signed-off-by: David Vrabel <david.vrabel@citrix.com>
 diff --git a/tools/libs/ctrl/xc_domain.c b/tools/libs/ctrl/xc_domain.c
-index f2d9d14b4d9f..84f7e747d520 100644
+index f2d9d14b4d..84f7e747d5 100644
 --- a/tools/libs/ctrl/xc_domain.c
 +++ b/tools/libs/ctrl/xc_domain.c
 @@ -607,6 +607,7 @@ int xc_shadow_control(xc_interface *xch,

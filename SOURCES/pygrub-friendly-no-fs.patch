@@ -1,5 +1,5 @@
 diff --git a/tools/pygrub/src/pygrub b/tools/pygrub/src/pygrub
-index 926737754a19..9f99065e0103 100755
+index 926737754a..9f99065e01 100755
 --- a/tools/pygrub/src/pygrub
 +++ b/tools/pygrub/src/pygrub
 @@ -1064,7 +1064,15 @@ if __name__ == "__main__":

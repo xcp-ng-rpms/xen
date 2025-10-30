@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.1%{?dist}
+Release: %{?xsrel}.0.ydi.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -210,6 +210,8 @@ Patch235:	0001-gic-debug.patch
 Patch236:	0001-acpi-arm-relax-MADT-GICC-entry-length-check-to-suppo.patch
 Patch237:	0001-Add-debug-traces-to-DOM0-loading.patch
 Patch238:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch239:	xsa473-1.patch
+Patch240:	xsa473-2.patch
 ################################################################################
 # Debugging patches
 #
@@ -1147,8 +1149,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Oct 29 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.1
+* Wed Oct 29 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.2
 - Upgrade to 4.19.3
+- Add XSA-473 patches
 
 * Fri Oct 10 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.6
 - Merge former xcpng-8.3 and ydi/9 work

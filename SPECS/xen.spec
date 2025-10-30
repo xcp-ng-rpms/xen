@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.3%{?dist}
+Release: %{?xsrel}.0.ydi.4%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -213,6 +213,7 @@ Patch238:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
 Patch239:	xsa473-1.patch
 Patch240:	xsa473-2.patch
 Patch241:	0001-Add-debug-in-gnttab_map_grant_ref.patch
+Patch242:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
 ################################################################################
 # Debugging patches
 #
@@ -1150,6 +1151,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Thu Oct 30 2025 Yann Sionneau <yann.sionneau@vates.tech> - 4.19.3-0.0.ydi.4
+- Add debug in xc_dom_gnttab_init in libxenguest
+
 * Thu Oct 30 2025 Yann Sionneau <yann.sionneau@vates.tech> - 4.19.3-0.0.ydi.3
 - Add debug in gnttab_map_grant_ref
 

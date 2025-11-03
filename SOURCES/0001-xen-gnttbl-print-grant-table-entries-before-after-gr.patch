@@ -1,0 +1,44 @@
+From 297e40689b5642eeaecb7d2250a41697974ec98c Mon Sep 17 00:00:00 2001
+From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+Date: Mon, 3 Nov 2025 16:40:03 +0100
+Subject: [PATCH] xen/gnttbl: print grant table entries before/after grant ref
+ mapping
+
+Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+---
+ xen/common/grant_table.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index 2751c2d58f..22bc60bd2a 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -1369,6 +1369,8 @@ static void dump_grant_op(struct gnttab_map_grant_ref *op) {
+ 
+ extern bool grant_table_req;
+ 
++static void cf_check gnttab_usage_print_all(unsigned char key);
++
+ static long
+ gnttab_map_grant_ref(
+     XEN_GUEST_HANDLE_PARAM(gnttab_map_grant_ref_t) uop, unsigned int count)
+@@ -1389,6 +1391,7 @@ gnttab_map_grant_ref(
+ 	dprintk(XENLOG_ERR, "%s: before map_grant_ref()\n", __func__);
+ 	dump_grant_op(&op);
+ 
++    gnttab_usage_print_all('q');
+ 
+     grant_table_req = true;
+ 
+@@ -1399,6 +1402,8 @@ gnttab_map_grant_ref(
+ 	dprintk(XENLOG_ERR, "%s: after map_grant_ref()\n", __func__);
+ 	dump_grant_op(&op);
+ 
++    gnttab_usage_print_all('q');
++
+         if ( unlikely(__copy_to_guest_offset(uop, i, &op, 1)) ) {
+ 	    dprintk(XENLOG_ERR, "%s: __copy_to_guest_offset failed\n", __func__);
+             return -EFAULT;
+-- 
+2.51.1
+

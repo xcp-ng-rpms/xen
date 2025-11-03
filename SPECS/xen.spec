@@ -218,6 +218,7 @@ Patch243:       0001-arm-add-debug-prints-for-grant-table-and-p2m-entries.patch
 Patch244:       0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
 Patch245:       0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 Patch246:       0001-xen-gnttbl-check-the-content-of-gnttbl-entries-when-.patch
+Patch247:       0001-xen-gnttbl-compilation-fix-for-prev-patch.patch
 ################################################################################
 # Debugging patches
 #
@@ -1158,6 +1159,7 @@ fi
 * Fri Nov 3 2025 Oleksii Kurochko <oleksii.kurochko@gmail.com> - 4.19.3-0.0.ydi.7
 - xenconsoled: add debug log in possible places of grant ref unmapping
 - xen/gnttbl: check the content of gnttbl entries when unmap happening
+- xen/gnttbl: compilation fix for prev patch
 
 * Fri Oct 31 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.5
 - add debug prints for grant table and p2m entries

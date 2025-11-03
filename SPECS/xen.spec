@@ -200,7 +200,6 @@ Patch223:	vtpm-ppi-acpi-dsm.patch
 Patch226:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 Patch227:	0001-xen-configs-introduce-mtcollins_defconfig.patch
 Patch228:	forge_a_debug_config_for_mtcollins.patch
-Patch229:	patch_wip-no-xenguest-arm.patch
 Patch230:	patch_wip-no-viridian-arm.patch
 Patch231:	patch_workaround-current_text_addr-x86-asm.patch
 Patch232:	arm-build.patch
@@ -221,6 +220,8 @@ Patch246:       0001-xen-gnttbl-check-the-content-of-gnttbl-entries-when-.patch
 Patch247:       0001-xen-gnttbl-compilation-fix-for-prev-patch.patch
 Patch248: 0001-xen-gnttbl-add-debug-messages-to-investigate-an-amou.patch
 Patch249: 0001-xen-gnttbl-redefine-INITIAL_NR_GRANT_FRAMES-and-allo.patch
+Patch250: 0001-patch-xenguest-for-arm.patch
+Patch251: 0001-Remove-x86-only-libacpi-option.patch
 ################################################################################
 # Debugging patches
 #

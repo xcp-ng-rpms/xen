@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.9%{?dist}
+Release: %{?xsrel}.0.ydi.10%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -220,6 +220,7 @@ Patch245:       0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 Patch246:       0001-xen-gnttbl-check-the-content-of-gnttbl-entries-when-.patch
 Patch247:       0001-xen-gnttbl-compilation-fix-for-prev-patch.patch
 Patch248: 0001-xen-gnttbl-add-debug-messages-to-investigate-an-amou.patch
+Patch249: 0001-xen-gnttbl-redefine-INITIAL_NR_GRANT_FRAMES-and-allo.patch
 ################################################################################
 # Debugging patches
 #
@@ -1162,6 +1163,7 @@ fi
 - xen/gnttbl: check the content of gnttbl entries when unmap happening
 - xen/gnttbl: compilation fix for prev patch
 - add debug messages to investigate an amount grant frames
+- redefine INITIAL_NR_GRANT_FRAMES and allocate all INITIAL_NR_GRANT_FRAMES
 
 * Fri Oct 31 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.5
 - add debug prints for grant table and p2m entries

@@ -1,0 +1,46 @@
+From 91779eb98a9843389562120bb9a2cb7d7c7f28ef Mon Sep 17 00:00:00 2001
+From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+Date: Mon, 3 Nov 2025 13:36:33 +0100
+Subject: [PATCH] xen/gnttbl: redefine INITIAL_NR_GRANT_FRAMES and allocate all
+ INITIAL_NR_GRANT_FRAMES
+
+Just to verify how xenconsoled issue will change if allocate all necessary
+grant frames.
+
+Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+---
+ xen/arch/arm/include/asm/grant_table.h | 2 +-
+ xen/common/grant_table.c               | 4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/arm/include/asm/grant_table.h b/xen/arch/arm/include/asm/grant_table.h
+index ac7e3badb0..e441cff481 100644
+--- a/xen/arch/arm/include/asm/grant_table.h
++++ b/xen/arch/arm/include/asm/grant_table.h
+@@ -8,7 +8,7 @@
+ 
+ #include <asm/guest_atomics.h>
+ 
+-#define INITIAL_NR_GRANT_FRAMES 1U
++#define INITIAL_NR_GRANT_FRAMES 4U
+ #define GNTTAB_MAX_VERSION 1
+ 
+ static inline void gnttab_clear_flags(struct domain *d,
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index 69eb29c2fc..2751c2d58f 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -2105,7 +2105,9 @@ int grant_table_init(struct domain *d, int max_grant_frames,
+     printk(">>> %s 0\n", __func__);
+ 
+     /* gnttab_grow_table() allocates a min number of frames, so 0 is okay. */
+-    ret = gnttab_grow_table(d, 0);
++    ret = gnttab_grow_table(d, INITIAL_NR_GRANT_FRAMES);
++
++    printk(">>> %s 1\n", __func__);
+ 
+     grant_write_unlock(gt);
+ 
+-- 
+2.51.1
+

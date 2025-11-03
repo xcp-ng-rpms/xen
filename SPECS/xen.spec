@@ -329,6 +329,7 @@ Patch1003: xsa475-2.patch
 
 # SMBIOS 2.6 patches
 Patch1004: 0001-hvmloader-Update-to-SMBIOS-2.6.patch
+Patch1005: 0001-hvmloader-Add-a-temporary-way-of-forcing-legacy-SMBI.patch
 
 ExclusiveArch: x86_64
 
@@ -1176,8 +1177,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Mon Oct 27 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.3
+* Mon Nov 03 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.3
 - Update SMBIOS version to 2.6 and fix UUID endianness issues.
+- Add temporary parameter to force legacy SMBIOS version and UUID behavior.
 
 * Tue Oct 21 2025 Teddy Astie <teddy.astie@vates.tech> - 4.17.5-20.2
 - Fixes for XSA-475 CVE-2025-58147 CVE-2025-58148

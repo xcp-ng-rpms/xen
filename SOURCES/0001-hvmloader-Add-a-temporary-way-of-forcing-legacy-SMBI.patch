@@ -1,0 +1,71 @@
+From b4d42ec269684f374d28e34351e6046f9b6cd4f9 Mon Sep 17 00:00:00 2001
+Message-ID: <b4d42ec269684f374d28e34351e6046f9b6cd4f9.1762190698.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 3 Nov 2025 18:24:52 +0100
+Subject: [PATCH] hvmloader: Add a temporary way of forcing legacy SMBIOS
+
+Add a temporary option for reversing "Update to SMBIOS 2.6" if
+found problematic.
+
+Setting the guest xenstore variable "hvmloader/smbios/force_legacy"
+to 1 forces the legacy behavior.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ tools/firmware/hvmloader/smbios.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/tools/firmware/hvmloader/smbios.c b/tools/firmware/hvmloader/smbios.c
+index 6647de79ea..7eb368702f 100644
+--- a/tools/firmware/hvmloader/smbios.c
++++ b/tools/firmware/hvmloader/smbios.c
+@@ -99,6 +99,7 @@ smbios_type_127_init(void *start);
+ 
+ static uint32_t *smbios_pt_addr = NULL;
+ static uint32_t smbios_pt_length = 0;
++static bool smbios_force_legacy = false;
+ 
+ static void
+ smbios_pt_init(void)
+@@ -311,6 +312,11 @@ hvm_write_smbios_tables(
+ 
+     xen_version_str[sizeof(xen_version_str)-1] = '\0';
+ 
++    smbios_force_legacy = strtoll(xenstore_read("hvmloader/smbios/force_legacy", "0"),
++                                  NULL, 0);
++    if ( smbios_force_legacy )
++        printf("Forcing legacy SMBIOS table version !\n");
++
+     /* scratch_start is a safe large memory area for scratch. */
+     len = write_smbios_tables((void *)ep, (void *)scratch_start,
+                               hvm_info->nr_vcpus, get_memsize(),
+@@ -352,7 +358,7 @@ smbios_entry_point_init(void *start,
+     memcpy(ep->anchor_string, "_SM_", 4);
+     ep->length = 0x1f;
+     ep->smbios_major_version = 2;
+-    ep->smbios_minor_version = 6;
++    ep->smbios_minor_version = smbios_force_legacy ? 4 : 6;
+     ep->max_structure_size = max_structure_size;
+     ep->entry_point_revision = 0;
+     memcpy(ep->intermediate_anchor_string, "_DMI_", 5);
+@@ -462,6 +468,9 @@ smbios_type_1_init(void *start, const char *xen_version,
+     p->version_str = 3;
+     p->serial_number_str = 4;
+ 
++    if ( smbios_force_legacy )
++        memcpy(p->uuid, uuid, 16);
++    else {
+     /*
+      * Xen toolstack uses big endian UUIDs, however SMBIOS specs uses another
+      * representation specified in SMBIOS >= 2.6) has the first 3 components
+@@ -478,6 +487,7 @@ smbios_type_1_init(void *start, const char *xen_version,
+     p->uuid[7] = uuid[6];
+     /* Rest */
+     memcpy(p->uuid + 8, uuid + 8, 8);
++    }
+ 
+     p->wake_up_type = 0x06; /* power switch */
+     p->sku_str = 0;
+-- 
+2.51.2
+

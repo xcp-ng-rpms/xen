@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.16%{?dist}
+Release: %{?xsrel}.0.ydi.17%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -200,7 +200,6 @@ Patch223:	vtpm-ppi-acpi-dsm.patch
 Patch226:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 Patch227:	0001-xen-configs-introduce-mtcollins_defconfig.patch
 Patch228:	forge_a_debug_config_for_mtcollins.patch
-Patch229:	patch_wip-no-xenguest-arm.patch
 Patch230:	patch_wip-no-viridian-arm.patch
 Patch231:	patch_workaround-current_text_addr-x86-asm.patch
 Patch232:	arm-build.patch
@@ -225,6 +224,8 @@ Patch250:	check_how_console_ring_page_is_mapped.patch
 Patch251:	xenstored__add_extra_logs_around_domain_introduction.patch
 Patch252:	0001-fixup-xenctrl-stubs.patch
 Patch253:	from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
+Patch254: 0001-Remove-x86-only-libacpi-option.patch
+Patch255: 0001-patch-xenguest-for-arm.patch
 ################################################################################
 # Debugging patches
 #

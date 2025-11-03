@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.6%{?dist}
+Release: %{?xsrel}.0.ydi.7%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -216,6 +216,7 @@ Patch241:	0001-Add-debug-in-gnttab_map_grant_ref.patch
 Patch242:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
 Patch243:       0001-arm-add-debug-prints-for-grant-table-and-p2m-entries.patch
 Patch244:       0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
+Patch245:       0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 ################################################################################
 # Debugging patches
 #
@@ -1153,6 +1154,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Nov 3 2025 Oleksii Kurochko <oleksii.kurochko@gmail.com> - 4.19.3-0.0.ydi.7
+- xenconsoled: add debug log in possible places of grant ref unmapping
+
 * Fri Oct 31 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.5
 - add debug prints for grant table and p2m entries
 - limit amount of p2m lookup messages

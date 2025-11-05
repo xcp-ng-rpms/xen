@@ -851,10 +851,10 @@ rm %{buildroot}/%{_libexecdir}/%{name}/bin/init-dom0less
 %{_libexecdir}/%{name}/bin/init-xenstore-domain
 %{_libexecdir}/%{name}/bin/lsevtchn
 %{_libexecdir}/%{name}/bin/readnotes
-%{_libexecdir}/%{name}/bin/xenguest
 %{_libexecdir}/%{name}/bin/xenpaging
 %{_libexecdir}/%{name}/boot/hvmloader
 %endif
+%{_libexecdir}/%{name}/bin/xenguest
 %{_libexecdir}/%{name}/bin/libxl-save-helper
 %{_libexecdir}/%{name}/bin/pygrub
 %{_libexecdir}/%{name}/bin/verify-stream-v2

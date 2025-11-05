@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.13%{?dist}
+Release: %{?xsrel}.0.ydi.14%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -224,6 +224,7 @@ Patch249: 0001-xen-gnttbl-redefine-INITIAL_NR_GRANT_FRAMES-and-allo.patch
 Patch250: 0001-xen-gnttbl-print-grant-table-entries-before-after-gr.patch
 Patch251: 0001-check-how-console-ring-page-is-mapped.patch
 Patch252: 0001-xenstored-add-extra-logs-around-domain-introduction.patch
+Patch253: 0001-fixup-xenctrl-stubs.patch
 ################################################################################
 # Debugging patches
 #

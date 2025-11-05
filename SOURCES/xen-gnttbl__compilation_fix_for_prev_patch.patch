@@ -1,17 +1,9 @@
-From fea692e0edcec38331cbfe9e2e786d0435f244e5 Mon Sep 17 00:00:00 2001
+xen/gnttbl: compilation fix for prev patch
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Mon, 3 Nov 2025 11:34:05 +0100
-Subject: [PATCH] xen/gnttbl: compilation fix for prev patch
 
 Fixes: c42c4b22fe ("xen/gnttbl: check the content of gnttbl entries when unmap happening")
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- ...-limit-amount-of-p2m-lookup-messages.patch |  82 ----------
- ...debug-log-in-possible-places-of-gran.patch | 150 ------------------
- xen/common/grant_table.c                      |   4 +-
- 3 files changed, 2 insertions(+), 234 deletions(-)
- delete mode 100644 0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
- delete mode 100644 0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 
 diff --git a/0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch b/0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
 deleted file mode 100644
@@ -279,6 +271,3 @@ index e5a74e52b5..99c01a440e 100644
  
      for_each_domain ( d )
          gnttab_usage_print(d);
--- 
-2.51.1
-

@@ -1,15 +1,11 @@
-From fb587c87c52d139f3011ac13f388b9df3ccc9fea Mon Sep 17 00:00:00 2001
+xenstored: add extra logs around domain introduction
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Tue, 4 Nov 2025 09:40:33 +0100
-Subject: [PATCH] xenstored: add extra logs around domain introduction
 
 By these logs I want to understand why
 xengnttab_map_grant_ref(...,GNTTAB_RESERVED_XENSTORE,...) isn't called.
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- tools/xenstored/domain.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
 
 diff --git a/tools/xenstored/domain.c b/tools/xenstored/domain.c
 index 64c8fd0cc3..02e8c134f6 100644
@@ -59,6 +55,3 @@ index 64c8fd0cc3..02e8c134f6 100644
  	if (get_strings(in, vec, ARRAY_SIZE(vec)) < ARRAY_SIZE(vec))
  		return EINVAL;
  
--- 
-2.51.1
-

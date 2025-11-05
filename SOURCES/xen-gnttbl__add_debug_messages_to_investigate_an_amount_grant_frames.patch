@@ -1,13 +1,8 @@
-From f7fb75508abbc304771c53496e2eeeed5d1a24cb Mon Sep 17 00:00:00 2001
+xen/gnttbl: add debug messages to investigate an amount grant frames
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Mon, 3 Nov 2025 12:44:53 +0100
-Subject: [PATCH] xen/gnttbl: add debug messages to investigate an amount grant
- frames
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- xen/common/grant_table.c | 36 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 36 insertions(+)
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
 index 99c01a440e..69eb29c2fc 100644
@@ -146,6 +141,3 @@ index 99c01a440e..69eb29c2fc 100644
          if ( nr_grant <= gt->max_grant_frames )
              gnttab_grow_table(d, nr_grant);
  
--- 
-2.51.1
-

@@ -1,15 +1,8 @@
-From c42c4b22fee429c907670c261df5ce857280ab26 Mon Sep 17 00:00:00 2001
+xen/gnttbl: check the content of gnttbl entries when unmap happening
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Mon, 3 Nov 2025 11:22:41 +0100
-Subject: [PATCH] xen/gnttbl: check the content of gnttbl entries when unmap
- happening
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- ...debug-log-in-possible-places-of-gran.patch | 150 ++++++++++++++++++
- xen/common/grant_table.c                      |  22 +++
- 2 files changed, 172 insertions(+)
- create mode 100644 0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 
 diff --git a/0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch b/0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
 new file mode 100644
@@ -214,6 +207,3 @@ index cc6dad038b..e5a74e52b5 100644
  }
  
  
--- 
-2.51.1
-

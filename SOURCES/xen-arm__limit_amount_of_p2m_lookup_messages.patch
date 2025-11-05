@@ -1,16 +1,11 @@
-From ae9d097d874406a25f0d6d7cd64556f9f5e7104e Mon Sep 17 00:00:00 2001
+xen/arm: limit amount of p2m lookup messages
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Fri, 31 Oct 2025 17:50:58 +0100
-Subject: [PATCH] xen/arm: limit amount of p2m lookup messages
 
 Print p2m entries information only when grant table mapping
 happens.
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- xen/arch/arm/mmu/p2m.c   | 19 ++++++++++++-------
- xen/common/grant_table.c |  9 +++++++++
- 2 files changed, 21 insertions(+), 7 deletions(-)
 
 diff --git a/xen/arch/arm/mmu/p2m.c b/xen/arch/arm/mmu/p2m.c
 index fafbafc7fc..09770e6b57 100644
@@ -77,6 +72,3 @@ index 22c7076189..cc6dad038b 100644
  	dprintk(XENLOG_ERR, "%s: after map_grant_ref()\n", __func__);
  	dump_grant_op(&op);
  
--- 
-2.51.0
-

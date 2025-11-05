@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.14%{?dist}
+Release: %{?xsrel}.0.ydi.15%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -207,24 +207,24 @@ Patch232:	arm-build.patch
 Patch233:	0001-Boot-debug-traces.patch
 Patch234:	acpi-debug.patch
 Patch235:	0001-gic-debug.patch
-Patch236:	0001-acpi-arm-relax-MADT-GICC-entry-length-check-to-suppo.patch
-Patch237:	0001-Add-debug-traces-to-DOM0-loading.patch
-Patch238:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
-Patch239:	xsa473-1.patch
-Patch240:	xsa473-2.patch
-Patch241:	0001-Add-debug-in-gnttab_map_grant_ref.patch
-Patch242:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
-Patch243:       0001-arm-add-debug-prints-for-grant-table-and-p2m-entries.patch
-Patch244:       0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
-Patch245:       0001-xenconsoled-add-debug-log-in-possible-places-of-gran.patch
-Patch246:       0001-xen-gnttbl-check-the-content-of-gnttbl-entries-when-.patch
-Patch247:       0001-xen-gnttbl-compilation-fix-for-prev-patch.patch
-Patch248: 0001-xen-gnttbl-add-debug-messages-to-investigate-an-amou.patch
-Patch249: 0001-xen-gnttbl-redefine-INITIAL_NR_GRANT_FRAMES-and-allo.patch
-Patch250: 0001-xen-gnttbl-print-grant-table-entries-before-after-gr.patch
-Patch251: 0001-check-how-console-ring-page-is-mapped.patch
-Patch252: 0001-xenstored-add-extra-logs-around-domain-introduction.patch
-Patch253: 0001-fixup-xenctrl-stubs.patch
+Patch236:	0001-Add-debug-traces-to-DOM0-loading.patch
+Patch237:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch238:	xsa473-1.patch
+Patch239:	xsa473-2.patch
+Patch240:	0001-Add-debug-in-gnttab_map_grant_ref.patch
+Patch241:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
+Patch242:	arm__add_debug_prints_for_grant_table_and_p2m_entries.patch
+Patch243:	xen-arm__limit_amount_of_p2m_lookup_messages.patch
+Patch244:	xenconsoled__add_debug_log_in_possible_places_of_grant_ref_unmapping.patch
+Patch245:	xen-gnttbl__check_the_content_of_gnttbl_entries_when_unmap_happening.patch
+Patch246:	xen-gnttbl__compilation_fix_for_prev_patch.patch
+Patch247:	xen-gnttbl__add_debug_messages_to_investigate_an_amount_grant_frames.patch
+Patch248:	xen-gnttbl__redefine_initial_nr_grant_frames_and_allocate_all_initial_nr_grant_frames.patch
+Patch249:	xen-gnttbl__print_grant_table_entries_before-after_grant_ref_mapping.patch
+Patch250:	check_how_console_ring_page_is_mapped.patch
+Patch251:	xenstored__add_extra_logs_around_domain_introduction.patch
+Patch252:	0001-fixup-xenctrl-stubs.patch
+Patch253:	from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
 ################################################################################
 # Debugging patches
 #
@@ -1162,7 +1162,7 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Fri Nov 3 2025 Oleksii Kurochko <oleksii.kurochko@gmail.com> - 4.19.3-0.0.ydi.7
+* Fri Nov 3 2025 Oleksii Kurochko <oleksii.kurochko@gmail.com> - 4.19.3-0.0.ydi.15
 - xenconsoled: add debug log in possible places of grant ref unmapping
 - xen/gnttbl: check the content of gnttbl entries when unmap happening
 - xen/gnttbl: compilation fix for prev patch
@@ -1171,6 +1171,7 @@ fi
 - print grant table entries before/after grant ref mapping.
 - check how console ring page is mapped
 - xenstored: add extra logs around domain introduction
+- more generic MADT APIC length fix
 
 * Fri Oct 31 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.5
 - add debug prints for grant table and p2m entries

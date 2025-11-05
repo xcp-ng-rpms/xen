@@ -1,17 +1,11 @@
-From 91779eb98a9843389562120bb9a2cb7d7c7f28ef Mon Sep 17 00:00:00 2001
+xen/gnttbl: redefine INITIAL_NR_GRANT_FRAMES and allocate all INITIAL_NR_GRANT_FRAMES
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Mon, 3 Nov 2025 13:36:33 +0100
-Subject: [PATCH] xen/gnttbl: redefine INITIAL_NR_GRANT_FRAMES and allocate all
- INITIAL_NR_GRANT_FRAMES
 
 Just to verify how xenconsoled issue will change if allocate all necessary
 grant frames.
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- xen/arch/arm/include/asm/grant_table.h | 2 +-
- xen/common/grant_table.c               | 4 +++-
- 2 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/xen/arch/arm/include/asm/grant_table.h b/xen/arch/arm/include/asm/grant_table.h
 index ac7e3badb0..e441cff481 100644
@@ -41,6 +35,3 @@ index 69eb29c2fc..2751c2d58f 100644
  
      grant_write_unlock(gt);
  
--- 
-2.51.1
-

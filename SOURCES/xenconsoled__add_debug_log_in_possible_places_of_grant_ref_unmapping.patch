@@ -1,15 +1,8 @@
-From 29981f8f83d1a75381f33a9e104020f9cce61f92 Mon Sep 17 00:00:00 2001
+xenconsoled: add debug log in possible places of grant ref unmapping
+
 From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
-Date: Mon, 3 Nov 2025 10:12:36 +0100
-Subject: [PATCH] xenconsoled: add debug log in possible places of grant ref
- unmapping
 
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
----
- ...-limit-amount-of-p2m-lookup-messages.patch | 82 +++++++++++++++++++
- tools/console/daemon/io.c                     | 17 ++++
- 2 files changed, 99 insertions(+)
- create mode 100644 0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
 
 diff --git a/0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch b/0001-xen-arm-limit-amount-of-p2m-lookup-messages.patch
 new file mode 100644
@@ -145,6 +138,3 @@ index f4e366ade0..0f8d68d5ea 100644
  	console_iter_void_arg1(d, console_unmap_interface);
  	console_iter_void_arg1(d, console_close_evtchn);
  }
--- 
-2.51.1
-

@@ -9,7 +9,7 @@ host's GICC header length.
 Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
 
 diff --git a/xen/arch/arm/gic-v2.c b/xen/arch/arm/gic-v2.c
-index 02043c0d4b..2ec9fe8773 100644
+index 02043c0d4b..2f5abd8bd7 100644
 --- a/xen/arch/arm/gic-v2.c
 +++ b/xen/arch/arm/gic-v2.c
 @@ -1121,7 +1121,10 @@ static int gicv2_make_hwdom_madt(const struct domain *d, u32 offset)
@@ -19,13 +19,13 @@ index 02043c0d4b..2ec9fe8773 100644
 -    size = ACPI_MADT_GICC_LENGTH;
 +    size = host_gicc->header.length;
 +
-+    printk("ACPI_MADT_GICC_LENGTH->%ld\n", size);
++    printk("ACPI_MADT_GICC_LENGTH->%u\n", size);
 +
      /* Add Generic Interrupt */
      for ( i = 0; i < d->max_vcpus; i++ )
      {
 diff --git a/xen/arch/arm/gic-v3.c b/xen/arch/arm/gic-v3.c
-index b46036e4dc..6c9f4cada7 100644
+index b46036e4dc..552243773d 100644
 --- a/xen/arch/arm/gic-v3.c
 +++ b/xen/arch/arm/gic-v3.c
 @@ -1533,7 +1533,10 @@ static int gicv3_make_hwdom_madt(const struct domain *d, u32 offset)
@@ -35,13 +35,13 @@ index b46036e4dc..6c9f4cada7 100644
 -    size = ACPI_MADT_GICC_LENGTH;
 +    size = host_gicc->header.length;
 +
-+    printk("ACPI_MADT_GICC_LENGTH->%ld\n", size);
++    printk("ACPI_MADT_GICC_LENGTH->%u\n", size);
 +
      for ( i = 0; i < d->max_vcpus; i++ )
      {
          gicc = (struct acpi_madt_generic_interrupt *)(base_ptr + table_len);
 diff --git a/xen/arch/arm/gic.c b/xen/arch/arm/gic.c
-index 3eaf670fd7..cf133e51e0 100644
+index 3eaf670fd7..09b68934d8 100644
 --- a/xen/arch/arm/gic.c
 +++ b/xen/arch/arm/gic.c
 @@ -438,8 +438,20 @@ unsigned long gic_get_hwdom_madt_size(const struct domain *d)
@@ -58,7 +58,7 @@ index 3eaf670fd7..cf133e51e0 100644
 +    host_gicc = container_of(header, struct acpi_madt_generic_interrupt,
 +                             header);
 +
-+    printk("ACPI_MADT_GICC_LENGTH->%ld\n", host_gicc->header.length);
++    printk("ACPI_MADT_GICC_LENGTH->%d\n", host_gicc->header.length);
 +
      madt_size = sizeof(struct acpi_table_madt)
 -                + ACPI_MADT_GICC_LENGTH * d->max_vcpus

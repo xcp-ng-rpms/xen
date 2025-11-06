@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.19%{?dist}
+Release: %{?xsrel}.0.ydi.20%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -215,11 +215,6 @@ Patch241:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
 Patch242:	arm__add_debug_prints_for_grant_table_and_p2m_entries.patch
 Patch243:	xen-arm__limit_amount_of_p2m_lookup_messages.patch
 Patch244:	xenconsoled__add_debug_log_in_possible_places_of_grant_ref_unmapping.patch
-Patch245:	xen-gnttbl__check_the_content_of_gnttbl_entries_when_unmap_happening.patch
-Patch246:	xen-gnttbl__compilation_fix_for_prev_patch.patch
-Patch247:	xen-gnttbl__add_debug_messages_to_investigate_an_amount_grant_frames.patch
-Patch248:	xen-gnttbl__redefine_initial_nr_grant_frames_and_allocate_all_initial_nr_grant_frames.patch
-Patch249:	xen-gnttbl__print_grant_table_entries_before-after_grant_ref_mapping.patch
 Patch250:	check_how_console_ring_page_is_mapped.patch
 Patch251:	xenstored__add_extra_logs_around_domain_introduction.patch
 Patch252:	0001-fixup-xenctrl-stubs.patch

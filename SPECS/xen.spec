@@ -226,6 +226,7 @@ Patch252:	0001-fixup-xenctrl-stubs.patch
 Patch253:	from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
 Patch254: 0001-Remove-x86-only-libacpi-option.patch
 Patch255: 0001-patch-xenguest-for-arm.patch
+Patch256: 0001-Initialize-rambase-on-ARM.patch
 ################################################################################
 # Debugging patches
 #

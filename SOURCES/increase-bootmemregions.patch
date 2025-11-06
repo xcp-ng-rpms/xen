@@ -1,0 +1,22 @@
+diff --git a/xen/common/page_alloc.c b/xen/common/page_alloc.c
+index 97bb362606..4bcecfad7a 100644
+--- a/xen/common/page_alloc.c
++++ b/xen/common/page_alloc.c
+@@ -266,7 +266,7 @@ struct bootmem_region {
+ };
+ /* Statically allocate a page for bootmem_region_list. */
+ static struct bootmem_region __initdata
+-    bootmem_region_list[PAGE_SIZE / sizeof(struct bootmem_region)];
++    bootmem_region_list[2*PAGE_SIZE / sizeof(struct bootmem_region)];
+ static unsigned int __initdata nr_bootmem_regions;
+ 
+ struct scrub_region {
+@@ -291,7 +291,7 @@ static void __init bootmem_region_add(unsigned long s, unsigned long e)
+             break;
+ 
+     BUG_ON((i < nr_bootmem_regions) && (e > bootmem_region_list[i].s));
+-    BUG_ON(nr_bootmem_regions == (PAGE_SIZE / sizeof(struct bootmem_region)));
++    BUG_ON(nr_bootmem_regions == (2*PAGE_SIZE / sizeof(struct bootmem_region)));
+ 
+     memmove(&bootmem_region_list[i+1], &bootmem_region_list[i],
+             (nr_bootmem_regions - i) * sizeof(*bootmem_region_list));

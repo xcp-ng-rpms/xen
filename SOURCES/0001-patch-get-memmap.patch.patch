@@ -1,0 +1,29 @@
+From cb2ea54901a0dc95f97e4efdcc1eb36d67384bb7 Mon Sep 17 00:00:00 2001
+Message-ID: <cb2ea54901a0dc95f97e4efdcc1eb36d67384bb7.1762434918.git.yann.dirson@vates.tech>
+From: Yann Dirson <yann.dirson@vates.tech>
+Date: Thu, 6 Nov 2025 14:10:57 +0100
+Subject: [XEN PATCH] patch get-memmap.patch
+To: xen-devel@lists.xenproject.org
+
+---
+ xen/common/efi/boot.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
+index c9efb7ce63..2ca09f560e 100644
+--- a/xen/common/efi/boot.c
++++ b/xen/common/efi/boot.c
+@@ -1191,6 +1191,10 @@ static void __init efi_exit_boot(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *Syste
+ 
+     efi_bs->GetMemoryMap(&info_size, NULL, &map_key,
+                          &efi_mdesc_size, &mdesc_ver);
++    if ( EFI_ERROR(status) ) {
++        PrintErr(L"first GetMemoryMap() Error: ");
++        DisplayUint(status, 0);
++    }
+     info_size += 8 * efi_mdesc_size;
+     efi_memmap = efi_arch_allocate_mmap_buffer(info_size);
+     if ( !efi_memmap )
+-- 
+2.47.3
+

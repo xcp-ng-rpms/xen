@@ -1,0 +1,13 @@
+diff --git a/xen/arch/arm/include/asm/setup.h b/xen/arch/arm/include/asm/setup.h
+index ea2e8503dc..6ed9a35796 100644
+--- a/xen/arch/arm/include/asm/setup.h
++++ b/xen/arch/arm/include/asm/setup.h
+@@ -8,7 +8,7 @@
+ #define MIN_FDT_ALIGN 8
+ #define MAX_FDT_SIZE SZ_2M
+ 
+-#define NR_MEM_BANKS 256
++#define NR_MEM_BANKS 512
+ #define NR_SHMEM_BANKS 32
+ 
+ #define MAX_MODULES 32 /* Current maximum useful modules */

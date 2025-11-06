@@ -1,15 +1,15 @@
-From efc42e1e6aad20f118fd4fc349dc591bd39930ec Mon Sep 17 00:00:00 2001
+From b23bc85e10e4eb76125a62bcdfc550d97f4f6b42 Mon Sep 17 00:00:00 2001
 From: Andrii Sultanov <andriy.sultanov@vates.tech>
 Date: Thu, 6 Nov 2025 14:24:33 +0000
 Subject: [PATCH] debug prints in populate_one_size
 
 Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
 ---
- tools/libs/guest/xg_dom_arm.c | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
+ tools/libs/guest/xg_dom_arm.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/tools/libs/guest/xg_dom_arm.c b/tools/libs/guest/xg_dom_arm.c
-index 2fd8ee7ad4..eefddc9734 100644
+index 2fd8ee7ad4..63fd10a700 100644
 --- a/tools/libs/guest/xg_dom_arm.c
 +++ b/tools/libs/guest/xg_dom_arm.c
 @@ -251,11 +251,17 @@ static int populate_one_size(struct xc_dom_image *dom, int pfn_shift,
@@ -30,7 +30,7 @@ index 2fd8ee7ad4..eefddc9734 100644
  
      /*
       * If base is not aligned at the next level up then try and make
-@@ -268,14 +274,20 @@ static int populate_one_size(struct xc_dom_image *dom, int pfn_shift,
+@@ -268,14 +274,22 @@ static int populate_one_size(struct xc_dom_image *dom, int pfn_shift,
  
      /* Nothing to allocate */
      if ( !count )
@@ -42,6 +42,8 @@ index 2fd8ee7ad4..eefddc9734 100644
      for ( i = 0 ; i < count ; i ++ )
          extents[i] = base_pfn + (i<<pfn_shift);
  
++    DOMPRINTF("%s: base_pfn = %lu, end_pfn = %lu", __FUNCTION__, base_pfn, end_pfn);
++    DOMPRINTF("%s: guest_domid = %d, count = %d, pfn_shift = %d", __FUNCTION__, dom->guest_domid, count, pfn_shift);
      nr = xc_domain_populate_physmap(dom->xch, dom->guest_domid, count,
                                      pfn_shift, 0, extents);
 -    if ( nr <= 0 ) return nr;

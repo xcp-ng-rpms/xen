@@ -1,22 +1,26 @@
-From cb2ea54901a0dc95f97e4efdcc1eb36d67384bb7 Mon Sep 17 00:00:00 2001
-Message-ID: <cb2ea54901a0dc95f97e4efdcc1eb36d67384bb7.1762434918.git.yann.dirson@vates.tech>
+From f618f6b56b0ea86efc4823b1e046dd4564f0b949 Mon Sep 17 00:00:00 2001
+Message-ID: <f618f6b56b0ea86efc4823b1e046dd4564f0b949.1762435999.git.yann.dirson@vates.tech>
 From: Yann Dirson <yann.dirson@vates.tech>
-Date: Thu, 6 Nov 2025 14:10:57 +0100
+Date: Thu, 6 Nov 2025 14:32:54 +0100
 Subject: [XEN PATCH] patch get-memmap.patch
 To: xen-devel@lists.xenproject.org
 
 ---
- xen/common/efi/boot.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ xen/common/efi/boot.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
-index c9efb7ce63..2ca09f560e 100644
+index c9efb7ce63..07c1227653 100644
 --- a/xen/common/efi/boot.c
 +++ b/xen/common/efi/boot.c
-@@ -1191,6 +1191,10 @@ static void __init efi_exit_boot(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *Syste
+@@ -1189,8 +1189,12 @@ static void __init efi_exit_boot(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *Syste
+     unsigned int i;
+ #endif
  
-     efi_bs->GetMemoryMap(&info_size, NULL, &map_key,
-                          &efi_mdesc_size, &mdesc_ver);
+-    efi_bs->GetMemoryMap(&info_size, NULL, &map_key,
+-                         &efi_mdesc_size, &mdesc_ver);
++    status = efi_bs->GetMemoryMap(&info_size, NULL, &map_key,
++                                  &efi_mdesc_size, &mdesc_ver);
 +    if ( EFI_ERROR(status) ) {
 +        PrintErr(L"first GetMemoryMap() Error: ");
 +        DisplayUint(status, 0);

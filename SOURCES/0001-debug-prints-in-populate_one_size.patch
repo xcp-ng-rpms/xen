@@ -1,0 +1,54 @@
+From efc42e1e6aad20f118fd4fc349dc591bd39930ec Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Thu, 6 Nov 2025 14:24:33 +0000
+Subject: [PATCH] debug prints in populate_one_size
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/libs/guest/xg_dom_arm.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/tools/libs/guest/xg_dom_arm.c b/tools/libs/guest/xg_dom_arm.c
+index 2fd8ee7ad4..eefddc9734 100644
+--- a/tools/libs/guest/xg_dom_arm.c
++++ b/tools/libs/guest/xg_dom_arm.c
+@@ -251,11 +251,17 @@ static int populate_one_size(struct xc_dom_image *dom, int pfn_shift,
+ 
+     /* No level zero super pages with current hardware */
+     if ( pfn_shift == PFN_512G_SHIFT )
++    {
++        DOMPRINTF("%s: no level zero super pages with current hardware", __FUNCTION__);
+         return 0;
++    }
+ 
+     /* base is misaligned for this level */
+     if ( mask & base_pfn )
++    {
++        DOMPRINTF("%s: base is misaligned for this level (mask: %lu, base_pfn: %lu)", __FUNCTION__, mask, base_pfn);
+         return 0;
++    }
+ 
+     /*
+      * If base is not aligned at the next level up then try and make
+@@ -268,14 +274,20 @@ static int populate_one_size(struct xc_dom_image *dom, int pfn_shift,
+ 
+     /* Nothing to allocate */
+     if ( !count )
++    {
++        DOMPRINTF("%s: nothing to allocate", __FUNCTION__);
+         return 0;
++    }
+ 
+     for ( i = 0 ; i < count ; i ++ )
+         extents[i] = base_pfn + (i<<pfn_shift);
+ 
+     nr = xc_domain_populate_physmap(dom->xch, dom->guest_domid, count,
+                                     pfn_shift, 0, extents);
+-    if ( nr <= 0 ) return nr;
++    if ( nr <= 0 ) {
++        DOMPRINTF("%s: nr = %d", __FUNCTION__, nr);
++        return nr;
++    }
+     DOMPRINTF("%s: populated %#x/%#x entries with shift %d",
+               __FUNCTION__, nr, count, pfn_shift);
+ 

@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.21%{?dist}
+Release: %{?xsrel}.0.ydi.22%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -223,6 +223,7 @@ Patch254: 0001-Remove-x86-only-libacpi-option.patch
 Patch255: 0001-patch-xenguest-for-arm.patch
 Patch256: 0001-Initialize-rambase-on-ARM.patch
 Patch257: 0001-patch-get-memmap.patch.patch
+Patch258: 0001-debug-prints-in-populate_one_size.patch
 ################################################################################
 # Debugging patches
 #

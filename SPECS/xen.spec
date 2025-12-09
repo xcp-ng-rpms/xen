@@ -334,6 +334,7 @@ Patch291: allow-rombios-pci-config-on-any-host-bridge.patch
 Patch292: gvt-g-hvmloader+rombios.patch
 Patch293: xen-spec-ctrl-utility.patch
 Patch294: vtpm-ppi-acpi-dsm.patch
+Patch295: disable-require-nx.patch
 
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch

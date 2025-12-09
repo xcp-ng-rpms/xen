@@ -1,0 +1,36 @@
+diff --color -Naur a/buildconfigs/config-debug b/buildconfigs/config-debug
+--- a/buildconfigs/config-debug	2025-12-09 09:30:17.462296583 +0100
++++ b/buildconfigs/config-debug	2025-12-09 09:31:04.902243249 +0100
+@@ -40,7 +40,7 @@
+ # CONFIG_HYPERV_GUEST is not set
+ # CONFIG_MEM_PAGING is not set
+ # CONFIG_MEM_SHARING is not set
+-CONFIG_REQUIRE_NX=y
++# CONFIG_REQUIRE_NX is not set
+ # end of Architecture Features
+ 
+ #
+diff --color -Naur a/buildconfigs/config-pvshim b/buildconfigs/config-pvshim
+--- a/buildconfigs/config-pvshim	2025-12-09 09:30:17.462336249 +0100
++++ b/buildconfigs/config-pvshim	2025-12-09 09:31:30.967109049 +0100
+@@ -38,7 +38,7 @@
+ CONFIG_PVH_GUEST=y
+ CONFIG_PV_SHIM=y
+ CONFIG_PV_SHIM_EXCLUSIVE=y
+-CONFIG_REQUIRE_NX=y
++# CONFIG_REQUIRE_NX is not set
+ # end of Architecture Features
+ 
+ #
+diff --color -Naur a/buildconfigs/config-release b/buildconfigs/config-release
+--- a/buildconfigs/config-release	2025-12-09 09:30:17.462365424 +0100
++++ b/buildconfigs/config-release	2025-12-09 09:31:17.926675871 +0100
+@@ -40,7 +40,7 @@
+ # CONFIG_HYPERV_GUEST is not set
+ # CONFIG_MEM_PAGING is not set
+ # CONFIG_MEM_SHARING is not set
+-CONFIG_REQUIRE_NX=y
++# CONFIG_REQUIRE_NX is not set
+ # end of Architecture Features
+ 
+ #

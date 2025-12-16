@@ -18,11 +18,13 @@
 # `git describe` when not building an from a tagged changeset.
 
 %define lp_devel_dir %{_usrsrc}/xen-%{version}-%{release}
+# same with some regex special chars neutralized:
+%define lp_devel_dir_re $(echo "%{lp_devel_dir}" | sed -e 's/+/\\\\+/')
 
 # Prevent RPM adding Provides/Requires to lp-devel package, or mangling shebangs
-%global __provides_exclude_from ^%{lp_devel_dir}/.*$
-%global __requires_exclude_from ^%{lp_devel_dir}/.*$
-%global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir}/.*$
+%global __provides_exclude_from ^%{lp_devel_dir_re}/.*$
+%global __requires_exclude_from ^%{lp_devel_dir_re}/.*$
+%global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir_re}/.*$
 
 Summary: Xen is a virtual machine monitor
 Name:    xen
@@ -1114,6 +1116,7 @@ fi
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS
 - Remove livepatch certificate support depending on unpublished XS packages
 - Require needed python3-setuptools
+- Do not fail build when revision contains a '+'
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

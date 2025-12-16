@@ -22,11 +22,13 @@
 %define base_dir  %{name}-%{version}
 
 %define lp_devel_dir %{_usrsrc}/xen-%{version}-%{release}
+# same with some regex special chars neutralized:
+%define lp_devel_dir_re $(echo "%{lp_devel_dir}" | sed -e 's/+/\\\\+/')
 
 # Prevent RPM adding Provides/Requires to lp-devel package, or mangling shebangs
-%global __provides_exclude_from ^%{lp_devel_dir}/.*$
-%global __requires_exclude_from ^%{lp_devel_dir}/.*$
-%global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir}/.*$
+%global __provides_exclude_from ^%{lp_devel_dir_re}/.*$
+%global __requires_exclude_from ^%{lp_devel_dir_re}/.*$
+%global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir_re}/.*$
 
 %if 0%{?xenserver} < 9
 %global __patch /usr/bin/patch --fuzz=0
@@ -35,7 +37,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.1%{?dist}
+Release: %{?xsrel}.0.ydi.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -1106,8 +1108,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Fri Oct 20 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.1-2.0.ydi.1
+* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.2
 - Merge former xcpng-8.3 and ydi/9 work
+- do not fail build when revision contains a '+'
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

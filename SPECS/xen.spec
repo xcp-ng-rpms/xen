@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -338,6 +338,10 @@ Patch294: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+# XSA-477
+Patch1002: 0001-x86-shadow-don-t-overrun-trace_emul_write_val.patch
+# XSA-479
+Patch1003: 0001-x86-spec-ctrl-Fix-incomplete-IBPB-flushing-during-co.patch
 
 ExclusiveArch: x86_64
 
@@ -1185,6 +1189,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Jan 16 2026 Quentin Casasnovas <quentin.casasnovas@vates.tech> - 4.17.5-23.2
+- Fix for XSA-477 CVE-2025-58150
+- Fix for XSA-479 CVE-2026-23553
+
 * Mon Dec 08 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-23.1
 - Sync with 4.17.5-23
 - *** Upstream changelog ***

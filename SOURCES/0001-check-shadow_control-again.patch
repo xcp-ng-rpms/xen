@@ -1,0 +1,53 @@
+From a0ea39b113dda5d9d4057e5b8018b4a5a128cc43 Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Tue, 20 Jan 2026 15:00:44 +0000
+Subject: [PATCH] check shadow_control again
+
+---
+ tools/ocaml/libs/xc/xenctrl_stubs.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
+index d43ec5529d..5a8474ceb8 100644
+--- a/tools/ocaml/libs/xc/xenctrl_stubs.c
++++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
+@@ -1188,7 +1188,7 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ {
+ 	CAMLparam2(xch_val, domid);
+ 	CAMLlocal1(mb);
+-#if defined(__i386__) || defined(__x86_64__)
++/*#if defined(__i386__) || defined(__x86_64__)*/
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1202,9 +1202,9 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ 		failwith_xc(xch);
+ 
+ 	mb = Val_int(c_mb);
+-#elif defined(__arm__) || defined(__aarch64__)
+-	mb = Val_int(0);
+-#endif
++/*#elif defined(__arm__) || defined(__aarch64__)*/
++	/*mb = Val_int(0);*/
++/*#endif*/
+ 	CAMLreturn(mb);
+ }
+ 
+@@ -1212,7 +1212,7 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 					  value mb)
+ {
+ 	CAMLparam3(xch_val, domid, mb);
+-#if defined(__i386__) || defined(__x86_64__)
++/*#if defined(__i386__) || defined(__x86_64__)*/
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1226,7 +1226,7 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 	if (ret != 0)
+ 		failwith_xc(xch);
+ 
+-#endif
++/*#endif*/
+ 	CAMLreturn(Val_unit);
+ }
+ 

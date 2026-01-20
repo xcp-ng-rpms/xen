@@ -227,6 +227,7 @@ Patch258: 0001-debug-prints-in-populate_one_size.patch
 Patch259: increase-membanks.patch
 Patch260: increase-bootmemregions.patch
 #Patch261: 0001-populate_physmap-debug-logging.patch
+Patch262: 0001-check-shadow_control-again.patch
 ################################################################################
 # Debugging patches
 #

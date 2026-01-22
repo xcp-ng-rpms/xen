@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.5
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.5.tar.gz
@@ -527,13 +527,13 @@ License: GPLv2
 %description dom0-tests
 This package contains test cases for the Xen Hypervisor.
 
-%package lp-devel_%{version}_%{release}
+%package lp-devel_%{version}
 License: GPLv2
 Summary: Development package for building livepatches
 %{core_builddeps Requires}
-%description lp-devel_%{version}_%{release}
+%description lp-devel_%{version}
 Contains the prepared source files, config, and xen-syms for building live
-patches against base version %{version}-%{release}.
+patches against base version %{version}
 
 %prep
 %autosetup -p1
@@ -1185,6 +1185,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Thu Jan 22 2026 Philippe Coval <philippe.coval@vates.tech> - 4.17.5-23.2
+- Rebuild with python-3 (with openssl-3)
+- Rename lp-devel package without release suffix
+
 * Mon Dec 08 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-23.1
 - Sync with 4.17.5-23
 - *** Upstream changelog ***

@@ -1,0 +1,49 @@
+From 54f2ee06f456a50a7ed0c3345354cdf51bc32257 Mon Sep 17 00:00:00 2001
+Message-ID: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1769420708.git.teddy.astie@vates.tech>
+From: Jan Beulich <jbeulich@suse.com>
+Date: Thu, 20 Nov 2025 11:26:25 +0100
+Subject: [PATCH 1/4] x86/cpu-policy: move invocation of recalculate_misc()
+
+The function is about guest exposure of features / leaves. There's no need
+for it to be applied on the host policy. In fact doing so gets in the way
+of using the host policy in certain places.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
+---
+Upstream: https://gitlab.com/xen-project/xen/-/commit/f6894fdfa83359d0686a41aee5c2a8ba7b2878b4
+
+ xen/arch/x86/cpu-policy.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
+index af020e5fce..dc1ececeb0 100644
+--- a/xen/arch/x86/cpu-policy.c
++++ b/xen/arch/x86/cpu-policy.c
+@@ -404,7 +404,6 @@ static void calculate_host_policy(void)
+ 
+     x86_cpu_featureset_to_policy(boot_cpu_data.x86_capability, p);
+     recalculate_xstate(p);
+-    recalculate_misc(p);
+ 
+     /* When vPMU is disabled, drop it from the host policy. */
+     if ( vpmu_mode == XENPMU_MODE_OFF )
+@@ -658,6 +657,7 @@ static void calculate_pv_max_policy(void)
+     unsigned int i;
+ 
+     *p = host_cpu_policy;
++    recalculate_misc(p);
+ 
+     guest_common_max_leaves(p);
+ 
+@@ -760,6 +760,7 @@ static void calculate_hvm_max_policy(void)
+     const uint32_t *mask;
+ 
+     *p = host_cpu_policy;
++    recalculate_misc(p);
+ 
+     guest_common_max_leaves(p);
+ 
+-- 
+2.52.0
+

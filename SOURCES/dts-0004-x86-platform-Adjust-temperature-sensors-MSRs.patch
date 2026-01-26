@@ -1,0 +1,76 @@
+From ff78ef74920ae32ab44bd76cfab899823d80a352 Mon Sep 17 00:00:00 2001
+Message-ID: <ff78ef74920ae32ab44bd76cfab899823d80a352.1776788104.git.teddy.astie@vates.tech>
+In-Reply-To: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1776788104.git.teddy.astie@vates.tech>
+References: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1776788104.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 24 Feb 2026 09:18:02 +0100
+Subject: [PATCH] x86/platform: Adjust temperature sensors MSRs
+
+Temperature sensors MSR were previously assumed to be available when "DTS"
+CPUID bit is set. This is not really the case :
+ * MSR_IA32_THERM_STATUS is gated behind ACPI CPUID bit, only DTS-related bits
+of this MSR are gated behind the DTS CPUID
+ * MSR_PACKAGE_THERM_STATUS is gated behind "PTM" CPUID
+
+Also adjust the MSR_TEMPERATURE_TARGET which is not architectural, but stable
+in practice, and required to be exposed for reliably querying CPU temperature.
+
+Fixes: 615c9f3f820 ("x86/platform: Expose DTS sensors MSR")
+Reported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+Upstream: https://gitlab.com/xen-project/xen/-/commit/87669157168e83756259b27db8774d959c211776
+---
+ xen/arch/x86/platform_hypercall.c    | 19 ++++++++++++++++++-
+ xen/include/xen/lib/x86/cpu-policy.h |  2 +-
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/platform_hypercall.c b/xen/arch/x86/platform_hypercall.c
+index 5d1f80351d..bba8d01c98 100644
+--- a/xen/arch/x86/platform_hypercall.c
++++ b/xen/arch/x86/platform_hypercall.c
+@@ -91,9 +91,26 @@ static bool msr_read_allowed(unsigned int msr)
+         return cpu_has_srbds_ctrl;
+ 
+     case MSR_IA32_THERM_STATUS:
++        return host_cpu_policy.basic.acpi;
++
++    /*
++     * This MSR is present on most Intel Core-family CPUs since Nehalem but is not an
++     * architectural MSR. No CPUID bit enumerates this MSR.
++     *
++     * This MSR exposes "temperature target" that is needed to compute the CPU
++     * temperature. The "temperature target" is a model specific value, and this MSR is
++     * the only known method of getting the one used for the CPU. On some CPU models with
++     * Intel SST-PP, the "temperature target" can vary over time.
++     *
++     * We assume all Intel CPUs with DTS may support this MSR; but reads can fail in case
++     * the platform doesn't actually support this MSR.
++     */
+     case MSR_TEMPERATURE_TARGET:
++        return boot_cpu_data.x86_vendor == X86_VENDOR_INTEL &&
++               host_cpu_policy.basic.digital_temp_sensor;
++
+     case MSR_PACKAGE_THERM_STATUS:
+-        return host_cpu_policy.basic.digital_temp_sensor;
++        return host_cpu_policy.basic.pkg_therm_mgmt;
+     }
+ 
+     if ( ppin_msr && msr == ppin_msr )
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index eb8a85df02..f2b76399e7 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -158,7 +158,7 @@ struct cpu_policy
+                         :1,
+                         :1,
+                         :1,
+-                        :1,
++                        pkg_therm_mgmt:1,
+                         hwp:1,
+                         hwp_interrupt:1,
+                         hwp_activity_window:1,
+-- 
+2.52.0
+

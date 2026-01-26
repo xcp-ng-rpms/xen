@@ -1,0 +1,81 @@
+From 3adacfeccdae34ea475ae7b69256f95c0ec0b138 Mon Sep 17 00:00:00 2001
+Message-ID: <3adacfeccdae34ea475ae7b69256f95c0ec0b138.1769420708.git.teddy.astie@vates.tech>
+In-Reply-To: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1769420708.git.teddy.astie@vates.tech>
+References: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1769420708.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 20 Jan 2026 09:02:39 +0100
+Subject: [PATCH 3/4] x86/platform: Expose DTS sensors MSR
+
+Intel provide CPU sensors through "DTS" MSRs. As these MSR are core-specific
+(or package-specific), we can't reliably fetch them from Dom0 directly.
+Expose these MSR (if supported) through XENPF_resource_op so that it is
+accessible through hypercall.
+
+Suggested-by: Jan Beulich <jbeulich@suse.com>
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+Upstream: https://gitlab.com/xen-project/xen/-/commit/615c9f3f82006a1365d5a6b4cfb8ebc4714a7b8d
+
+Backport notes:
+Rebase patch to not have DTS MSR relative to FRED MSRs (that don't exist in this Xen version).
+
+ xen/arch/x86/include/asm/msr-index.h | 3 +++
+ xen/arch/x86/platform_hypercall.c    | 6 ++++++
+ xen/include/xen/lib/x86/cpu-policy.h | 2 +-
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/x86/include/asm/msr-index.h b/xen/arch/x86/include/asm/msr-index.h
+index db602fdbfe..60ac9a3ab3 100644
+--- a/xen/arch/x86/include/asm/msr-index.h
++++ b/xen/arch/x86/include/asm/msr-index.h
+@@ -114,6 +114,9 @@
+ #define  MCU_OPT_CTRL_GDS_MIT_DIS           (_AC(1, ULL) <<  4)
+ #define  MCU_OPT_CTRL_GDS_MIT_LOCK          (_AC(1, ULL) <<  5)
+ 
++#define MSR_TEMPERATURE_TARGET              0x000001a2
++#define MSR_PACKAGE_THERM_STATUS            0x000001b1
++
+ #define MSR_RTIT_OUTPUT_BASE                0x00000560
+ #define MSR_RTIT_OUTPUT_MASK                0x00000561
+ #define MSR_RTIT_CTL                        0x00000570
+diff --git a/xen/arch/x86/platform_hypercall.c b/xen/arch/x86/platform_hypercall.c
+index a96231f2a6..5d1f80351d 100644
+--- a/xen/arch/x86/platform_hypercall.c
++++ b/xen/arch/x86/platform_hypercall.c
+@@ -28,6 +28,7 @@
+ #include <asm/current.h>
+ #include <public/platform.h>
+ #include <acpi/cpufreq/processor_perf.h>
++#include <asm/cpu-policy.h>
+ #include <asm/edd.h>
+ #include <asm/microcode.h>
+ #include <asm/mtrr.h>
+@@ -88,6 +89,11 @@ static bool msr_read_allowed(unsigned int msr)
+ 
+     case MSR_MCU_OPT_CTRL:
+         return cpu_has_srbds_ctrl;
++
++    case MSR_IA32_THERM_STATUS:
++    case MSR_TEMPERATURE_TARGET:
++    case MSR_PACKAGE_THERM_STATUS:
++        return host_cpu_policy.basic.digital_temp_sensor;
+     }
+ 
+     if ( ppin_msr && msr == ppin_msr )
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index 162fbf2120..eb8a85df02 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -152,7 +152,7 @@ struct cpu_policy
+             union {
+                 uint32_t _6a;
+                 struct {
+-                    bool :1,
++                    bool digital_temp_sensor:1,
+                         turbo_boost:1,
+                         arat:1,
+                         :1,
+-- 
+2.52.0
+

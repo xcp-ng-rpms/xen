@@ -1,11 +1,5 @@
-From c9fcb9a9d6030d7c5a23ac086acec49f47b172fd Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>
-Date: Fri, 16 Jan 2026 10:34:05 +0100
-Subject: [PATCH] x86/spec-ctrl: Fix incomplete IBPB flushing during context
- switch
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+From: Roger Pau Monné <roger.pau@citrix.com>
+Subject: x86/spec-ctrl: Fix incomplete IBPB flushing during context switch
 
 The previous logic attempted to skip an IBPB in the case of vCPU returning to
 a CPU on which it was the previous vCPU to run.  While safe for Xen's
@@ -34,13 +28,9 @@ Fixes: a2ed643ed783 ("x86/ctxt: Issue a speculation barrier between vcpu context
 Reported-by: David Kaplan <david.kaplan@amd.com>
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
-Signed-off-by: Quentin Casasnovas <quentin.casasnovas@vates.tech>
----
- xen/arch/x86/domain.c | 36 +++++++++---------------------------
- 1 file changed, 9 insertions(+), 27 deletions(-)
 
 diff --git a/xen/arch/x86/domain.c b/xen/arch/x86/domain.c
-index 2eea4c555bd6..ffa37340e903 100644
+index b764c417aa99..7c43eee98dfc 100644
 --- a/xen/arch/x86/domain.c
 +++ b/xen/arch/x86/domain.c
 @@ -2078,33 +2078,15 @@ void context_switch(struct vcpu *prev, struct vcpu *next)
@@ -86,6 +76,3 @@ index 2eea4c555bd6..ffa37340e903 100644
  
          /* Update the top-of-stack block with the new speculation settings. */
          info->scf =
--- 
-2.43.0
-

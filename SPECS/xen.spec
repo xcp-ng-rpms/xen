@@ -37,7 +37,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.2%{?dist}
+Release: %{?xsrel}.0.ydi.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -735,11 +735,11 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %files dom0-tools
 %{_sysconfdir}/bash_completion.d/xl
-%exclude %{_sysconfdir}/init.d/xencommons
-%exclude %{_sysconfdir}/init.d/xendomains
-%exclude %{_sysconfdir}/init.d/xendriverdomain
+%exclude %{_sysconfdir}/rc.d/init.d/xencommons
+%exclude %{_sysconfdir}/rc.d/init.d/xendomains
+%exclude %{_sysconfdir}/rc.d/init.d/xendriverdomain
 %exclude %{_sysconfdir}/sysconfig/xendomains
-%exclude %{_sysconfdir}/init.d/xen-watchdog
+%exclude %{_sysconfdir}/rc.d/init.d/xen-watchdog
 %config %{_sysconfdir}/logrotate.d/xen-tools
 %config %{_sysconfdir}/sysconfig/xencommons
 %config %{_sysconfdir}/xen/oxenstored.conf
@@ -1108,9 +1108,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.2
+* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.3
 - Merge former xcpng-8.3 and ydi/9 work
 - do not fail build when revision contains a '+'
+- adjust exclude list to use rc.d/
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

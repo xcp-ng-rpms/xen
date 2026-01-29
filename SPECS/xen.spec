@@ -786,11 +786,15 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %files dom0-tools
 %{_sysconfdir}/bash_completion.d/xl
+%exclude %{_sysconfdir}/rc.d/init.d/xencommons
+%exclude %{_sysconfdir}/rc.d/init.d/xendomains
+%exclude %{_sysconfdir}/rc.d/init.d/xendriverdomain
+%exclude %{_sysconfdir}/rc.d/init.d/xen-watchdog
 %exclude %{_sysconfdir}/init.d/xencommons
 %exclude %{_sysconfdir}/init.d/xendomains
 %exclude %{_sysconfdir}/init.d/xendriverdomain
-%exclude %{_sysconfdir}/sysconfig/xendomains
 %exclude %{_sysconfdir}/init.d/xen-watchdog
+%exclude %{_sysconfdir}/sysconfig/xendomains
 %config %{_sysconfdir}/logrotate.d/xen-tools
 %config %{_sysconfdir}/sysconfig/xencommons
 %config %{_sysconfdir}/xen/oxenstored.conf
@@ -1161,6 +1165,7 @@ fi
 - allow building for x86_64_v2
 - remove livepatch certificate support depending on unpublished XS packages
 - replace Requires: on non-exe back with package names, comment out qemu for now
+- ignore init.d scripts in both possible locations
 - update to 4.20.2-5 from XS:
   * Wed Jan 28 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-5
   - Fix error reporting with the iommu_op hypercall

@@ -762,8 +762,12 @@ install_xen -%{hv_rel}-d build-xen-debug
 %exclude %{_sysconfdir}/rc.d/init.d/xencommons
 %exclude %{_sysconfdir}/rc.d/init.d/xendomains
 %exclude %{_sysconfdir}/rc.d/init.d/xendriverdomain
-%exclude %{_sysconfdir}/sysconfig/xendomains
 %exclude %{_sysconfdir}/rc.d/init.d/xen-watchdog
+%exclude %{_sysconfdir}/init.d/xencommons
+%exclude %{_sysconfdir}/init.d/xendomains
+%exclude %{_sysconfdir}/init.d/xendriverdomain
+%exclude %{_sysconfdir}/init.d/xen-watchdog
+%exclude %{_sysconfdir}/sysconfig/xendomains
 %config %{_sysconfdir}/logrotate.d/xen-tools
 %config %{_sysconfdir}/sysconfig/xencommons
 %config %{_sysconfdir}/xen/oxenstored.conf
@@ -1118,6 +1122,7 @@ fi
 - Require needed python3-setuptools
 - Do not fail build when revision contains a '+'
 - Allow building for x86_64_v2
+- Ignore init.d scripts in both possible locations
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

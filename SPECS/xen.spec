@@ -467,6 +467,7 @@ export PYTHON="%{__python}"
            --disable-pvshim \
            --enable-rombios \
            --enable-systemd \
+           --with-initddir=%{_sysconfdir}/rc.d/init.d \
            --with-xenstored=oxenstored \
            --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
            --with-system-ipxe=%{_datadir}/ipxe/ipxe.bin \
@@ -1118,6 +1119,7 @@ fi
 - Require needed python3-setuptools
 - Do not fail build when revision contains a '+'
 - Allow building for x86_64_v2
+- Make sure init.d scripts are installed under /etc/rc.d/
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

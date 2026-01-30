@@ -1,7 +1,5 @@
-From b1ec65f4eb4eadd42eb324024365d0c5b7273fe9 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
-Date: Fri, 16 Jan 2026 10:29:11 +0100
-Subject: [PATCH] x86/shadow: don't overrun trace_emul_write_val
+Subject: x86/shadow: don't overrun trace_emul_write_val
 
 Guests can do wider-than-PTE-size writes on page tables. The tracing
 helper variable, however, only offers space for a single PTE (and it is
@@ -23,11 +21,6 @@ This is XSA-477 / CVE-2025-58150.
 Fixes: 9a86ac1aa3d2 ("xentrace 5/7: Additional tracing for the shadow code")
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
-Signed-off-by: Quentin Casasnovas <quentin.casasnovas@vates.tech>
----
- xen/arch/x86/mm/shadow/multi.c   | 24 ++++++++++++++++--------
- xen/arch/x86/mm/shadow/private.h |  8 --------
- 2 files changed, 16 insertions(+), 16 deletions(-)
 
 diff --git a/xen/arch/x86/mm/shadow/multi.c b/xen/arch/x86/mm/shadow/multi.c
 index e54a507b54f6..d528e1491f01 100644
@@ -121,6 +114,3 @@ index 91f798c5aa78..8a39ed979d58 100644
  /******************************************************************************
   * Auditing routines
   */
--- 
-2.43.0
-

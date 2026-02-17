@@ -1,0 +1,22 @@
+From 52eabf754a049a4a3fbea65d5d5522dcb25ac3d2 Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Tue, 17 Feb 2026 08:16:13 +0000
+Subject: [PATCH] xenguest: Toggle xc_dom_image->claim_enabled
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/xenguest/xenguest_stubs.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
+index ac938f11ca..626ca43a46 100644
+--- a/tools/xenguest/xenguest_stubs.c
++++ b/tools/xenguest/xenguest_stubs.c
+@@ -632,6 +632,7 @@ int stub_xc_pv_build(int c_mem_max_mib, int mem_start_mib,
+     dom->console_domid = console_domid;
+     dom->xenstore_evtchn = store_evtchn;
+     dom->xenstore_domid = store_domid;
++    dom->claim_enabled = 1;
+ 
+     if ( xc_dom_boot_xen_init(dom, xch, domid) )
+         failwith_oss_xc("xc_dom_boot_xen_init");

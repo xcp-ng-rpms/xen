@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.35%{?dist}
+Release: %{?xsrel}.0.ydi.36%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -227,6 +227,7 @@ Patch258: 0001-debug-prints-in-populate_one_size.patch
 Patch259: increase-membanks.patch
 Patch260: increase-bootmemregions.patch
 #Patch261: 0001-populate_physmap-debug-logging.patch
+Patch262: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
 ################################################################################
 # Debugging patches
 #

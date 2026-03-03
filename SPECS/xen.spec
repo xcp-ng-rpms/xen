@@ -35,7 +35,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.3
-Release: %{?xsrel}.0.ydi.36%{?dist}
+Release: %{?xsrel}.0.ydi.48%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -200,34 +200,23 @@ Patch223:	vtpm-ppi-acpi-dsm.patch
 Patch226:	0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 Patch227:	0001-xen-configs-introduce-mtcollins_defconfig.patch
 Patch228:	forge_a_debug_config_for_mtcollins.patch
-Patch230:	patch_wip-no-viridian-arm.patch
-Patch231:	patch_workaround-current_text_addr-x86-asm.patch
-Patch232:	arm-build.patch
-Patch233:	0001-Boot-debug-traces.patch
-Patch234:	acpi-debug.patch
-Patch235:	0001-gic-debug.patch
-Patch236:	0001-Add-debug-traces-to-DOM0-loading.patch
-Patch237:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
-Patch238:	xsa473-1.patch
-Patch239:	xsa473-2.patch
-Patch240:	0001-Add-debug-in-gnttab_map_grant_ref.patch
-Patch241:	0001-Add-debug-messages-in-xc_dom_gnttab_init-in-libxengu.patch
-Patch242:	arm__add_debug_prints_for_grant_table_and_p2m_entries.patch
-Patch243:	xen-arm__limit_amount_of_p2m_lookup_messages.patch
-Patch244:	xenconsoled__add_debug_log_in_possible_places_of_grant_ref_unmapping.patch
-Patch250:	check_how_console_ring_page_is_mapped.patch
-Patch251:	xenstored__add_extra_logs_around_domain_introduction.patch
-Patch252:	0001-fixup-xenctrl-stubs.patch
-Patch253:	from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
-Patch254: 0001-Remove-x86-only-libacpi-option.patch
-Patch255: 0001-patch-xenguest-for-arm.patch
-Patch256: 0001-Initialize-rambase-on-ARM.patch
-#Patch257: 0001-patch-get-memmap.patch.patch
-Patch258: 0001-debug-prints-in-populate_one_size.patch
-Patch259: increase-membanks.patch
-Patch260: increase-bootmemregions.patch
-#Patch261: 0001-populate_physmap-debug-logging.patch
-Patch262: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
+Patch229:	patch_wip-no-viridian-arm.patch
+Patch230:	patch_workaround-current_text_addr-x86-asm.patch
+Patch231:	arm-build.patch
+Patch232:	0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch233:	xsa473-1.patch
+Patch234:	xsa473-2.patch
+Patch235:	0001-fixup-xenctrl-stubs.patch
+Patch236:	from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
+Patch237: 0001-Remove-x86-only-libacpi-option.patch
+Patch238: 0001-patch-xenguest-for-arm.patch
+Patch239: 0001-Initialize-rambase-on-ARM.patch
+Patch240: increase-membanks.patch
+Patch241: increase-bootmemregions.patch
+#Patch242: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
+Patch243: 0001-mmu-pm2.c-Add-ENOMEM-logging.patch
+Patch244: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
+
 ################################################################################
 # Debugging patches
 #

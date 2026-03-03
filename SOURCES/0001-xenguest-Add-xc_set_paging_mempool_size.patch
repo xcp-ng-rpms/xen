@@ -1,0 +1,26 @@
+From 287ac19a70c76a7e11814c0501ccfadb054e87cf Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Thu, 5 Mar 2026 08:35:23 +0000
+Subject: [PATCH] xenguest: Add xc_set_paging_mempool_size
+
+Allocate arbitrary 3000 pages for now, the number should probably come
+from somewhere more definitive in the future.
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/xenguest/xenguest_stubs.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
+index 626ca43a46..fedff075a5 100644
+--- a/tools/xenguest/xenguest_stubs.c
++++ b/tools/xenguest/xenguest_stubs.c
+@@ -1498,6 +1498,8 @@ static int pvh_setup_mem(struct xc_dom_image *dom, uint64_t max_mem_mib,
+ 
+     if ( xc_dom_mem_init(dom, max_mem_mib) )
+         failwith_oss_xc("xc_dom_mem_init");
++    if ( xc_set_paging_mempool_size(xch, domid, 3000 << XC_PAGE_SHIFT) )
++        failwith_oss_xc("xc_set_paging_mempool_size");
+     if ( xc_dom_boot_mem_init(dom) )
+         failwith_oss_xc("xc_dom_boot_mem_init");
+ 

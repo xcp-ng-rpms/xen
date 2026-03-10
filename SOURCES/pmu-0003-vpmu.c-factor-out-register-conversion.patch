@@ -1,0 +1,92 @@
+From ec50851c902dba4d57920348e2f86eaad8a7933d Mon Sep 17 00:00:00 2001
+Message-ID: <ec50851c902dba4d57920348e2f86eaad8a7933d.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:40 +0100
+Subject: [PATCH 03/15] vpmu.c: factor out register conversion
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A followup commit will use this to store the guest's regs when domid ==
+DOMID_XEN.
+To avoid code duplication move the code into a function.
+
+No functional change.
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/arch/x86/cpu/vpmu.c | 49 ++++++++++++++++++++++-------------------
+ 1 file changed, 26 insertions(+), 23 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/vpmu.c b/xen/arch/x86/cpu/vpmu.c
+index 64cdbfc48c..3bbf5b09ed 100644
+--- a/xen/arch/x86/cpu/vpmu.c
++++ b/xen/arch/x86/cpu/vpmu.c
+@@ -175,6 +175,31 @@ static inline struct vcpu *choose_hwdom_vcpu(void)
+     return hardware_domain->vcpu[idx];
+ }
+ 
++static inline void vpmu_convert_regs(struct xen_pmu_regs *r, uint64_t *flags,
++                                     struct vcpu *sampled,
++                                     const struct cpu_user_regs *cur_regs) {
++  r->ip = cur_regs->rip;
++  r->sp = cur_regs->rsp;
++  r->flags = cur_regs->rflags;
++
++  if (!is_hvm_vcpu(sampled)) {
++    r->ss = cur_regs->ss;
++    r->cs = cur_regs->cs;
++    if (!(sampled->arch.flags & TF_kernel_mode))
++      *flags |= PMU_SAMPLE_USER;
++  } else {
++    struct segment_register seg;
++
++    hvm_get_segment_register(sampled, x86_seg_cs, &seg);
++    r->cs = seg.sel;
++    hvm_get_segment_register(sampled, x86_seg_ss, &seg);
++    r->ss = seg.sel;
++    r->cpl = seg.dpl;
++    if (!(sampled->arch.hvm.guest_cr[0] & X86_CR0_PE))
++      *flags |= PMU_SAMPLE_REAL;
++  }
++}
++
+ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+ {
+     struct vcpu *sampled = current, *sampling;
+@@ -269,29 +294,7 @@ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+             else
+                 cur_regs = guest_cpu_user_regs();
+ 
+-            r->ip = cur_regs->rip;
+-            r->sp = cur_regs->rsp;
+-            r->flags = cur_regs->rflags;
+-
+-            if ( !is_hvm_vcpu(sampled) )
+-            {
+-                r->ss = cur_regs->ss;
+-                r->cs = cur_regs->cs;
+-                if ( !(sampled->arch.flags & TF_kernel_mode) )
+-                    *flags |= PMU_SAMPLE_USER;
+-            }
+-            else
+-            {
+-                struct segment_register seg;
+-
+-                hvm_get_segment_register(sampled, x86_seg_cs, &seg);
+-                r->cs = seg.sel;
+-                hvm_get_segment_register(sampled, x86_seg_ss, &seg);
+-                r->ss = seg.sel;
+-                r->cpl = seg.dpl;
+-                if ( !(sampled->arch.hvm.guest_cr[0] & X86_CR0_PE) )
+-                    *flags |= PMU_SAMPLE_REAL;
+-            }
++            vpmu_convert_regs(r, flags, sampled, cur_regs);
+         }
+ 
+         vpmu->xenpmu_data->domain_id = domid;
+-- 
+2.53.0
+

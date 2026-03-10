@@ -1,0 +1,106 @@
+From 2f48df6dd18d8e42efe97fb45c066a5e213b110b Mon Sep 17 00:00:00 2001
+Message-ID: <2f48df6dd18d8e42efe97fb45c066a5e213b110b.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:45 +0100
+Subject: [PATCH 08/15] vpmu.c hypervisor stacktrace support in vPMU
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/arch/x86/cpu/vpmu.c | 53 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 51 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/vpmu.c b/xen/arch/x86/cpu/vpmu.c
+index 02091f02bf..27dd2f379e 100644
+--- a/xen/arch/x86/cpu/vpmu.c
++++ b/xen/arch/x86/cpu/vpmu.c
+@@ -175,9 +175,51 @@ static inline struct vcpu *choose_hwdom_vcpu(void)
+     return hardware_domain->vcpu[idx];
+ }
+ 
++static inline void vpmu_hypervisor_stacktrace(struct xen_pmu_hv_stacktrace *xenpmu_stack, uint64_t rsp, uint64_t rbp)
++{
++#ifdef CONFIG_FRAME_POINTER
++    /* Based on _show_trace in ../traps.c,
++     * TODO: there should be an iterator to share this code
++     * */
++    unsigned long *frame, addr;
++    uint64_t low = rsp, high = get_stack_trace_bottom(rsp), next = rbp;
++
++    while(xenpmu_stack->stacktrace_nr < sizeof(xenpmu_stack->stacktrace) / sizeof(xenpmu_stack->stacktrace[0])) {
++        /* Valid frame pointer? */
++        if ( (next < low) || (next >= high) )
++        {
++            /*
++             * Exception stack frames have a different layout, denoted by an
++             * inverted frame pointer.
++             */
++            next = ~next;
++            if ( (next < low) || (next >= high) )
++                break;
++            frame = (unsigned long *)next;
++            next  = frame[0];
++            addr  = frame[(offsetof(struct cpu_user_regs, rip) -
++                           offsetof(struct cpu_user_regs, rbp))
++                         / BYTES_PER_LONG];
++        }
++        else
++        {
++            /* Ordinary stack frame. */
++            frame = (unsigned long *)next;
++            next  = frame[0];
++            addr  = frame[1];
++        }
++
++        xenpmu_stack->stacktrace[PMU_MAX_STACKTRACE - 1 - xenpmu_stack->stacktrace_nr++] = addr;
++
++        low = (unsigned long)&frame[2];
++    }
++#endif
++}
++
+ static inline void vpmu_convert_regs(struct xen_pmu_regs *r, uint64_t *flags,
+                                      struct vcpu *sampled,
+-                                     const struct cpu_user_regs *cur_regs) {
++                                     const struct cpu_user_regs *cur_regs)
++{
+   r->ip = cur_regs->rip;
+   r->sp = cur_regs->rsp;
+   r->flags = cur_regs->rflags;
+@@ -261,6 +303,7 @@ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+ 
+             /* avoid stale values when domid != DOMID_XEN */
+             vpmu->xenpmu_hv_stacktrace->guest.r.regs.ip = 0;
++            vpmu->xenpmu_hv_stacktrace->stacktrace_nr = 0;
+         }
+ 
+         /* Store appropriate registers in xenpmu_data */
+@@ -301,6 +344,11 @@ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+                 {
+                     vpmu_convert_regs(&vpmu->xenpmu_hv_stacktrace->guest.r.regs,
+                                       NULL, sampled, guest_cpu_user_regs());
++
++                    /* can only call this when domid == DOMID_XEN */
++                    if (vpmu_features & XENPMU_FEATURE_HV_STACKTRACE)
++                      vpmu_hypervisor_stacktrace(vpmu->xenpmu_hv_stacktrace,
++                                                 regs->rsp, regs->rbp);
+                 }
+                 domid = DOMID_XEN;
+             }
+@@ -759,7 +807,8 @@ long do_xenpmu_op(
+     case XENPMU_feature_set:
+         if ( pmu_params.val & ~(XENPMU_FEATURE_INTEL_BTS |
+                                 XENPMU_FEATURE_IPC_ONLY |
+-                                XENPMU_FEATURE_ARCH_ONLY))
++                                XENPMU_FEATURE_ARCH_ONLY |
++                                XENPMU_FEATURE_HV_STACKTRACE))
+             return -EINVAL;
+ 
+         spin_lock(&vpmu_lock);
+-- 
+2.53.0
+

@@ -1,0 +1,67 @@
+From 52d3a1a5aba8fa0f87209608b3cfc7d35e18f281 Mon Sep 17 00:00:00 2001
+Message-ID: <52d3a1a5aba8fa0f87209608b3cfc7d35e18f281.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 9 Mar 2026 13:54:36 +0100
+Subject: [PATCH 12/15] x86: Define some Intel vPMU leafs
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/cpu/vpmu_intel.c        |  4 ++--
+ xen/arch/x86/domain.c                |  2 +-
+ xen/include/xen/lib/x86/cpu-policy.h | 10 +++++++++-
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/vpmu_intel.c b/xen/arch/x86/cpu/vpmu_intel.c
+index ee5aa1a34e..c19b6ab3fc 100644
+--- a/xen/arch/x86/cpu/vpmu_intel.c
++++ b/xen/arch/x86/cpu/vpmu_intel.c
+@@ -840,8 +840,8 @@ static int cf_check vmx_vpmu_initialise(struct vcpu *v)
+     u64 msr_content;
+     static bool_t ds_warned;
+ 
+-    if ( v->domain->arch.cpuid->basic.pmu_version <= 1 ||
+-         v->domain->arch.cpuid->basic.pmu_version >= 6 )
++    if ( v->domain->arch.cpuid->basic.pmu.version <= 1 ||
++         v->domain->arch.cpuid->basic.pmu.version >= 6 )
+         return -EINVAL;
+ 
+     if ( (arch_pmc_cnt + fixed_pmc_cnt) == 0 )
+diff --git a/xen/arch/x86/domain.c b/xen/arch/x86/domain.c
+index 2eea4c555b..2253f316b6 100644
+--- a/xen/arch/x86/domain.c
++++ b/xen/arch/x86/domain.c
+@@ -443,7 +443,7 @@ void domain_cpu_policy_changed(struct domain *d)
+ 
+         /* If PMU version is zero then the guest doesn't have VPMU */
+         if ( boot_cpu_data.x86_vendor == X86_VENDOR_INTEL &&
+-             p->basic.pmu_version == 0 )
++             p->basic.pmu.version == 0 )
+             vpmu_destroy(v);
+     }
+ }
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index ebaa896fea..34b8ded9c3 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -153,7 +153,15 @@ struct cpu_policy
+             uint64_t :64, :64; /* Leaf 0x9 - DCA */
+ 
+             /* Leaf 0xa - Intel PMU. */
+-            uint8_t pmu_version, _pmu[15];
++            struct {
++                uint8_t /* a */ version, num_gp_ctrs, gp_ctr_width,
++                                event_enum_length;
++                uint32_t /* b */:32;
++                uint32_t /* c */ fixed_ctr_mask;
++                uint32_t /* d */ num_fixed_ctr:5, fixed_ctr_width:8, :1,
++                                 anythread_depreciation:1, slots_per_cyc:4,
++                                 :13;
++            } pmu;
+ 
+             uint64_t :64, :64; /* Leaf 0xb - Topology. */
+             uint64_t :64, :64; /* Leaf 0xc - rsvd */
+-- 
+2.53.0
+

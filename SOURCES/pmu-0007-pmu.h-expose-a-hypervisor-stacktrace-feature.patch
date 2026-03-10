@@ -1,0 +1,49 @@
+From 44f6f970bb8dbed043c0dd4176a075a2ae9f9e62 Mon Sep 17 00:00:00 2001
+Message-ID: <44f6f970bb8dbed043c0dd4176a075a2ae9f9e62.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:44 +0100
+Subject: [PATCH 07/15] pmu.h: expose a hypervisor stacktrace feature
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+For now this'll only be expected to work when the hypervisor is compiled
+with frame pointers, and only when the domain is privileged enough to
+profile Xen (i.e. it is the hardware domain running in HV or ALL modes).
+
+The stacktrace feature is a flag, rather than a new mode, and would
+simply report a stacktrace of depth 0 in other cases.
+Old hypervisors with VPMU 0.1 would also report a stracktrace of depth
+0, due to implicit zero-filling of the page that contains 'struct xen_pmu_data'.
+
+This is just the interface, followup commit implements it.
+
+No functional change.
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/include/public/pmu.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/xen/include/public/pmu.h b/xen/include/public/pmu.h
+index a5c640d51a..685dd1e111 100644
+--- a/xen/include/public/pmu.h
++++ b/xen/include/public/pmu.h
+@@ -76,10 +76,12 @@ DEFINE_XEN_GUEST_HANDLE(xen_pmu_params_t);
+  *                              Architectural Performance Events exposed by
+  *                              cpuid and listed in the Intel developer's manual
+  *                              (ignored on AMD).
++ * - XENPMU_FEATURE_HV_STACKTRACE: Hypervisor stacktraces (when compiled with frame pointers)
+  */
+ #define XENPMU_FEATURE_INTEL_BTS  (1<<0)
+ #define XENPMU_FEATURE_IPC_ONLY   (1<<1)
+ #define XENPMU_FEATURE_ARCH_ONLY  (1<<2)
++#define XENPMU_FEATURE_HV_STACKTRACE (1<<3)
+ 
+ /*
+  * Shared PMU data between hypervisor and PV(H) domains.
+-- 
+2.53.0
+

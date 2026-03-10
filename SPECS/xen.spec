@@ -365,6 +365,23 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
+# XCP-ng vPMU patches
+Patch1101: pmu-0001-arch-x86-pmu.h-document-current-memory-layout-for-VP.patch
+Patch1102: pmu-0002-arch-x86-pmu.h-convert-ascii-art-drawing-to-Unicode.patch
+Patch1103: pmu-0003-vpmu.c-factor-out-register-conversion.patch
+Patch1104: pmu-0004-pmu.h-introduce-a-stacktrace-area.patch
+Patch1105: pmu-0005-arch-x86-pmu.h-convert-ascii-art-diagram-to-Unicode.patch
+Patch1106: pmu-0006-arch-x86-vpmu.c-store-guest-registers-when-domain_id.patch
+Patch1107: pmu-0007-pmu.h-expose-a-hypervisor-stacktrace-feature.patch
+Patch1108: pmu-0008-vpmu.c-hypervisor-stacktrace-support-in-vPMU.patch
+Patch1109: pmu-0009-xen-tools-pyperf.py-example-script-to-parse-perf-out.patch
+Patch1110: pmu-0010-x86-vpmu-Expose-up-to-8-Intel-event-selectors-in-PV-.patch
+Patch1111: pmu-0011-x86-vpmu-Expose-PEBS-and-DS-area-in-PV-mode.patch
+Patch1112: pmu-0012-x86-Define-some-Intel-vPMU-leafs.patch
+Patch1113: pmu-0013-x86-vpmu-Sanitise-Intel-PMU-version.patch
+Patch1114: pmu-0014-x86-vpmu-Limit-to-using-supported-general-fixed-coun.patch
+Patch1115: pmu-0015-x86-vpmu-Allow-PMU-version-6.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

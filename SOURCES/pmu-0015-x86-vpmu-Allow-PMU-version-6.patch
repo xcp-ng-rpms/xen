@@ -1,0 +1,41 @@
+From 8c4199aafbcffa50c595f90765140202b8a1d735 Mon Sep 17 00:00:00 2001
+Message-ID: <8c4199aafbcffa50c595f90765140202b8a1d735.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 10 Mar 2026 17:14:18 +0100
+Subject: [PATCH 15/15] x86/vpmu: Allow PMU version 6
+
+PMU version 6 is backward compatible with older versions,
+as we're exposing version 2 to the guest, it is not expected
+not try using PMU version 6 features.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/cpu/vpmu_intel.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/x86/cpu/vpmu_intel.c b/xen/arch/x86/cpu/vpmu_intel.c
+index b5ea92b347..f94bbf2055 100644
+--- a/xen/arch/x86/cpu/vpmu_intel.c
++++ b/xen/arch/x86/cpu/vpmu_intel.c
+@@ -841,7 +841,7 @@ static int cf_check vmx_vpmu_initialise(struct vcpu *v)
+     static bool_t ds_warned;
+ 
+     if ( v->domain->arch.cpuid->basic.pmu.version <= 1 ||
+-         v->domain->arch.cpuid->basic.pmu.version >= 6 )
++         v->domain->arch.cpuid->basic.pmu.version >= 7 )
+         return -EINVAL;
+ 
+     if ( (arch_pmc_cnt + fixed_pmc_cnt) == 0 )
+@@ -926,6 +926,7 @@ const struct arch_vpmu_ops *__init core2_vpmu_init(void)
+     case 3:
+     case 4:
+     case 5:
++    case 6:
+         printk(XENLOG_INFO "VPMU: PMU version %u is not fully supported. "
+                "Emulating version 2\n", version);
+         /* FALLTHROUGH */
+-- 
+2.53.0
+

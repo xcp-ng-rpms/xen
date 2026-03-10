@@ -1,0 +1,106 @@
+From 8eff4365d9ae3908a29fde6e9630e4696fcdf80b Mon Sep 17 00:00:00 2001
+Message-ID: <8eff4365d9ae3908a29fde6e9630e4696fcdf80b.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 10 Mar 2026 17:01:06 +0100
+Subject: [PATCH 13/15] x86/vpmu: Sanitise Intel PMU version
+
+Currently, Xen exposes the host CPUID as-is, which is not correct
+on hardware that implements PMU features that are not supported by
+Xen (e.g AnyThread bit of PMU version 3, IA32_PERF_GLOBAL_INUSE of
+PMU version 4, and many other things).
+
+As we're actually virtualizing PMU version 2 (as version 3 is the
+same as version 2 with the addition to AnyThread bit, which is we
+don't support since [1]), adjust the messages related to PMU
+emulation to account that.
+
+[1] 9f5390441a6e ("x86/vpmu_intel: handle SMT consistently for programmable and fixed counters")
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/cpu-policy.c     | 31 +++++++++++++++++++++++++++++++
+ xen/arch/x86/cpu/vpmu_intel.c |  4 ++--
+ 2 files changed, 33 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
+index af020e5fce..855260191e 100644
+--- a/xen/arch/x86/cpu-policy.c
++++ b/xen/arch/x86/cpu-policy.c
+@@ -274,6 +274,33 @@ static void recalculate_xstate(struct cpu_policy *p)
+     }
+ }
+ 
++static void sanitise_vpmu(struct cpu_policy *p)
++{
++switch ( p->x86_vendor )
++    {
++    case X86_VENDOR_INTEL:
++        if ( !p->basic.pmu.version )
++            return;
++
++        /*
++         * Expose up to PMU version 2 
++         *
++         * PMU version 3 introduced the AnyThread bit we don't want
++         * to support (see "AnyThread Counting and Software Evolution"
++         * regarding notes with virtualization). This is the only known
++         * feature introduced in PMU version 3.
++         *
++         * PMU version 5 deprecated AnyThread, and introduced a CPUID
++         * bit (ANYTHREAD_DEPRECATION) to indicate that this bit isn't supported.
++         * That CPUID bit should be set for PMU version 5.
++         */
++        if ( p->basic.pmu.version > 2 )
++            p->basic.pmu.version = 2;
++
++        break;
++    }
++}
++
+ /*
+  * Misc adjustments to the policy.  Mostly clobbering reserved fields and
+  * duplicating shared fields.  Intentionally hidden fields are annotated.
+@@ -409,6 +436,8 @@ static void calculate_host_policy(void)
+     /* When vPMU is disabled, drop it from the host policy. */
+     if ( vpmu_mode == XENPMU_MODE_OFF )
+         p->basic.raw[0xa] = EMPTY_LEAF;
++    else
++        sanitise_vpmu(p);
+ 
+     if ( p->extd.svm )
+     {
+@@ -1052,6 +1081,8 @@ void recalculate_cpuid_policy(struct domain *d)
+     if ( vpmu_mode == XENPMU_MODE_OFF ||
+          ((vpmu_mode & XENPMU_MODE_ALL) && !is_hardware_domain(d)) )
+         p->basic.raw[0xa] = EMPTY_LEAF;
++    else
++        sanitise_vpmu(p);
+ 
+     if ( !p->extd.svm )
+         p->extd.raw[0xa] = EMPTY_LEAF;
+diff --git a/xen/arch/x86/cpu/vpmu_intel.c b/xen/arch/x86/cpu/vpmu_intel.c
+index c19b6ab3fc..be61fcb9f8 100644
+--- a/xen/arch/x86/cpu/vpmu_intel.c
++++ b/xen/arch/x86/cpu/vpmu_intel.c
+@@ -923,14 +923,14 @@ const struct arch_vpmu_ops *__init core2_vpmu_init(void)
+ 
+     switch ( version )
+     {
++    case 3:
+     case 4:
+     case 5:
+         printk(XENLOG_INFO "VPMU: PMU version %u is not fully supported. "
+-               "Emulating version 3\n", version);
++               "Emulating version 2\n", version);
+         /* FALLTHROUGH */
+ 
+     case 2:
+-    case 3:
+         break;
+ 
+     default:
+-- 
+2.53.0
+

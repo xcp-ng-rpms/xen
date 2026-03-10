@@ -1,0 +1,67 @@
+From 1992e80944ef95f3e4f0dfbc4cb3449aeb78180a Mon Sep 17 00:00:00 2001
+Message-ID: <1992e80944ef95f3e4f0dfbc4cb3449aeb78180a.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 10 Mar 2026 17:13:18 +0100
+Subject: [PATCH 14/15] x86/vpmu: Limit to using supported general/fixed
+ counters
+
+Hardware can support more than 8 general or 3 fixed counters,
+which could lead to inconsistent access to MSRs (thus failure to
+initialize vPMU in guest) as we don't support accessing more than
+these limits.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/cpu-policy.c     |  6 ++++++
+ xen/arch/x86/cpu/vpmu_intel.c | 15 +++++++++++++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
+index 855260191e..9dfce36c55 100644
+--- a/xen/arch/x86/cpu-policy.c
++++ b/xen/arch/x86/cpu-policy.c
+@@ -297,6 +297,12 @@ switch ( p->x86_vendor )
+         if ( p->basic.pmu.version > 2 )
+             p->basic.pmu.version = 2;
+ 
++        /* Truncate control register count to what we support */
++        if ( p->basic.pmu.num_gp_ctrs > 8 )
++            p->basic.pmu.num_gp_ctrs = 8;
++
++        if ( p->basic.pmu.num_fixed_ctr > 3 )
++            p->basic.pmu.num_fixed_ctr = 3;
+         break;
+     }
+ }
+diff --git a/xen/arch/x86/cpu/vpmu_intel.c b/xen/arch/x86/cpu/vpmu_intel.c
+index be61fcb9f8..b5ea92b347 100644
+--- a/xen/arch/x86/cpu/vpmu_intel.c
++++ b/xen/arch/x86/cpu/vpmu_intel.c
+@@ -946,7 +946,22 @@ const struct arch_vpmu_ops *__init core2_vpmu_init(void)
+     }
+ 
+     arch_pmc_cnt = core2_get_arch_pmc_count();
++    if ( arch_pmc_cnt > 8 )
++    {
++        printk(XENLOG_INFO
++               "VPMU: Too many general counters (%u), emulating 8 registers\n",
++               arch_pmc_cnt);
++        arch_pmc_cnt = 8;
++    }
++
+     fixed_pmc_cnt = core2_get_fixed_pmc_count();
++    if ( fixed_pmc_cnt > 3 )
++    {
++        printk(XENLOG_INFO
++               "VPMU: Too many fixed counters (%u), emulating 3 registers\n",
++               arch_pmc_cnt);
++        fixed_pmc_cnt = 3;
++    }
+ 
+     if ( cpu_has_pdcm )
+     {
+-- 
+2.53.0
+

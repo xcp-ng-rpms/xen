@@ -1,0 +1,147 @@
+From a95994f5ad65d5ba8cba9d8a6274220090ce4040 Mon Sep 17 00:00:00 2001
+Message-ID: <a95994f5ad65d5ba8cba9d8a6274220090ce4040.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:43 +0100
+Subject: [PATCH 06/15] arch-x86/vpmu.c: store guest registers when domain_id
+ == DOMID_XEN
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When Xen profiling is enabled (for HW domain only), then domain_id is
+set to DOMID_XEN, and Xen's IP is reported as the sample location.
+
+With VPMU >= 0.2 we can now report more information to help a guest
+construct a stacktrace, and store the guest's registers and domain_id
+into the new 'struct xen_pmu_hv_stracktrace'.
+
+Privileged (HW domain) guests can then trace themselves, even if the
+sample interrupt triggered inside Xen. This is useful if kernel or
+userspace stacktrace gather is enabled.
+
+For this to be effective a kernel change is required too, but it is
+backwards compatible with old kernels, that:
+* would ignore the newly stored data (it is towards the end of the page,
+in a previously unused area)
+* would report VPMU 0.1, and thus Xen would have xen_pmu_hv_stacktrace ==
+  NULL, and not report this information
+
+To avoid stale values the guest_domain_id is always initialized to the
+correct value, and ip is set to 0.
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/arch/x86/cpu/vpmu.c         | 33 ++++++++++++++++++++++++++++-----
+ xen/arch/x86/include/asm/vpmu.h |  1 +
+ 2 files changed, 29 insertions(+), 5 deletions(-)
+
+diff --git a/xen/arch/x86/cpu/vpmu.c b/xen/arch/x86/cpu/vpmu.c
+index f512cd51c0..02091f02bf 100644
+--- a/xen/arch/x86/cpu/vpmu.c
++++ b/xen/arch/x86/cpu/vpmu.c
+@@ -185,7 +185,7 @@ static inline void vpmu_convert_regs(struct xen_pmu_regs *r, uint64_t *flags,
+   if (!is_hvm_vcpu(sampled)) {
+     r->ss = cur_regs->ss;
+     r->cs = cur_regs->cs;
+-    if (!(sampled->arch.flags & TF_kernel_mode))
++    if (flags && !(sampled->arch.flags & TF_kernel_mode))
+       *flags |= PMU_SAMPLE_USER;
+   } else {
+     struct segment_register seg;
+@@ -195,7 +195,7 @@ static inline void vpmu_convert_regs(struct xen_pmu_regs *r, uint64_t *flags,
+     hvm_get_segment_register(sampled, x86_seg_ss, &seg);
+     r->ss = seg.sel;
+     r->cpl = seg.dpl;
+-    if (!(sampled->arch.hvm.guest_cr[0] & X86_CR0_PE))
++    if (flags && !(sampled->arch.hvm.guest_cr[0] & X86_CR0_PE))
+       *flags |= PMU_SAMPLE_REAL;
+   }
+ }
+@@ -255,6 +255,14 @@ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+         else
+             domid = sampled->domain->domain_id;
+ 
++        if (vpmu->xenpmu_hv_stacktrace)
++        {
++            vpmu->xenpmu_hv_stacktrace->guest_domain_id = domid;
++
++            /* avoid stale values when domid != DOMID_XEN */
++            vpmu->xenpmu_hv_stacktrace->guest.r.regs.ip = 0;
++        }
++
+         /* Store appropriate registers in xenpmu_data */
+ #ifdef CONFIG_COMPAT
+         /* FIXME: 32-bit PVH should go here as well */
+@@ -289,6 +297,11 @@ void vpmu_do_interrupt(struct cpu_user_regs *regs)
+                       is_hardware_domain(sampling->domain) )
+             {
+                 cur_regs = regs;
++                if (vpmu->xenpmu_hv_stacktrace)
++                {
++                    vpmu_convert_regs(&vpmu->xenpmu_hv_stacktrace->guest.r.regs,
++                                      NULL, sampled, guest_cpu_user_regs());
++                }
+                 domid = DOMID_XEN;
+             }
+             else
+@@ -560,6 +573,7 @@ static void vpmu_cleanup(struct vcpu *v)
+     vpmu_arch_destroy(v);
+     xenpmu_data = vpmu->xenpmu_data;
+     vpmu->xenpmu_data = NULL;
++    vpmu->xenpmu_hv_stacktrace = NULL;
+ 
+     spin_unlock(&vpmu->vpmu_lock);
+ 
+@@ -586,6 +600,7 @@ static int pvpmu_init(struct domain *d, xen_pmu_params_t *params)
+     struct vpmu_struct *vpmu;
+     struct page_info *page;
+     uint64_t gfn = params->val;
++    void *vpmu_page;
+ 
+     if ( (params->vcpu >= d->max_vcpus) || (d->vcpu[params->vcpu] == NULL) )
+         return -EINVAL;
+@@ -615,7 +630,8 @@ static int pvpmu_init(struct domain *d, xen_pmu_params_t *params)
+         return -EEXIST;
+     }
+ 
+-    v->arch.vpmu.xenpmu_data = __map_domain_page_global(page);
++    vpmu_page = __map_domain_page_global(page);
++    v->arch.vpmu.xenpmu_data = vpmu_page;
+     if ( !v->arch.vpmu.xenpmu_data )
+     {
+         spin_unlock(&vpmu->vpmu_lock);
+@@ -623,8 +639,15 @@ static int pvpmu_init(struct domain *d, xen_pmu_params_t *params)
+         return -ENOMEM;
+     }
+ 
+-    if ( vpmu_arch_initialise(v) )
+-        put_vpmu(v);
++    if (params->version.maj > 0 || params->version.min >= 2)
++      v->arch.vpmu.xenpmu_hv_stacktrace =
++          (void *)((uint8_t *)vpmu_page + PAGE_SIZE -
++                   sizeof(struct xen_pmu_hv_stacktrace));
++    else
++     v->arch.vpmu.xenpmu_hv_stacktrace = NULL;
++
++    if (vpmu_arch_initialise(v))
++      put_vpmu(v);
+ 
+     spin_unlock(&vpmu->vpmu_lock);
+ 
+diff --git a/xen/arch/x86/include/asm/vpmu.h b/xen/arch/x86/include/asm/vpmu.h
+index 05e1fbfccf..4f6ef4000a 100644
+--- a/xen/arch/x86/include/asm/vpmu.h
++++ b/xen/arch/x86/include/asm/vpmu.h
+@@ -66,6 +66,7 @@ struct vpmu_struct {
+     size_t context_size;
+     size_t priv_context_size;
+     struct xen_pmu_data *xenpmu_data;
++    struct xen_pmu_hv_stacktrace *xenpmu_hv_stacktrace; /* only set if client vpmu >= 0.2 */
+     spinlock_t vpmu_lock;
+ };
+ 
+-- 
+2.53.0
+

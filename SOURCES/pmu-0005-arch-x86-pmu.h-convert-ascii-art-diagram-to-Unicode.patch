@@ -1,0 +1,110 @@
+From 0d3e2f44aeb094d74e6fbe3c1b7e27bb5c599f35 Mon Sep 17 00:00:00 2001
+Message-ID: <0d3e2f44aeb094d74e6fbe3c1b7e27bb5c599f35.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:42 +0100
+Subject: [PATCH 05/15] arch-x86/pmu.h: convert ascii art diagram to Unicode
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Using `aa2u` tool.
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/include/public/arch-x86/pmu.h | 47 ++++++++++++++++---------------
+ xen/include/public/pmu.h          |  2 +-
+ 2 files changed, 25 insertions(+), 24 deletions(-)
+
+diff --git a/xen/include/public/arch-x86/pmu.h b/xen/include/public/arch-x86/pmu.h
+index bdc8218cbe..92ae4dbb1d 100644
+--- a/xen/include/public/arch-x86/pmu.h
++++ b/xen/include/public/arch-x86/pmu.h
+@@ -75,8 +75,10 @@ DEFINE_XEN_GUEST_HANDLE(xen_pmu_regs_t);
+ #define PMU_SAMPLE_PV      (1<<3) /* Sample from a PV guest */
+ 
+ /*
+- * Architecture-specific information describing the state of the guest at
+- * the time of a PMU interrupt.
++ * Architecture-specific information describing state of the guest at
++ * the time of PMU interrupt.
++ * Even if the interrupt arrived while inside Xen, this will always contain
++ * the guest's state.
+  */
+ struct xen_pmu_arch_guest {
+     union {
+@@ -146,11 +148,10 @@ struct xen_pmu_arch {
+ typedef struct xen_pmu_arch xen_pmu_arch_t;
+ DEFINE_XEN_GUEST_HANDLE(xen_pmu_arch_t);
+ 
+-
+ /* Memory layout:
+  *                ╭─────────────────────╮
+  *                │ struct xen_pmu_data │
+- * ╒══════════════╧═════════════════════╧═══════════════════════╕ ◁╮
++ * ╒══════════════╧═════════════════════╧═══════════════════════╕ ◁│
+  * │ vcpu_id                                                    │  │
+  * ├────────────────────────────────────────────────────────────┤  │
+  * │ pcpu_id                                                    │  │
+@@ -207,25 +208,25 @@ DEFINE_XEN_GUEST_HANDLE(xen_pmu_arch_t);
+  * ┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆  ┆
+  * ┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆┆  ┆
+  * │████████████████████████████████████████████████████████████│  │
+- * |############################################################|  |
+- * |##########.------------------------------.##################|  |
+- * |##########| struct xen_pmu_hv_stacktrace |##################|  |
+- * +==========+==============================+==================+  |
+- * |                              ^ [stacktrace_nr-1]           |  |
+- * |                              :                             |  |
+- * | stacktrace[stacktrace_nr]    : [0]                         |  |
+- * +------------------------------------------------------------+  |
+- * | stacktrace_nr                                              |  |
+- * +------------------------------------------------------------+  |
+- * | guest_domain_id                                            |  |
+- * +------------------------------------------------------------+  |
+- * |##pad#######################################################|  |
+- * +=======+=+===+==================+===========================+  |
+- * | guest | | r | regs             |##pad######################|  |
+- * +-------. +---. (xen or guest)   |###########################|  |
+- * |         +======================+===========================+  |
+- * |         |##pad2############################################|  | PAGE_SIZE
+- * +=========+==================================================+ <.
++ * │████████████████████████████████████████████████████████████│  │
++ * │██████████╭──────────────────────────────╮██████████████████│  │
++ * │██████████│ struct xen_pmu_hv_stacktrace │██████████████████│  │
++ * ╞══════════╧══════════════════════════════╧══════════════════╡  │
++ * │                              △ [stacktrace_nr-1]           │  │
++ * │                              ┆                             │  │
++ * │ stacktrace[stacktrace_nr]    ┆ [0]                         │  │
++ * ├────────────────────────────────────────────────────────────┤  │
++ * │ stacktrace_nr                                              │  │
++ * ├────────────────────────────────────────────────────────────┤  │
++ * │ guest_domain_id                                            │  │
++ * ├────────────────────────────────────────────────────────────┤  │
++ * │██pad███████████████████████████████████████████████████████│  │
++ * ╞═══════╤═╤═══╤══════════════════╤═══════════════════════════╡  │
++ * │ guest │ │ r │ regs             │██pad██████████████████████│  │
++ * ├───────╯ ├───╯ (xen or guest)   │███████████████████████████│  │
++ * │         ╞══════════════════════╧═══════════════════════════╡  │
++ * │         │██pad2████████████████████████████████████████████│  │ PAGE_SIZE
++ * ╘═════════╧══════════════════════════════════════════════════╛ ◁╯
+ */
+ 
+ #endif /* __XEN_PUBLIC_ARCH_X86_PMU_H__ */
+diff --git a/xen/include/public/pmu.h b/xen/include/public/pmu.h
+index 3f1f1ce31b..a5c640d51a 100644
+--- a/xen/include/public/pmu.h
++++ b/xen/include/public/pmu.h
+@@ -141,7 +141,7 @@ struct xen_pmu_hv_stacktrace {
+     * arrives while in Xen.
+     * */
+     struct xen_pmu_arch_guest guest;
+-#define XEN_PMU_STACKTRACE_PAD 48
++#define XEN_PMU_STACKTRACE_PAD 56
+     uint8_t pad2[XEN_PMU_STACKTRACE_PAD];
+ };
+ 
+-- 
+2.53.0
+

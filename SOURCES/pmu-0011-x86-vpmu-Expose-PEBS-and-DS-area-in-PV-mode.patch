@@ -1,0 +1,42 @@
+From 635fb87cfe5461b8407a584910ce7bc4f17d9b22 Mon Sep 17 00:00:00 2001
+Message-ID: <635fb87cfe5461b8407a584910ce7bc4f17d9b22.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 9 Mar 2026 11:00:42 +0100
+Subject: [PATCH 11/15] x86/vpmu: Expose PEBS and DS area in PV mode
+
+I don't see any reason for them for not be available, especially
+since core2_vpmu_do_wrmsr has PV specific logic for MSR_IA32_DS_AREA.
+
+Fixes: 27c554198666 ("x86/VPMU: add support for PMU register handling on PV guests")
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+---
+ xen/arch/x86/pv/emul-priv-op.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/xen/arch/x86/pv/emul-priv-op.c b/xen/arch/x86/pv/emul-priv-op.c
+index c53552203b..fd3425bc04 100644
+--- a/xen/arch/x86/pv/emul-priv-op.c
++++ b/xen/arch/x86/pv/emul-priv-op.c
+@@ -986,6 +986,8 @@ static int cf_check read_msr(
+     case MSR_P6_EVNTSEL(0) ... MSR_P6_EVNTSEL(7):
+     case MSR_CORE_PERF_FIXED_CTR0 ... MSR_CORE_PERF_FIXED_CTR2:
+     case MSR_CORE_PERF_FIXED_CTR_CTRL ... MSR_CORE_PERF_GLOBAL_OVF_CTRL:
++    case MSR_IA32_PEBS_ENABLE:
++    case MSR_IA32_DS_AREA:
+         if ( boot_cpu_data.x86_vendor == X86_VENDOR_INTEL )
+         {
+             vpmu_msr = true;
+@@ -1163,6 +1165,8 @@ static int cf_check write_msr(
+     case MSR_P6_EVNTSEL(0) ... MSR_P6_EVNTSEL(7):
+     case MSR_CORE_PERF_FIXED_CTR0 ... MSR_CORE_PERF_FIXED_CTR2:
+     case MSR_CORE_PERF_FIXED_CTR_CTRL ... MSR_CORE_PERF_GLOBAL_OVF_CTRL:
++    case MSR_IA32_PEBS_ENABLE:
++    case MSR_IA32_DS_AREA:
+         if ( boot_cpu_data.x86_vendor == X86_VENDOR_INTEL )
+         {
+             vpmu_msr = true;
+-- 
+2.53.0
+

@@ -1,0 +1,189 @@
+From 9d681fc063af6dc01bfddb9bb3882675ba4737ae Mon Sep 17 00:00:00 2001
+Message-ID: <9d681fc063af6dc01bfddb9bb3882675ba4737ae.1773161960.git.teddy.astie@vates.tech>
+In-Reply-To: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+References: <b8078ed45d66b94467b594ac7e8d849af32a0984.1773161960.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Edwin=20T=C3=B6r=C3=B6k?= <edwin.torok@cloud.com>
+Date: Fri, 25 Jul 2025 16:06:46 +0100
+Subject: [PATCH 09/15] xen/tools/pyperf.py: example script to parse perf
+ output
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Looks up symbols by parsing the output of 'perf script -i
+perf.data.kvm'.
+
+Note that addr2line is very slow, and invoking it for each symbol would
+results in the script taking several minutes to process a trace that
+only lasts a few seconds.
+Processing only unique addresses, and processing multiple addresses in
+one go reduces this to acceptable running times.
+
+Based on an earlier script by Andriy Sultanov for parsing 'perf kvm report
+--stdio' output.
+
+This doesn't have to be added to the tree, eventually perf itself should
+be capable of performing this lookup, but meanwhile it is useful to have
+some way for automatically converting stacktraces.
+
+Signed-off-by: Edwin Török <edwin.torok@cloud.com>
+---
+ xen/tools/pyperf.py | 146 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 146 insertions(+)
+ create mode 100644 xen/tools/pyperf.py
+
+diff --git a/xen/tools/pyperf.py b/xen/tools/pyperf.py
+new file mode 100644
+index 0000000000..881e6e1e0b
+--- /dev/null
++++ b/xen/tools/pyperf.py
+@@ -0,0 +1,146 @@
++#!/usr/bin/env python3
++## run after 'perf kvm --host --guest record -a -F 99 -- xe vm-list'
++# wraps the call to 'perf script' to get xen symbols instead of just addresses, like:
++#
++# perf  236848 [000] 67971.504330:          1 cycles:P:
++#        ffff82d04029fc73 [unknown] ([unknown])
++#        ffff82d04029ebc2 [unknown] ([unknown])
++#        ffff82d04029ef1f [unknown] ([unknown])
++#        ffff82d0403081df [unknown] ([unknown])
++#        ffff82d0402012d3 [unknown] ([unknown])
++#            7f2ea410469d __GI___ioctl+0x3d (/usr/lib64/libc.so.6)
++#            55f9b3a8df5c perf_evsel__run_ioctl+0x6c (/usr/bin/perf)
++#            55f9b397b152 __evlist__enable.constprop.0+0x112 (/usr/bin/perf)
++#            55f9b38c2643 __cmd_record.constprop.0+0x2833 (/usr/bin/perf)
++#            55f9b38c3e1c cmd_record+0xeec (/usr/bin/perf)
++#            55f9b38e3ed0 cmd_kvm+0x7d0 (/usr/bin/perf)
++#            55f9b3961ff1 run_builtin+0x71 (/usr/bin/perf)
++#            55f9b38adbeb main+0x68b (/usr/bin/perf)
++#            7f2ea403314a __libc_start_call_main+0x7a (/usr/lib64/libc.so.6)
++#            7f2ea403320b __libc_start_main@@GLIBC_2.34+0x8b (/usr/lib64/libc.so.6)
++#            55f9b38ade55 _start+0x25 (/usr/bin/perf)
++# 
++# Or with perf script -F+srcline:
++# perf  236848 [000] 67971.504330:          1 cycles:P:
++#        ffff82d04029fc73 [unknown] ([unknown])
++#        ffff82d04029ebc2 [unknown] ([unknown])
++#        ffff82d04029ef1f [unknown] ([unknown])
++#        ffff82d0403081df [unknown] ([unknown])
++#        ffff82d0402012d3 [unknown] ([unknown])
++#            7f2ea410469d __GI___ioctl+0x3d (/usr/lib64/libc.so.6)
++#  libc.so.6[d569d]
++#            55f9b3a8df5c perf_evsel__run_ioctl+0x6c (/usr/bin/perf)
++#  evsel.c:435
++#            55f9b397b152 __evlist__enable.constprop.0+0x112 (/usr/bin/perf)
++# evlist.c:573
++#            55f9b38c2643 __cmd_record.constprop.0+0x2833 (/usr/bin/perf)
++#  builtin-record.c:2524
++#            55f9b38c3e1c cmd_record+0xeec (/usr/bin/perf)
++#  builtin-record.c:4215
++#            55f9b38e3ed0 cmd_kvm+0x7d0 (/usr/bin/perf)
++#  builtin-kvm.c:2081
++#            55f9b3961ff1 run_builtin+0x71 (/usr/bin/perf)
++#  perf.c:322
++#            55f9b38adbeb main+0x68b (/usr/bin/perf)
++#  perf.c:375
++#            7f2ea403314a __libc_start_call_main+0x7a (/usr/lib64/libc.so.6)
++#  libc.so.6[414a]
++#            7f2ea403320b __libc_start_main@@GLIBC_2.34+0x8b (/usr/lib64/libc.so.6)
++#  libc.so.6[420b]
++#            55f9b38ade55 _start+0x25 (/usr/bin/perf)
++#  ??:0
++# 
++# TODO: BUG when we have only 1 unknown and not from hypervisor we print 2 bogus values
++# and claim it was hypervisor
++# This is useful for FlameGraphs
++
++from collections import defaultdict
++from typing import Optional
++import subprocess
++import tempfile
++
++with open('/sys/hypervisor/version/major', 'r') as f:
++    major = f.read().rstrip()
++with open('/sys/hypervisor/version/minor', 'r') as f:
++    minor = f.read().rstrip()
++with open('/sys/hypervisor/version/extra', 'r') as f:
++    extra = f.read().rstrip()
++
++xen_version = f'{major}.{minor}{extra}'
++xen_symbols = f'/boot/xen-syms-{xen_version}'
++# TODO: srcline transform as we do for ours
++report: bytes = subprocess.check_output(['perf', 'script', '-i', 'perf.data.kvm'])
++
++# invoking addr2line for each symbol is very slow
++# (takes several minutes to process a trace that way)
++# Instead collect all addresses, and invoke addr2line once
++# (this way we can also query it only for unique addresses)
++maybe_in_hypervisor = False
++
++addresses = set()
++lines = []
++
++for rawline in report.splitlines():
++    line = rawline.decode()
++    columns = line.split()
++    if line and line[0] != ' ':
++        # beginning of new stacktrace, could start in hypervisor
++        maybe_in_hypervisor = True
++    if len(columns) == 3 and maybe_in_hypervisor and columns[1] == '[unknown]' and columns[2] == '([unknown])':
++        addr = columns[0]
++        addresses.add(addr)
++        lines.append((line, columns))
++    else:
++        maybe_in_hypervisor = False
++        lines.append((line, []))
++
++addr2loc: defaultdict[str, list[str]] = defaultdict(list)
++with tempfile.NamedTemporaryFile() as tmp:
++    # TODO: add back -i, but sharing needs to be fixed
++    tmp.write(f"-asfe {xen_symbols}\n".encode("utf-8"))
++    for addr in addresses:
++        tmp.write((addr + "\n").encode("utf-8"))
++    tmp.flush()
++    cmd = ['addr2line', '@' + tmp.name]
++    symbols = subprocess.check_output(cmd).decode().splitlines()
++    # output format:
++    #  address
++    #  function_name
++    #  source_file:line_number
++    #  inlined by function_name
++    #  inlined by source_file:line_number
++    # we keep each of these separate, but change the order,
++    # so that it works for a flamegraph (from callees to callers)
++    #  source_file:line_number
++    #  function_name
++    #  inlined by source_file:line_number
++    #  inlined by function_name
++
++    # sometimes we get extra info in parenthesis, drop it:
++    # /builddir/build/BUILD/xen-4.21.0/xen/build-xen-debug/../arch/x86/pv/emul-priv-op.c:1349 (discriminator 8)
++    addr = ""
++    prev: Optional[str] = None
++    for symline in symbols:
++        if symline.startswith("0x"):
++            addr = symline[2:]
++            addr2loc[addr] = []
++            prev = None
++        else:
++            if prev:
++                for line in [symline, prev]:
++                    addr2loc[addr].append("%024s %s_[h] ([%s])" %
++                                          (addr, line.split()[0], xen_symbols))
++            prev = symline
++
++    for (line, columns) in lines:
++        if len(columns) == 3:
++            addr = columns[0]
++            loc = addr2loc.get(addr)
++            if loc:
++                # TODO: stacktrace needs to be shared when inlined functions have common parent
++                for out in loc:
++                    print(out)
++            else:
++                print(line)
++        else:
++            print(line)
+-- 
+2.53.0
+

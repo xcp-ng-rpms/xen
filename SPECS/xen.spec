@@ -223,7 +223,7 @@ Patch179: skip-flask-call.patch
 Patch180: public-abi.patch
 Patch181: elf-note-filtering.patch
 
-ExclusiveArch: x86_64
+ExclusiveArch: %{x86_64}
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
@@ -1117,6 +1117,7 @@ fi
 - Remove livepatch certificate support depending on unpublished XS packages
 - Require needed python3-setuptools
 - Do not fail build when revision contains a '+'
+- Allow building for x86_64_v2
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

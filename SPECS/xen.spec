@@ -37,7 +37,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.3%{?dist}
+Release: %{?xsrel}.0.ydi.4%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -208,7 +208,7 @@ Patch1003: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
 # Patch1006: workaround-current_text_addr-x86-asm.patch
 # Patch1007: workaround-pdx-unused-var.patch
 
-ExclusiveArch: x86_64 aarch64
+ExclusiveArch: %{x86_64} aarch64
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
@@ -1108,10 +1108,11 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.3
+* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.4
 - Merge former xcpng-8.3 and ydi/9 work
 - do not fail build when revision contains a '+'
 - adjust exclude list to use rc.d/
+- allow building for x86_64_v2
 
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling

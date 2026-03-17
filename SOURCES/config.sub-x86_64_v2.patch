@@ -1,0 +1,11 @@
+--- /usr/lib/rpm/redhat/config.sub	2026-03-10 00:00:00.000000000 +0000
++++ ./config.sub	2026-03-17 15:31:28.970082466 +0000
+@@ -1278,7 +1278,7 @@
+ 			| w65 \
+ 			| wasm32 | wasm64 \
+ 			| we32k \
+-			| x86 | x86_64 | xc16x | xgate | xps100 \
++			| x86 | x86_64 | x86_64_v2 | xc16x | xgate | xps100 \
+ 			| xstormy16 | xtensa* \
+ 			| ymp \
+ 			| z8k | z80)

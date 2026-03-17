@@ -37,7 +37,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.19.1
-Release: %{?xsrel}.0.ydi.4%{?dist}
+Release: %{?xsrel}.0.ydi.5%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
@@ -45,6 +45,7 @@ Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
 Source5: gen_test_metadata.py
+Source6: config.sub-x86_64_v2.patch
 
 # patches from xen.pg:
 # awk '/^([^#]+)(#.*)?/ {printf "Patch%d:\t%s\n", NR, $1}; /^#/ {print}' < .git/patches/patches/series
@@ -446,6 +447,8 @@ ARCHOPTS=" \
            --with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64 \
 "
 %endif
+
+patch -p1 < ${SOURCE6}
 
 %configure --disable-qemu-traditional \
            --disable-seabios \
@@ -1108,11 +1111,13 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.4
+* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.19.3-0.0.ydi.5
 - Merge former xcpng-8.3 and ydi/9 work
 - do not fail build when revision contains a '+'
 - adjust exclude list to use rc.d/
 - allow building for x86_64_v2
+- include a config.sub patch to recognize the --build=x86_64_v2-koji-linux-gnu
+  passed by you know who
 - update to 4.19.1-2 from XS:
   * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
   - Fix (experimental) nested virt enabling

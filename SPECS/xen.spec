@@ -448,7 +448,7 @@ ARCHOPTS=" \
 "
 %endif
 
-patch -p1 < ${SOURCE6}
+patch -p1 < %{SOURCE6}
 
 %configure --disable-qemu-traditional \
            --disable-seabios \

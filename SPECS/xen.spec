@@ -1113,15 +1113,15 @@ fi
 - do not fail build when revision contains a '+'
 - adjust exclude list to use rc.d/
 - allow building for x86_64_v2
+- update to 4.19.1-2 from XS:
+  * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
+  - Fix (experimental) nested virt enabling
+  - Fix IO_PAGE_FAULT on AMD machines due to interrupt migration
+  - Reduce PCI config space accesses
+  - Fix reboot/shutdown issues on AMD due to local APIC ESR interrupts
 
-* Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
-- Fix (experimental) nested virt enabling
-- Fix IO_PAGE_FAULT on AMD machines due to interrupt migration
-- Reduce PCI config space accesses
-- Fix reboot/shutdown issues on AMD due to local APIC ESR interrupts
-
-* Mon Jan 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.1-1
-- Update to Xen 4.19.1
+  * Mon Jan 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.1-1
+  - Update to Xen 4.19.1
 
 * Mon May 05 2025 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.5-9.3
 - Backport dd05d265b8ab "x86/intel: Fix PERF_GLOBAL fixup when virtualised"

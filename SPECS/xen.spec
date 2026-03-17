@@ -1155,7 +1155,7 @@ fi
 * Fri Feb 28 2025 David Morel <david.morel@vates.tech> - 4.17.5-4.2
 - Fix for XSA-467 / CVE-2025-1713
 
-* Mon Feb  6 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-4.1
+* Mon Feb 03 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-4.1
 - xenguest: activate nested virt when requested
 
 * Tue Nov  5 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-4

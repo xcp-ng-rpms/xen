@@ -42,10 +42,10 @@ index c26e544e8393..60fe9aa3ea53 100644
  -include $(DEPS_INCLUDE)
 diff --git a/tools/misc/xen-spec-ctrl.c b/tools/misc/xen-spec-ctrl.c
 new file mode 100644
-index 000000000000..d46778eca989
+index 000000000000..a6216c2e4877
 --- /dev/null
 +++ b/tools/misc/xen-spec-ctrl.c
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,49 @@
 +#define _GNU_SOURCE
 +
 +#include <stdio.h>
@@ -57,18 +57,20 @@ index 000000000000..d46778eca989
 +
 +void show_help(void)
 +{
-+    fprintf(stderr,
++    fprintf(stdout,
 +            "xen-spec-ctrl: Xen speculation control tool\n"
 +            "Usage: xen-spec-ctrl update\n");
 +}
 +
 +int main(int argc, char *argv[])
 +{
-+    int ret;
-+    struct xen_sysctl sysctl = {0};
++    struct xen_sysctl sysctl = {
++        .interface_version = XEN_SYSCTL_INTERFACE_VERSION,
++        .cmd = XEN_SYSCTL_spec_ctrl,
++        .u.spec_ctrl.op = XENPF_spec_ctrl_update,
++    };
 +    xc_interface *xch;
-+    char *str = "Mitigations have been updated! "
-+                "Check xen-cpuid output for the details.";
++    int ret;
 +
 +    if ( argc < 2 || strcmp(argv[1], "update") != 0 )
 +    {
@@ -80,34 +82,21 @@ index 000000000000..d46778eca989
 +    if ( xch == NULL )
 +        err(1, "xc_interface_open");
 +
-+    sysctl.interface_version = XEN_SYSCTL_INTERFACE_VERSION;
-+    sysctl.cmd = XEN_SYSCTL_spec_ctrl;
-+    sysctl.u.spec_ctrl.op = XENPF_spec_ctrl_update;
-+
 +    ret = xc_sysctl(xch, &sysctl);
-+    if ( ret != 0 )
-+    {
-+        switch ( errno )
-+        {
-+        case ENOEXEC:
-+            str = "No new H/W features have been found. "
-+                  "Did you forget to update the microcode with xen-ucode?";
-+            break;
 +
-+        default:
-+            str = strerror(errno);
-+            break;
-+        }
-+    }
-+
-+    fprintf(stderr, "Status: %s\n", str);
++    if ( ret == 0 )
++        fprintf(stdout, "Features updated\n");
++    else if ( ret == -1 && errno == ENOEXEC )
++        fprintf(stdout, "No new features found\n");
++    else
++        err(1, "Unexpected error: ");
 +
 +    xc_interface_close(xch);
 +
 +    return 0;
 +}
 diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
-index f07bd36cdb7f..af0ca950949c 100644
+index be28372d5863..0adfdfee5612 100644
 --- a/xen/arch/x86/cpu-policy.c
 +++ b/xen/arch/x86/cpu-policy.c
 @@ -18,26 +18,26 @@
@@ -147,7 +136,7 @@ index f07bd36cdb7f..af0ca950949c 100644
      INIT_HVM_HAP_DEF_FEATURES;
  static const uint32_t deep_features[] = INIT_DEEP_FEATURES;
  
-@@ -359,7 +359,7 @@ void calculate_raw_cpu_policy(void)
+@@ -364,7 +364,7 @@ void calculate_raw_cpu_policy(void)
      /* Was already added by probe_cpuid_faulting() */
  }
  
@@ -156,7 +145,7 @@ index f07bd36cdb7f..af0ca950949c 100644
  {
      struct cpu_policy *p = &host_cpu_policy;
      unsigned int max_extd_leaf;
-@@ -404,7 +404,7 @@ static void __init calculate_host_policy(void)
+@@ -409,7 +409,7 @@ static void __init calculate_host_policy(void)
   * - Some incoming VMs have a larger-than-necessary feat max_subleaf.
   * - Some VMs we'd like to synthesise leaves not present on the host.
   */
@@ -165,7 +154,7 @@ index f07bd36cdb7f..af0ca950949c 100644
  {
      p->basic.max_leaf       = ARRAY_SIZE(p->basic.raw) - 1;
      p->feat.max_subleaf     = ARRAY_SIZE(p->feat.raw) - 1;
-@@ -412,14 +412,14 @@ static void __init guest_common_max_leaves(struct cpu_policy *p)
+@@ -417,14 +417,14 @@ static void __init guest_common_max_leaves(struct cpu_policy *p)
  }
  
  /* Guest default policies inherit the host max leaf/subleaf settings. */
@@ -180,19 +169,19 @@ index f07bd36cdb7f..af0ca950949c 100644
 -static void __init guest_common_max_feature_adjustments(uint32_t *fs)
 +static void guest_common_max_feature_adjustments(uint32_t *fs)
  {
-     if ( boot_cpu_data.x86_vendor == X86_VENDOR_INTEL )
+     switch ( boot_cpu_data.x86_vendor )
      {
-@@ -495,7 +495,7 @@ static void __init guest_common_max_feature_adjustments(uint32_t *fs)
-         __set_bit(X86_FEATURE_RTM_ALWAYS_ABORT, fs);
+@@ -513,7 +513,7 @@ static void __init guest_common_max_feature_adjustments(uint32_t *fs)
+     __set_bit(X86_FEATURE_CMP_LEGACY, fs);
  }
  
 -static void __init guest_common_default_feature_adjustments(uint32_t *fs)
 +static void guest_common_default_feature_adjustments(uint32_t *fs)
  {
-     if ( boot_cpu_data.x86_vendor == X86_VENDOR_INTEL )
+     switch ( boot_cpu_data.x86_vendor )
      {
-@@ -575,7 +575,7 @@ static void __init guest_common_default_feature_adjustments(uint32_t *fs)
-     }
+@@ -602,7 +602,7 @@ static void __init guest_common_default_feature_adjustments(uint32_t *fs)
+         __clear_bit(X86_FEATURE_CMP_LEGACY, fs);
  }
  
 -static void __init guest_common_feature_adjustments(uint32_t *fs)
@@ -200,7 +189,7 @@ index f07bd36cdb7f..af0ca950949c 100644
  {
      /* Unconditionally claim to be able to set the hypervisor bit. */
      __set_bit(X86_FEATURE_HYPERVISOR, fs);
-@@ -599,7 +599,7 @@ static void __init guest_common_feature_adjustments(uint32_t *fs)
+@@ -626,7 +626,7 @@ static void __init guest_common_feature_adjustments(uint32_t *fs)
          __set_bit(X86_FEATURE_IBPB, fs);
  }
  
@@ -209,7 +198,7 @@ index f07bd36cdb7f..af0ca950949c 100644
  {
      struct cpu_policy *p = &pv_max_cpu_policy;
      uint32_t fs[FSCAPINTS];
-@@ -700,7 +700,7 @@ static void __init calculate_pv_def_policy(void)
+@@ -727,7 +727,7 @@ static void __init calculate_pv_def_policy(void)
      recalculate_xstate(p);
  }
  
@@ -218,7 +207,7 @@ index f07bd36cdb7f..af0ca950949c 100644
  {
      struct cpu_policy *p = &hvm_max_cpu_policy;
      uint32_t fs[FSCAPINTS];
-@@ -869,7 +869,7 @@ static void __init calculate_hvm_def_policy(void)
+@@ -896,7 +896,7 @@ static void __init calculate_hvm_def_policy(void)
      recalculate_xstate(p);
  }
  
@@ -228,7 +217,7 @@ index f07bd36cdb7f..af0ca950949c 100644
      calculate_host_policy();
  
 diff --git a/xen/arch/x86/cpu/amd.c b/xen/arch/x86/cpu/amd.c
-index c448997be551..1584455cf060 100644
+index ed0c45953f4a..6cb0cdb0dd2d 100644
 --- a/xen/arch/x86/cpu/amd.c
 +++ b/xen/arch/x86/cpu/amd.c
 @@ -52,7 +52,7 @@ boolean_param("allow_unsafe", opt_allow_unsafe);
@@ -240,11 +229,21 @@ index c448997be551..1584455cf060 100644
  
  static bool __read_mostly fam17_c6_disabled;
  
+@@ -1258,7 +1258,8 @@ static void cf_check init_amd(struct cpuinfo_x86 *c)
+ 	}
+ 
+ 	/* AMD CPUs do not support SYSENTER outside of legacy mode. */
+-	__clear_bit(X86_FEATURE_SEP, c->x86_capability);
++	if (c == &boot_cpu_data)
++		setup_clear_cpu_cap(X86_FEATURE_SEP);
+ 
+ 	if (c->x86 == 0x10) {
+ 		/* do this for boot cpu */
 diff --git a/xen/arch/x86/cpu/common.c b/xen/arch/x86/cpu/common.c
-index ff4cd2289797..d9b605b12256 100644
+index 168cd3a9eef9..319443506f48 100644
 --- a/xen/arch/x86/cpu/common.c
 +++ b/xen/arch/x86/cpu/common.c
-@@ -626,6 +626,139 @@ void identify_cpu(struct cpuinfo_x86 *c)
+@@ -634,6 +634,155 @@ void identify_cpu(struct cpuinfo_x86 *c)
  	setup_doitm();
  }
  
@@ -252,7 +251,7 @@ index ff4cd2289797..d9b605b12256 100644
 +{
 +    unsigned int i, max_leaf, max_extd, tmp;
 +
-+    BUILD_BUG_ON(FSCAPINTS != 22);
++    BUILD_BUG_ON(FSCAPINTS != 19);
 +
 +    max_leaf = cpuid_eax(0);
 +    if ( max_leaf >= 1 )
@@ -285,7 +284,7 @@ index ff4cd2289797..d9b605b12256 100644
 +    if ( max_extd >= 0x80000008 )
 +        cpuid(0x80000008, &tmp, &fs[FEATURESET_e8b], &tmp, &tmp);
 +    if ( max_extd >= 0x80000021 )
-+        cpuid(0x80000021, &fs[FEATURESET_e21a], &tmp, &tmp, &tmp);
++        cpuid(0x80000021, &fs[FEATURESET_e21a], &tmp, &fs[FEATURESET_e21c], &tmp);
 +
 +    if ( test_bit(X86_FEATURE_ARCH_CAPS, fs) )
 +        rdmsr(MSR_ARCH_CAPABILITIES, fs[FEATURESET_m10Al], fs[FEATURESET_m10Ah]);
@@ -301,11 +300,22 @@ index ff4cd2289797..d9b605b12256 100644
 +{
 +    volatile uint32_t *new_fs = data;
 +    uint32_t fs[FSCAPINTS] = {};
-+    unsigned int i, cpu = smp_processor_id();
++    unsigned int i;
++
++    /*
++     * Disable CPUID masking if in use, to avoid having current's
++     * cpu_policy affect the rescan.
++     */
++    if ( ctxt_switch_masking )
++        alternative_vcall(ctxt_switch_masking, NULL);
 +
 +    fill_featureset(fs);
 +
++    if ( ctxt_switch_masking )
++        alternative_vcall(ctxt_switch_masking, current);
++
 +    for ( i = 0; i < ARRAY_SIZE(fs); ++i )
++    {
 +        /*
 +         * The common case is no difference from the initiating CPU.  Only
 +         * issue the atomic operation if it looks like we have bits to clear.
@@ -314,13 +324,7 @@ index ff4cd2289797..d9b605b12256 100644
 +            asm volatile ( "lock and %[fs], %[new_fs]"
 +                           : [new_fs] "+m" (new_fs[i])
 +                           : [fs] "r" (fs[i]) );
-+
-+    /*
-+     * Update cpu_data[], but skip CPU0 for now.  boot_cpu_data needs to wait
-+     * until all CPUs have merged.
-+     */
-+    if ( cpu != 0 )
-+        memcpy(cpu_data[cpu].x86_capability, fs, sizeof(fs));
++    }
 +}
 +
 +int sysctl_update_spec_ctrl_cpuid(void)
@@ -328,8 +332,19 @@ index ff4cd2289797..d9b605b12256 100644
 +    uint32_t i, new_fs[FSCAPINTS] = {};
 +    bool lost = false, updated = false;
 +
++    /*
++     * Disable CPUID masking if in use, to avoid having current's
++     * cpu_policy affect the rescan.
++     */
++    if ( ctxt_switch_masking )
++        alternative_vcall(ctxt_switch_masking, NULL);
++
 +    /* Scan for new features on the current CPU. */
 +    fill_featureset(new_fs);
++
++    if ( ctxt_switch_masking )
++        alternative_vcall(ctxt_switch_masking, current);
++
 +    for ( i = 0; i < ARRAY_SIZE(new_fs); ++i )
 +        if ( new_fs[i] & ~boot_cpu_data.x86_capability[i] )
 +            break;
@@ -385,23 +400,38 @@ index ff4cd2289797..d9b605b12256 100644
  #define SMT_LEVEL       0
  
 diff --git a/xen/arch/x86/include/asm/processor.h b/xen/arch/x86/include/asm/processor.h
-index c26ef9090c3a..4f0ca980587a 100644
+index 98734f4d3ff3..d6e04b006858 100644
 --- a/xen/arch/x86/include/asm/processor.h
 +++ b/xen/arch/x86/include/asm/processor.h
-@@ -510,6 +510,8 @@ void tsx_init(void);
- void update_mcu_opt_ctrl(void);
- void set_in_mcu_opt_ctrl(uint32_t mask, uint32_t val);
+@@ -498,6 +498,8 @@ void set_in_mcu_opt_ctrl(uint32_t mask, uint32_t val);
+ void update_pb_opt_ctrl(void);
+ void set_in_pb_opt_ctrl(uint32_t mask, uint32_t val);
  
 +int sysctl_update_spec_ctrl_cpuid(void);
 +
  enum ap_boot_method {
      AP_BOOT_NORMAL,
      AP_BOOT_SKINIT,
+diff --git a/xen/arch/x86/setup.c b/xen/arch/x86/setup.c
+index 02673ee7b6c4..3d4975d444a1 100644
+--- a/xen/arch/x86/setup.c
++++ b/xen/arch/x86/setup.c
+@@ -2003,7 +2003,10 @@ void asmlinkage __init noreturn __start_xen(void)
+         set_in_cr4(X86_CR4_FSGSBASE);
+ 
+     if ( cpu_has_pku )
++    {
+         set_in_cr4(X86_CR4_PKE);
++        setup_force_cpu_cap(X86_FEATURE_OSPKE);
++    }
+ 
+     if ( opt_invpcid && cpu_has_invpcid )
+         use_invpcid = true;
 diff --git a/xen/arch/x86/sysctl.c b/xen/arch/x86/sysctl.c
-index 1d40d82c5ad2..5a3348d87675 100644
+index 1b04947516bb..a98a7684da77 100644
 --- a/xen/arch/x86/sysctl.c
 +++ b/xen/arch/x86/sysctl.c
-@@ -423,6 +423,33 @@ long arch_do_sysctl(
+@@ -360,6 +360,33 @@ long arch_do_sysctl(
          break;
      }
  
@@ -432,14 +462,14 @@ index 1d40d82c5ad2..5a3348d87675 100644
 +        domctl_lock_release();
 +        break;
 +
-     default:
-         ret = -ENOSYS;
-         break;
+     case XEN_SYSCTL_get_cpu_policy:
+     {
+         static const struct cpu_policy *const system_policies[6] = {
 diff --git a/xen/arch/x86/xstate.c b/xen/arch/x86/xstate.c
-index 68cdd8fcf021..d410e7fc78ca 100644
+index af9e345a7ace..831cd852aa30 100644
 --- a/xen/arch/x86/xstate.c
 +++ b/xen/arch/x86/xstate.c
-@@ -889,6 +889,7 @@ void xstate_init(struct cpuinfo_x86 *c)
+@@ -897,6 +897,7 @@ void xstate_init(struct cpuinfo_x86 *c)
  
      if ( bsp )
      {
@@ -448,34 +478,34 @@ index 68cdd8fcf021..d410e7fc78ca 100644
          /*
           * xsave_cntxt_size is the max size required by enabled features.
 diff --git a/xen/include/public/sysctl.h b/xen/include/public/sysctl.h
-index 3a6e7d48f02e..fd0a0735542d 100644
+index 367e5b5facf1..4fc2eac9c349 100644
 --- a/xen/include/public/sysctl.h
 +++ b/xen/include/public/sysctl.h
-@@ -1200,6 +1200,11 @@ struct xen_sysctl_dt_overlay {
+@@ -162,6 +162,11 @@ struct xen_sysctl_perfc_op {
+     XEN_GUEST_HANDLE_64(xen_sysctl_perfc_val_t) val;
  };
- #endif
  
 +struct xen_sysctl_spec_ctrl {
 +#define XENPF_spec_ctrl_update  0 /* Try to use new mitigations */
 +    uint32_t op;      /* IN */
 +};
 +
- struct xen_sysctl {
-     uint32_t cmd;
- #define XEN_SYSCTL_readconsole                    1
-@@ -1231,6 +1236,7 @@ struct xen_sysctl {
- /* #define XEN_SYSCTL_set_parameter              28 */
- #define XEN_SYSCTL_get_cpu_policy                29
- #define XEN_SYSCTL_dt_overlay                    30
+ /* XEN_SYSCTL_getdomaininfolist */
+ struct xen_sysctl_getdomaininfolist {
+     /* IN variables. */
+@@ -1262,6 +1267,7 @@ struct xen_sysctl {
+ #define XEN_SYSCTL_physinfo                       3
+ #define XEN_SYSCTL_sched_id                       4
+ #define XEN_SYSCTL_perfc_op                       5
 +#define XEN_SYSCTL_spec_ctrl                    188
-     uint32_t interface_version; /* XEN_SYSCTL_INTERFACE_VERSION */
-     union {
-         struct xen_sysctl_readconsole       readconsole;
-@@ -1265,6 +1271,7 @@ struct xen_sysctl {
- #if defined(__arm__) || defined(__aarch64__)
-         struct xen_sysctl_dt_overlay        dt_overlay;
- #endif
+ #define XEN_SYSCTL_getdomaininfolist              6
+ #define XEN_SYSCTL_debug_keys                     7
+ #define XEN_SYSCTL_getcpuinfo                     8
+@@ -1298,6 +1304,7 @@ struct xen_sysctl {
+         struct xen_sysctl_numa_meminfo      numa_meminfo;
+         struct xen_sysctl_sched_id          sched_id;
+         struct xen_sysctl_perfc_op          perfc_op;
 +        struct xen_sysctl_spec_ctrl         spec_ctrl;
-         uint8_t                             pad[128];
-     } u;
- };
+         struct xen_sysctl_getdomaininfolist getdomaininfolist;
+         struct xen_sysctl_debug_keys        debug_keys;
+         struct xen_sysctl_getcpuinfo        getcpuinfo;

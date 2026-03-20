@@ -204,8 +204,10 @@ Patch159: add-kexec-purgatory.patch
 Patch160: kexec-implement-new-load-types.patch
 Patch161: kexec-block-other-load-types.patch
 Patch162: kexec-support-non-page-aligned-segments.patch
-Patch163: livepatch-embed-public-key.patch
-Patch164: livepatch-check-payload-signatures.patch
+# BEGIN XCP-ng: no live-patching certificates
+#Patch163: livepatch-embed-public-key.patch
+#Patch164: livepatch-check-payload-signatures.patch
+# END XCP-ng: no live-patching certificates
 Patch165: restrict-arbitrary-ioport-mapping.patch
 Patch166: domctl-to-allow-pci-config-access.patch
 Patch167: prevent-device-assign-to-dom0.patch
@@ -313,13 +315,15 @@ BuildRequires: systemd
 BuildRequires: systemd-rpm-macros
 %endif
 
-# For embedded live patching certificate
-BuildRequires: openssl
-BuildRequires: nss-tools
-BuildRequires: python3-xssign
-
-# For signing
-BuildRequires: xssign-macros
+# BEGIN XCP-ng: no live-patching certificates
+## For embedded live patching certificate
+#BuildRequires: openssl
+#BuildRequires: nss-tools
+#BuildRequires: python3-xssign
+#
+## For signing
+#BuildRequires: xssign-macros
+# END XCP-ng: no live-patching certificates
 
 # Need cov-analysis if coverity is enabled
 %{?_cov_buildrequires}
@@ -491,8 +495,10 @@ ARCHOPTS=" \
            --with-system-ovmf=%{_datadir}/edk2/OVMF-release.fd
 
 
-%fetchcert -c XEN_LP_SIGN_KEY_XS9 -o livepatch.cer
-openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
+# BEGIN XCP-ng: no live-patching certificates
+#%fetchcert -c XEN_LP_SIGN_KEY_XS9 -o livepatch.cer
+#openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
+# END XCP-ng: no live-patching certificates
 
 # Format sbat.csv with version/release
 sed -i -e 's/@@VERSION@@/%{version}/g' \
@@ -528,10 +534,12 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
     $mk build MAP
-    if [ -f xen/$3/xen.efi ]; then
-        %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
-        mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
-    fi
+# BEGIN XCP-ng: no live-patching certificates
+#    if [ -f xen/$3/xen.efi ]; then
+#        %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
+#        mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
+#    fi
+# END XCP-ng: no live-patching certificates
 }
 
 # Builds of Xen
@@ -1150,6 +1158,7 @@ fi
 - Merge former xcpng-8.3 and ydi/9 work
 - do not fail build when revision contains a '+'
 - allow building for x86_64_v2
+- remove livepatch certificate support depending on unpublished XS packages
 - update to 4.20.2-5 from XS:
   * Wed Jan 28 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-5
   - Fix error reporting with the iommu_op hypercall

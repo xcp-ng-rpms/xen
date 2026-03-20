@@ -208,8 +208,11 @@ Patch169: add-kexec-purgatory.patch
 Patch170: kexec-implement-new-load-types.patch
 Patch171: kexec-block-other-load-types.patch
 Patch172: kexec-support-non-page-aligned-segments.patch
+# XCP-ng: no live-patching, no need for their certificates
+%if ! 0%{?xcpng}
 Patch173: livepatch-embed-public-key.patch
 Patch174: livepatch-check-payload-signatures.patch
+%endif
 Patch175: restrict-arbitrary-ioport-mapping.patch
 Patch176: domctl-to-allow-pci-config-access.patch
 Patch177: prevent-device-assign-to-dom0.patch
@@ -301,6 +304,8 @@ BuildRequires: systemd
 BuildRequires: systemd-rpm-macros
 %endif
 
+# XCP-ng: no SB or live-patching yet, no need for their certificates
+%if ! 0%{?xcpng}
 # For embedded live patching certificate
 BuildRequires: openssl
 BuildRequires: nss-tools
@@ -308,6 +313,7 @@ BuildRequires: python3-xssign
 
 # For signing
 BuildRequires: xssign-macros
+%endif
 
 # Need cov-analysis if coverity is enabled
 %{?_cov_buildrequires}
@@ -461,8 +467,11 @@ export PYTHON="%{__python}"
            --with-system-ovmf=%{_datadir}/edk2/OVMF-release.fd
 
 
+# XCP-ng: no SB or live-patching, no need for their certificates
+%if ! 0%{?xcpng}
 %fetchcert -c XEN_LP_SIGN_KEY_XS9 -o livepatch.cer
 openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
+%endif
 
 # Format sbat.csv with version/release
 sed -i -e 's/@@VERSION@@/%{version}/g' \
@@ -500,10 +509,13 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
     $mk build MAP
+# XCP-ng: no SB yet
+%if ! 0%{?xcpng}
     if [ -f xen/$3/xen.efi ]; then
         %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
         mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
     fi
+%endif
 }
 
 # Builds of Xen
@@ -1096,6 +1108,7 @@ fi
 * Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1 WIP
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS
+- Remove livepatch certificate support depending on unpublished XS packages
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

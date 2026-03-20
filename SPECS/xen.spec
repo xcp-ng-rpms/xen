@@ -1,21 +1,21 @@
+%global package_speccommit 6100b0f53e19e50dc86c0234e2c9950a381a5a11
+%global usver 4.20.2
+%global xsver 5
+%global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
 # Commitish for Source0, required by tooling.
-%global package_srccommit RELEASE-4.19.1
+%global package_srccommit RELEASE-4.20.2
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 1
+%global hv_rel 5
 
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
-%{!?package_speccommit: %global package_speccommit ???}
 
 # Normally derived from the tag and provided by the environment.  May be a
 # `git describe` when not building an from a tagged changeset.
-%{!?xsrel: %global xsrel %{hv_rel}}
-
-%define base_dir  %{name}-%{version}
 
 %define lp_devel_dir %{_usrsrc}/xen-%{version}-%{release}
 
@@ -24,21 +24,188 @@
 %global __requires_exclude_from ^%{lp_devel_dir}/.*$
 %global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir}/.*$
 
-%if 0%{?xenserver} < 9
-%global __patch /usr/bin/patch --fuzz=0
-%endif
-
 Summary: Xen is a virtual machine monitor
 Name:    xen
-Version: 4.19.1
+Version: 4.20.2
 Release: %{?xsrel}%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
-Source0: https://code.citrite.net/rest/archive/latest/projects/XSU/repos/%{name}/archive?at=%{package_srccommit}&prefix=%{base_dir}&format=tar.gz#/%{base_dir}.tar.gz
+Source0: xen-4.20.2.tar.gz
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
 Source5: gen_test_metadata.py
+Patch0: build-tweaks.patch
+Patch1: configure-build.patch
+Patch2: xenserver-configuration.patch
+Patch3: coverity-model.patch
+Patch4: backport-e2b5544a9298.patch
+Patch5: backport-1badcf503507.patch
+Patch6: backport-9fb2b66c60a5.patch
+Patch7: backport-601bbb00d267.patch
+Patch8: backport-f5b36e23ec45.patch
+Patch9: backport-bb897593b7a7.patch
+Patch10: backport-a13ce6cee8ea.patch
+Patch11: backport-c31086c50b9d.patch
+Patch12: backport-23989412fb76.patch
+Patch13: backport-219510a9d6ae.patch
+Patch14: backport-39748952e917.patch
+Patch15: backport-0cb467d86df3.patch
+Patch16: backport-f63a5ba705b9.patch
+Patch17: backport-f48e4904ab81.patch
+Patch18: backport-95c476191fbb.patch
+Patch19: backport-36bea7790339.patch
+Patch20: backport-70c933d44f71.patch
+Patch21: backport-8c12e47a5d3b.patch
+Patch22: backport-9a474fcceccf.patch
+Patch23: backport-8e60d47cf011.patch
+Patch24: backport-c9f62baee892.patch
+Patch25: backport-b3bf9646101e.patch
+Patch26: backport-15341fcac766.patch
+Patch27: backport-a05598bd1264.patch
+Patch28: backport-aea52ce607fe.patch
+Patch29: backport-ed9488a0d155.patch
+Patch30: backport-4c3ce492ede1.patch
+Patch31: backport-50bbacacb814.patch
+Patch32: backport-3125ca0da2d8.patch
+Patch33: backport-2d779cabddfa.patch
+Patch34: backport-2d497e97e20e.patch
+Patch35: backport-e773c257af85.patch
+Patch36: backport-96a587a05736.patch
+Patch37: backport-eac626eb4c9f.patch
+Patch38: backport-5f31c46139be.patch
+Patch39: backport-22650d605462.patch
+Patch40: backport-623c365951f9.patch
+Patch41: backport-e83364bc5147.patch
+Patch42: backport-196cdc097ff1.patch
+Patch43: backport-32b63424e4e4.patch
+Patch44: backport-7909fd5e7847.patch
+Patch45: backport-e5eeca2fcaa3.patch
+Patch46: backport-a492ec7b01ee.patch
+Patch47: backport-b541c627b227.patch
+Patch48: backport-fd23bc59c2db.patch
+Patch49: backport-31d9c88a3857.patch
+Patch50: backport-bd0b3a876d80.patch
+Patch51: backport-cb50e4033717.patch
+Patch52: backport-353e5952943f.patch
+Patch53: backport-c5c45bcbd6a1.patch
+Patch54: backport-f5aadd575bb5.patch
+Patch55: backport-ccb11468b69f.patch
+Patch56: backport-cb41b4ce14a9.patch
+Patch57: backport-59a1d6d3ea1e.patch
+Patch58: backport-85d7fe2e14e5.patch
+Patch59: backport-38a5e0d0317b.patch
+Patch60: backport-50baf2d9f7bb.patch
+Patch61: backport-bb3da1c885ff.patch
+Patch62: backport-7e95dab9eb63.patch
+Patch63: backport-a6fd4a1c55dd.patch
+Patch64: backport-f6c6f2679d49.patch
+Patch65: backport-75fa670e582c.patch
+Patch66: backport-c4abe30ca6e4.patch
+Patch67: backport-c71d8ef0cca3.patch
+Patch68: backport-5d492ce33d66.patch
+Patch69: backport-98cdab167938.patch
+Patch70: backport-3539308d8206.patch
+Patch71: backport-a4d92cf18955.patch
+Patch72: backport-d0193c6d6716.patch
+Patch73: backport-439ebb08081f.patch
+Patch74: backport-80fb43a1b583.patch
+Patch75: backport-dcfcc4acabf9.patch
+Patch76: backport-7672602df6c0.patch
+Patch77: backport-04ebc7b527a7.patch
+Patch78: backport-f34c96528110.patch
+Patch79: backport-a76278016ef7.patch
+Patch80: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch81: quirk-pci-phantom-function-devices.patch
+Patch82: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch83: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch84: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch85: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch86: livepatch-ignore-duplicate-new.patch
+Patch87: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch88: pygrub-Ignore-GRUB2-if-statements.patch
+Patch89: libfsimage-Add-support-for-btrfs.patch
+Patch90: quiet-broke-irq-affinity.patch
+Patch91: xen-hide-AVX512-on-SKX-by-default.patch
+Patch92: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch93: xen-tweak-cmdline-defaults.patch
+Patch94: xen-tweak-debug-overhead.patch
+Patch95: tweak-iommu-policy.patch
+Patch96: tweak-sc-policy.patch
+Patch97: disable-core-parking.patch
+Patch98: remove-info-leak.patch
+Patch99: strip_efi.patch
+Patch100: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch101: hitachi-driver-domain-ssid.patch
+Patch102: xen-define-offsets-for-kdump.patch
+Patch103: xen-scheduler-auto-privdom-weight.patch
+Patch104: xen-hvm-disable-tsc-ramping.patch
+Patch105: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch106: i8259-timers-pick-online-vcpu.patch
+Patch107: revert-ca2eee92df44.patch
+Patch108: libxc-cpuid-cores_per_socket.patch
+Patch109: libxc-cpu-clear-deps.patch
+Patch110: libxc-cpu-policies.patch
+Patch111: max-featureset-compat.patch
+Patch112: pygrub-add-disk-as-extra-group.patch
+Patch113: pygrub-add-default-and-extra-args.patch
+Patch114: pygrub-always-boot-default.patch
+Patch115: pygrub-friendly-no-fs.patch
+Patch116: pygrub-default-xenmobile-kernel.patch
+Patch117: pygrub-blacklist-support.patch
+Patch118: oem-bios-xensource.patch
+Patch119: misc-log-guest-consoles.patch
+Patch120: track-nonaffine-time.patch
+Patch121: mixed-domain-runstates.patch
+Patch122: xenguest.patch
+Patch123: xen-vmdebug.patch
+Patch124: 0003-xen-page_alloc-Add-static-per-NUMA-node-counts-of.patch
+Patch125: 0005-xen-page_alloc-Implement-per-NUMA-node-outstandin.patch
+Patch126: tools-xc_domain_claim_pages_node.patch
+Patch127: add-domain_adjust_tot_pages-param.patch
+Patch128: add-domain-node_tot_pages.patch
+Patch129: tools-xc_domain_numa_get_node_pages.patch
+Patch130: add-avail_node_heap_pages-param.patch
+Patch131: ocaml-numa_get_distances.patch
+Patch132: tools-xc_numa_meminfo.patch
+Patch133: 0001-x86-hvmloader-account-for-external-components-consum.patch
+Patch134: oxenstore-censor-sensitive-data.patch
+Patch135: oxenstore-large-packets.patch
+Patch136: nvidia-vga.patch
+Patch137: hvmloader-disable-pci-option-rom-loading.patch
+Patch138: xen-force-software-vmcs-shadow.patch
+Patch139: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch140: use-msr-ll-instead-of-vmcs-efer.patch
+Patch141: revert-4a7e71aa0851-partial.patch
+Patch142: add-pv-iommu-headers.patch
+Patch143: add-pv-iommu-local-domain-ops.patch
+Patch144: add-pv-iommu-foreign-support.patch
+Patch145: upstream-pv-iommu-tools.patch
+Patch146: Add-PV-IOMMU-elf-note.patch
+Patch147: xen-spec-ctrl-utility.patch
+Patch148: vtpm-ppi-acpi-dsm.patch
+Patch149: add-sbat-section.patch
+Patch150: align_all_sections_to_4kb.patch
+Patch151: 0006-discard-.text.header-for-PE-binary.patch
+Patch152: 0007-discard-multiboot-related-entry-code.patch
+Patch153: 0009-avoid-a-relocation-in-efi_arch_post_exit_boot.patch
+Patch154: split-init-section.patch
+Patch155: move-trampoline-to-data-section.patch
+Patch156: correct-sections-permissions.patch
+Patch157: add-lockdown-mode.patch
+Patch158: disallow-most-command-line-options.patch
+Patch159: add-kexec-purgatory.patch
+Patch160: kexec-implement-new-load-types.patch
+Patch161: kexec-block-other-load-types.patch
+Patch162: kexec-support-non-page-aligned-segments.patch
+Patch163: livepatch-embed-public-key.patch
+Patch164: livepatch-check-payload-signatures.patch
+Patch165: restrict-arbitrary-ioport-mapping.patch
+Patch166: domctl-to-allow-pci-config-access.patch
+Patch167: prevent-device-assign-to-dom0.patch
+Patch168: restrict-arbitrary-iomem-mapping.patch
+Patch169: skip-flask-call.patch
+Patch170: public-abi.patch
 
 ExclusiveArch: x86_64
 
@@ -46,13 +213,6 @@ BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
 %global py_sitearch %{python3_sitearch}
 %global __python %{__python3}
-
-%if 0%{?xenserver} < 9
-# Interim, build Python2 bindings too
-%global py2_compat 1
-BuildRequires: python2-devel
-BuildRequires: python2-rpm-macros
-%endif
 
 # These build dependencies are needed for building the xen.gz as
 # well as live patches.
@@ -97,7 +257,7 @@ BuildRequires: xz-devel
 BuildRequires: zlib-devel
 
 # For libxl
-BuildRequires: yajl-devel
+BuildRequires: json-c-devel
 BuildRequires: libuuid-devel
 BuildRequires: perl-interpreter
 
@@ -122,7 +282,6 @@ BuildRequires: ocaml-findlib
 BuildRequires: perl-podlators
 
 # For xenguest
-BuildRequires: json-c-devel
 BuildRequires: libempserver-devel
 
 %if 0%{?xenserver} < 9
@@ -130,6 +289,14 @@ BuildRequires: systemd
 %else
 BuildRequires: systemd-rpm-macros
 %endif
+
+# For embedded live patching certificate
+BuildRequires: openssl
+BuildRequires: nss-tools
+BuildRequires: python3-xssign
+
+# For signing
+BuildRequires: xssign-macros
 
 # Need cov-analysis if coverity is enabled
 %{?_cov_buildrequires}
@@ -149,6 +316,15 @@ Summary: The Xen Hypervisor debug information
 License: GPLv2
 %description hypervisor-debuginfo
 This package contains the Xen Hypervisor debug information.
+
+%package hypervisor-elf
+Summary: The Xen Hypervisor ELF binaries
+License: GPLv2
+Requires(post): coreutils grep
+%description hypervisor-elf
+This package contains the Xen Project Hypervisor combined with the XenServer
+patchqueue in ELF form (xen.gz). This is needed when upgrading from older
+releases of XenServer that do not support booting a multiboot2 PE-based binary.
 
 %package tools
 Summary: Xen Hypervisor general tools
@@ -177,14 +353,23 @@ Requires: xen-devel = %{version}
 %description libs-devel
 This package contains the Xen Hypervisor general development for all domains.
 
+%package oxenstored
+Summary: OCaml xenstore daemon
+License: LGPLv2.1
+Provides: %{_sbindir}/oxenstored
+%description oxenstored
+This package contains the OCaml xenstore daemon.
+
 %package dom0-tools
 Summary: Xen Hypervisor Domain 0 tools
 License: GPLv2 and LGPLv2 and MIT
 Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
-Requires: edk2
-Requires: ipxe
+Requires: %{_sbindir}/oxenstored
+Requires: %{_libdir}/xen/bin/qemu-system-i386
+Requires: %{_datadir}/edk2/OVMF-release.fd
+Requires: %{_datadir}/ipxe/ipxe.bin
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -261,23 +446,31 @@ export PYTHON="%{__python}"
            --enable-systemd \
            --with-xenstored=oxenstored \
            --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
-           --with-system-ipxe=/usr/share/ipxe/ipxe.bin \
-           --with-system-ovmf=/usr/share/edk2/OVMF-release.fd
+           --with-system-ipxe=%{_datadir}/ipxe/ipxe.bin \
+           --with-system-ovmf=%{_datadir}/edk2/OVMF-release.fd
+
+
+%fetchcert -c XEN_LP_SIGN_KEY_XS9 -o livepatch.cer
+openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
+
+# Format sbat.csv with version/release
+sed -i -e 's/@@VERSION@@/%{version}/g' \
+       -e 's/@@RELEASE@@/%{release}/g' xen/arch/x86/sbat.csv
 
 # Take a snapshot of the configured source tree for livepatches
 mkdir ../livepatch-src
 cp -a . ../livepatch-src/
 echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
 
+# Check if there are any changes in the public headers.
+# Any changes here must be checked. If necessary, update the hypercall
+# filter code in the dom0 kernel. To resolve this, copy xen/include/public to
+# public-abi and refresh public-abi.patch.
+diff -Naur public-abi xen/include/public
+
 # Build tools and man pages
 %{?_cov_wrap} %{make_build} build-tools
 %{make_build} -C docs man-pages
-
-%if 0%{?py2_compat}
-# Interim python2 bindings too
-%{make_build} DESTDIR=%{buildroot} PYTHON=python2 -C tools/python
-%{make_build} DESTDIR=%{buildroot} PYTHON=python2 -C tools/pygrub
-%endif
 
 # The hypervisor build system can't cope with RPM's {C,LD}FLAGS
 unset CFLAGS
@@ -294,6 +487,10 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
     $mk build MAP
+    if [ -f xen/$3/xen.efi ]; then
+        %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
+        mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
+    fi
 }
 
 # Builds of Xen
@@ -311,28 +508,22 @@ export PYTHON="%{__python}"
 # The existence of this directory causes ocamlfind to put things in it
 mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs
 
-%if 0%{?py2_compat}
-# Interim python2 bindings.  Must be installed ahead of the main install-tools
-# so the Python3 scripts take priority.
-%{make_build} DESTDIR=%{buildroot} PYTHON=python2 install -C tools/python
-%{make_build} DESTDIR=%{buildroot} PYTHON=python2 install -C tools/pygrub
-%endif
-
 # Install tools and man pages
 %{make_build} DESTDIR=%{buildroot} install-tools
 %{make_build} DESTDIR=%{buildroot} -C docs install-man-pages
 
-# Install artefacts for livepatches
-%{__install} -p -D -m 644 xen/build-xen-release/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms
-%{__install} -p -D -m 644 xen/build-xen-debug/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms-d
+# Install artifacts for livepatches
+%{__install} -p -D -m 644 xen/build-xen-release/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms
+%{__install} -p -D -m 644 xen/build-xen-debug/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms-d
 cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
 
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
     %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
-    %{__install} -p -D -m 644 xen/$2/System.map %{buildroot}/boot/xen-%{version}$1.map
+    %{__install} -p -D -m 644 xen/$2/System.efi.map %{buildroot}/boot/xen-%{version}$1.map
     %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
-    %{__install} -p -D -m 644 xen/$2/xen-syms   %{buildroot}/boot/xen-syms-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/xen.efi.elf   %{buildroot}/boot/xen-syms-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/xen.efi    %{buildroot}/boot/xen-%{version}$1.efi
 }
 install_xen -%{hv_rel}   build-xen-release
 install_xen -%{hv_rel}-d build-xen-debug
@@ -342,7 +533,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{__install} -p -D -m 644 xen/build-shim/xen-syms %{buildroot}%{_libexecdir}/%{name}/boot/xen-shim-syms
 
 # Build test case metadata
-%{__python} %{SOURCE5} -i %{buildroot}%{_libexecdir}/%{name} -o %{buildroot}%{_datadir}/xen-dom0-tests-metadata.json
+%{__python} %{SOURCE5} \
+    -r %{buildroot} \
+    -i %{buildroot}%{_libexecdir}/%{name}/tests \
+    -o %{buildroot}%{_datadir}/xen-dom0-tests-metadata.json
 
 %{__install} -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sysconfig/kernel-xen
 %{__install} -D -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/xen/xl.conf
@@ -350,10 +544,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{?_cov_install}
 
 %files hypervisor
-/boot/%{name}-%{version}-%{hv_rel}.gz
+/boot/%{name}-%{version}-%{hv_rel}.efi
 /boot/%{name}-%{version}-%{hv_rel}.map
 /boot/%{name}-%{version}-%{hv_rel}.config
-/boot/%{name}-%{version}-%{hv_rel}-d.gz
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
 /boot/%{name}-%{version}-%{hv_rel}-d.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
@@ -364,6 +558,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 /boot/%{name}-syms-%{version}-%{hv_rel}
 /boot/%{name}-syms-%{version}-%{hv_rel}-d
 %{_libexecdir}/%{name}/boot/xen-shim-syms
+
+%files hypervisor-elf
+/boot/%{name}-%{version}-%{hv_rel}.gz
+/boot/%{name}-%{version}-%{hv_rel}-d.gz
 
 %files tools
 %{_bindir}/xenstore
@@ -477,8 +675,8 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/libxentoolcore.so.1.0
 %{_libdir}/libxentoollog.so.1
 %{_libdir}/libxentoollog.so.1.0
-%{_libdir}/libxenvchan.so.4.19
-%{_libdir}/libxenvchan.so.4.19.0
+%{_libdir}/libxenvchan.so.4.20
+%{_libdir}/libxenvchan.so.4.20.0
 
 %files libs-devel
 
@@ -524,6 +722,9 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/libxenvchan.a
 %{_libdir}/libxenvchan.so
 %{_libdir}/pkgconfig/xenvchan.pc
+
+%files oxenstored
+%{_sbindir}/oxenstored
 
 %files dom0-tools
 %{_sysconfdir}/bash_completion.d/xl
@@ -576,20 +777,9 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{py_sitearch}/xenfsimage.cpython*.so
 %{py_sitearch}/pygrub-0.7-py*.egg-info
 
-%if 0%{?py2_compat}
-%{python2_sitearch}/grub/
-%{python2_sitearch}/xenfsimage.so
-%{python2_sitearch}/pygrub-0.7-py*.egg-info
-%endif
-
 # Xen python libs
 %{py_sitearch}/xen-3.0-py*.egg-info
 %{py_sitearch}/xen/
-
-%if 0%{?py2_compat}
-%{python2_sitearch}/xen-3.0-py*.egg-info
-%{python2_sitearch}/xen/
-%endif
 
 %{_libexecdir}/%{name}/bin/convert-legacy-stream
 %{_libexecdir}/%{name}/bin/init-xenstore-domain
@@ -607,6 +797,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/bin/xenpaging
 %{_libexecdir}/%{name}/boot/hvmloader
 %{_libexecdir}/%{name}/boot/xen-shim
+%{_libexecdir}/%{name}/ocaml/xsd_glue/xenctrl_plugin/domain_getinfo_v1.cmxs
 %{_sbindir}/flask-get-bool
 %{_sbindir}/flask-getenforce
 %{_sbindir}/flask-label-pci
@@ -614,7 +805,6 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_sbindir}/flask-set-bool
 %{_sbindir}/flask-setenforce
 %{_sbindir}/gdbsx
-%{_sbindir}/oxenstored
 %{_sbindir}/xen-access
 %{_sbindir}/xen-diag
 %{_sbindir}/xen-hptool
@@ -683,24 +873,24 @@ install_xen -%{hv_rel}-d build-xen-debug
 %files dom0-libs
 %{_libdir}/libxencall.so.1
 %{_libdir}/libxencall.so.1.3
-%{_libdir}/libxenctrl.so.4.19
-%{_libdir}/libxenctrl.so.4.19.0
+%{_libdir}/libxenctrl.so.4.20
+%{_libdir}/libxenctrl.so.4.20.0
 %{_libdir}/libxendevicemodel.so.1
 %{_libdir}/libxendevicemodel.so.1.4
 %{_libdir}/libxenforeignmemory.so.1
 %{_libdir}/libxenforeignmemory.so.1.4
-%{_libdir}/libxenfsimage.so.4.19
-%{_libdir}/libxenfsimage.so.4.19.0
-%{_libdir}/libxenguest.so.4.19
-%{_libdir}/libxenguest.so.4.19.0
+%{_libdir}/libxenfsimage.so.4.20
+%{_libdir}/libxenfsimage.so.4.20.0
+%{_libdir}/libxenguest.so.4.20
+%{_libdir}/libxenguest.so.4.20.0
 %{_libdir}/libxenhypfs.so.1
 %{_libdir}/libxenhypfs.so.1.0
-%{_libdir}/libxenlight.so.4.19
-%{_libdir}/libxenlight.so.4.19.0
-%{_libdir}/libxenstat.so.4.19
-%{_libdir}/libxenstat.so.4.19.0
-%{_libdir}/libxlutil.so.4.19
-%{_libdir}/libxlutil.so.4.19.0
+%{_libdir}/libxenlight.so.4.20
+%{_libdir}/libxenlight.so.4.20.0
+%{_libdir}/libxenstat.so.4.20
+%{_libdir}/libxenstat.so.4.20.0
+%{_libdir}/libxlutil.so.4.20
+%{_libdir}/libxlutil.so.4.20.0
 %{_libdir}/xenfsimage/btrfs/fsimage.so
 %{_libdir}/xenfsimage/ext2fs-lib/fsimage.so
 %{_libdir}/xenfsimage/fat/fsimage.so
@@ -721,6 +911,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/libxencall.so
 %{_libdir}/pkgconfig/xencall.pc
 
+%{_includedir}/xen-barrier.h
 %{_includedir}/xenctrl.h
 %{_includedir}/xenctrl_compat.h
 %{_libdir}/libxenctrl.a
@@ -788,6 +979,11 @@ install_xen -%{hv_rel}-d build-xen-debug
 %exclude %{_libdir}/ocaml/xenstore/META
 %exclude %{_libdir}/ocaml/xenstore/xenstore.cma
 %exclude %{_libdir}/ocaml/xenstore/xenstore.cmo
+%{_libdir}/ocaml/xsd_glue/META
+%{_libdir}/ocaml/xsd_glue/plugin_interface_v1.a
+%{_libdir}/ocaml/xsd_glue/plugin_interface_v1.cma
+%{_libdir}/ocaml/xsd_glue/plugin_interface_v1.cmi
+%{_libdir}/ocaml/xsd_glue/plugin_interface_v1.cmxa
 
 %files ocaml-devel
 %exclude %{_libdir}/ocaml/xenbus/libxenbus_stubs.a
@@ -817,12 +1013,16 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %files dom0-tests
 %exclude %{_libexecdir}/%{name}/bin/depriv-fd-checker
-%{_libexecdir}/%{name}/bin/test-cpu-policy
-%{_libexecdir}/%{name}/bin/test-paging-mempool
-%{_libexecdir}/%{name}/bin/test-resource
-%{_libexecdir}/%{name}/bin/test-tsx
-%{_libexecdir}/%{name}/bin/test-xenstore
-%{_libexecdir}/%{name}/bin/test_x86_emulator
+%{_libexecdir}/%{name}/tests/test-cpu-policy
+%{_libexecdir}/%{name}/tests/test-mem-claim
+%{_libexecdir}/%{name}/tests/test-paging-mempool
+%{_libexecdir}/%{name}/tests/test-pdx-mask
+%{_libexecdir}/%{name}/tests/test-pdx-offset
+%{_libexecdir}/%{name}/tests/test-resource
+%{_libexecdir}/%{name}/tests/test-tsx
+%{_libexecdir}/%{name}/tests/test-xenstore
+%{_libexecdir}/%{name}/tests/test_vpci
+%{_libexecdir}/%{name}/tests/test_x86_emulator
 %{_datadir}/xen-dom0-tests-metadata.json
 
 %files lp-devel_%{version}_%{release}
@@ -832,23 +1032,23 @@ install_xen -%{hv_rel}-d build-xen-debug
 
 %post hypervisor
 # Update the debug and release symlinks
-ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen-debug.gz
-ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen-release.gz
+ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen-debug.efi
+ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen-release.efi
 
-# Point /boot/xen.gz appropriately
-if [ ! -e /boot/xen.gz ]; then
+# Point /boot/xen.efi appropriately
+if [ ! -e /boot/xen.efi ]; then
     # Use a production hypervisor by default
-    ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
-elif [ ! -L /boot/xen.gz ]; then
+    ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
+elif [ ! -L /boot/xen.efi ]; then
     # Use the production hypervisor, but keep it unlinked
-    cp -f /boot/%{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+    cp -f /boot/%{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
 else
     # Else look at the current link, and whether it is debug
-    path="`readlink -f /boot/xen.gz`"
-    if [ ${path} != ${path%%-d.gz} ]; then
-        ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen.gz
+    path="`readlink -f /boot/xen.efi`"
+    if [ ${path} != ${path%%-d.efi} ]; then
+        ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen.efi
     else
-        ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+        ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
     fi
 fi
 
@@ -858,7 +1058,6 @@ fi
 
 %post dom0-tools
 %systemd_post proc-xen.mount
-%systemd_post var-lib-xenstored.mount
 %systemd_post xen-init-dom0.service
 %systemd_post xen-watchdog.service
 %systemd_post xenconsoled.service
@@ -866,7 +1065,6 @@ fi
 
 %preun dom0-tools
 %systemd_preun proc-xen.mount
-%systemd_preun var-lib-xenstored.mount
 %systemd_preun xen-init-dom0.service
 %systemd_preun xen-watchdog.service
 %systemd_preun xenconsoled.service
@@ -874,7 +1072,6 @@ fi
 
 %postun dom0-tools
 %systemd_postun proc-xen.mount
-%systemd_postun var-lib-xenstored.mount
 %systemd_postun xen-init-dom0.service
 %systemd_postun xen-watchdog.service
 %systemd_postun xenconsoled.service
@@ -883,6 +1080,112 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Jan 28 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-5
+- Fix error reporting with the iommu_op hypercall
+- Introduce new hypercall with memory claim details
+
+* Thu Jan 15 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-4
+- Fix for XSA-479 CVE-2026-23553
+
+* Thu Jan 15 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-3
+- Bugfixes to NUMA aware memory claims
+
+* Thu Dec 04 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-2
+- Support the new Linux AMD microcode container format with multiple blobs per
+  CPU, to cope with pre-EntrySign firmware.
+
+* Thu Nov 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-1
+- Update to Xen 4.20.2
+
+* Wed Nov 05 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.1-8
+- Support loading post-entrysign microcode
+- Fix dynamic linking of xsd_glue for external oxenstored
+
+* Mon Oct 27 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.20.1-7
+- Fix for XSA-476 CVE-2025-58149
+- Support passthrough of devices on PCI segment different than 0
+
+* Tue Oct 14 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.20.1-6
+- Fix for XSA-475 CVE-2025-58147 CVE-2025-58148
+
+* Thu Oct 09 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.1-5
+- Support NUMA aware memory claims
+
+* Wed Oct 08 2025 Ross Lagerwall <ross.lagerwall@citrix.com> - 4.20.1-4
+- Secure PCI passthrough for Secure Boot
+- Use superpages where possible on migrate/resume
+- Populate CPUID 0x1.edx features early for self-snoop detection
+
+* Mon Sep 01 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.20.1-3
+- Fix for XSA-472 CVE-2025-27466 CVE-2025-58142 CVE-2025-58143
+
+* Fri Aug 29 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.1-2
+- Update xen.efi to support NX and the Memory Attributes protocol
+
+* Wed Aug 27 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.1-1
+- Update to Xen 4.20.1
+
+* Wed Aug 27 2025 Lin Liu <Lin.Liu01@cloud.com> - 4.19.2-13
+- Add support for 4 or more socket Intel Granite Rapids systems
+- Fix usage of PCI devices on segments other than 0
+- Allow use of the hap_{2mb,1gb} command options in lockdown mode
+
+* Mon Aug 04 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.2-12
+- Domain runstate extentions for more RRDs
+
+* Wed Jul 30 2025 Ross Lagerwall <ross.lagerwall@citrix.com> - 4.19.2-11
+- Strip xen.efi and provide a non-stripped version
+- Reduce overhead of PML buffer flushing
+- Account for PCI MMIO used memory in hvmloader
+- Drop multiboot2 PE patches
+
+* Fri Jul 11 2025 Ross Lagerwall <ross.lagerwall@citrix.com> - 4.19.2-10
+- Rebuild to use new certificates
+
+* Mon Jul 07 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.2-9
+- Fix for XSA-471 CVE-2024-36350 CVE-2024-36357
+- Fix build ID detection
+- Expand command line filtering when in lockdown mode
+
+* Thu Jun 19 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.2-8
+- Rebuild
+
+* Fri Jun 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.2-7
+- Fix for XSA-470 CVE-2025-27465
+
+* Fri Jun 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.2-6
+- Fix possible watchdog timeout caused by unnecessary cache flushing
+- Adjustments to UEFI Secure Boot integration
+- Drop the remnants of GVT-g support
+
+* Fri May 23 2025 Ross Lagerwall <ross.lagerwall@citrix.com> - 4.19.2-5
+- CA-411441: Use symbol map from EFI file
+
+* Wed May 21 2025 Frediano Ziglio <frediano.ziglio@cloud.com> - 4.19.2-4
+- CP-308117: Rebuild due to signature issue
+
+* Fri May 16 2025 Frediano Ziglio <frediano.ziglio@cloud.com> - 4.19.2-3
+- CP-45134: Add support for Secure Boot
+
+* Tue May 13 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.2-2
+- Fix for XSA-469 CVE-2024-28956
+- Perform provenance checks on AMD microcode blobs
+- Work around Ice Lake erratum ICX143, which manifests as a hang on boot
+
+* Mon Apr 07 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.2-1
+- Update to Xen 4.19.2.
+
+* Mon Mar 24 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.1-4
+- Identify which domain watchdog fired
+- Add xenguest support for the platform:mmio_hole_size attribute
+- Fix crash on boot when operating on the dom0 or initrd binaries
+
+* Mon Mar 03 2025 Andrew Cooper <andrew.cooper3@citrix.com> - 4.19.1-3
+- Fix for XSA-467 CVE-2025-1713
+- Scan for microcode by default
+- Fix build warning in oxenstored
+- Drop workaround for HP Gen8 systems
+
 * Mon Feb 24 2025 Roger Pau Monné <roger.pau@citrix.com> - 4.19.1-2
 - Fix (experimental) nested virt enabling
 - Fix IO_PAGE_FAULT on AMD machines due to interrupt migration
@@ -897,7 +1200,7 @@ fi
 - Fix emulation of MOVBE instruction
 - Fix Ocaml rpath setting
 
-* Tue Dec  3 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-6
+* Tue Dec 03 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-6
 - Fix migration of VMs from CH 8.2 CU1 to XS8 when the guest is using BHI_DIS_S
 
 * Mon Nov 25 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-5
@@ -905,7 +1208,7 @@ fi
 - Fix dom0 pIRQ limit calculation
 - Fix emulation of BMI1/2 instructions
 
-* Tue Nov  5 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-4
+* Tue Nov 05 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-4
 - Fixes for
   - XSA-463 CVE-2024-45818
   - XSA-464 CVE-2024-45819
@@ -927,7 +1230,7 @@ fi
 * Wed Aug 21 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-1
 - Update to Xen 4.17.5
 
-* Fri Aug  2 2024 Roger Pau Monné <roger.pau@citrix.com> - 4.17.4-8
+* Fri Aug 02 2024 Roger Pau Monné <roger.pau@citrix.com> - 4.17.4-8
 - Fix for XSA-460 CVE-2024-31145
 - Fix IO breakpoint recognition in PV guests
 - Fix libxenstore.so to not modify SIGBUS behind the back of the application
@@ -939,7 +1242,7 @@ fi
 - Don't package Ocaml Xenbus library
 - Inject #DF instead of overwriting RIP in xen-hvmcrash
 
-* Wed Jul  3 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.4-6
+* Wed Jul 03 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.4-6
 - Fix for XSA-458 CVE-2024-31143
 - Fix early detection of CPU features on hardware with the CPUID Limit active
   in firmware
@@ -965,7 +1268,7 @@ fi
 - Fix xentop cpu% sort order
 - Fix possible watchdog timeouts or NULL pointer deference with CPU hotplug
 
-* Tue May  7 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.4-2
+* Tue May 07 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.4-2
 - Fix a heterogeneous CPU levelling bug between ICX and CLX
 
 * Tue Apr 30 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.4-1
@@ -976,16 +1279,16 @@ fi
   host crash
 - Include the debug xen debug symbols in in the lp-devel subpackage
 
-* Tue Apr  9 2024 Alex Brett <alex.brett@cloud.com> - 4.17.3-6
+* Tue Apr 09 2024 Alex Brett <alex.brett@cloud.com> - 4.17.3-6
 - CA-391273: Rebuild to resolve xen-dom0-tools dependency issue
 
-* Wed Apr  3 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.3-5
+* Wed Apr 03 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.3-5
 - Fixes for:
   - XSA-454 CVE-2023-46842
   - XSA-455 CVE-2024-31142
   - XSA-456 CVE-2024-2201
 
-* Fri Mar  8 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.3-4
+* Fri Mar 08 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.3-4
 - Fixes for:
   - XSA-453 CVE-2024-2193, off by default
   - XSA-452 CVE-2023-28746
@@ -1026,20 +1329,20 @@ fi
 - Rebuild with updated Ocaml 4.14 runtime.
 - Fix possible memory leak in libxenguest cpu-policy infrastructure.
 
-* Mon Dec 4 2023 Alejandro Vallejo <alejandro.vallejo@cloud.com> - 4.13.5-10.58
+* Mon Dec 04 2023 Alejandro Vallejo <alejandro.vallejo@cloud.com> - 4.13.5-10.58
 - Remove limit of 64 CPUs from hvmloader.
 - Fix pygrub incompatibility with python3.
 - Improve the livepatch infrastructure.
 
-* Wed Nov 8 2023 Roger Pau Monné <roger.pau@citrix.com> - 4.13.5-10.57
+* Wed Nov 08 2023 Roger Pau Monné <roger.pau@citrix.com> - 4.13.5-10.57
 - Add new x2APIC 'Mixed mode' driver, and use it by default.
 
-* Wed Nov 1 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.56
+* Wed Nov 01 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.56
 - Fixes for
   - XSA-445 CVE-2023-46835
   - XSA-446 CVE-2023-46836
 
-* Wed Nov 1 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.55
+* Wed Nov 01 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.55
 - Fix for AMD erratum #1485, which has been observed to cause #UD exception on
   AMD Zen4 systems.
 - Allow using the platform/ovmf-override key to configure the OVMF firwmare to
@@ -1079,12 +1382,12 @@ fi
   workaround for XSA-246, but wasn't effective owing to poor error handling
   elsewhere.
 
-* Thu Aug 3 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.50
+* Thu Aug 03 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.50
 - Fixes for
   - XSA-434 CVE-2023-20569
   - XSA-435 CVE-2022-40982
 
-* Thu Aug 3 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.49
+* Thu Aug 03 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.49
 - Fix bug in XSA-433 fix, which accidentally disabled a hardware errata
   workaround.
 - Update IO-APIC IRTEs atomically.  Fixes a race condition which causes
@@ -1138,7 +1441,7 @@ fi
 - Remove the xen-installer-files subpackage.  It was a vestigial remnant of an
   old build system.
 
-* Mon Mar 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.42
+* Mon Mar 06 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.42
 - Fixes for
   - XSA-427 CVE-2022-42332
   - XSA-428 CVE-2022-42333 CVE-2022-42334
@@ -1147,19 +1450,19 @@ fi
   was all specific to dom0, and ineligible to be used elsewhere.
 - Reintroduce the python2 pygrub/libfsimage bindings.
 
-* Fri Mar 3 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.41
+* Fri Mar 03 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.41
 - Load AMD microcode on all logical processors.
 - Switch to using Python 3.  Retain Python 2 builds of xen.lowlevel in the
   short term until dependent packages have been updated.
 - Fix libfsimage build in the presence of newer Linux headers.
 
-* Mon Feb 6 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.40
+* Mon Feb 06 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.40
 - Fix for XSA-426 CVE-2022-27672.
 - More fixes for memory corruption issues in the Ocaml bindings.
 - On xenstored live update, validate the config file before launching
   into the new xenstored.
 
-* Thu Feb 2 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.39
+* Thu Feb 02 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.39
 - Fix memory corruption issues in the Ocaml bindings.
 
 * Mon Jan 16 2023 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.5-10.38
@@ -1178,11 +1481,11 @@ fi
 - Fix timer affinity after S3.
 - Drop Introspection Extensions.
 
-* Fri Dec 2 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.36
+* Fri Dec 02 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.36
 - Activate AVX-512 by default on AMD platforms.
 - Fixes for oxenstored live update.
 
-* Fri Nov 4 2022  Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.35
+* Fri Nov 04 2022  Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.35
 - Fix for XSA-422 CVE-2022-23824
 
 * Thu Oct 27 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.34
@@ -1198,7 +1501,7 @@ fi
   - XSA-420 CVE-2022-42324
   - XSA-421 CVE-2022-42325 CVE-2022-42326
 
-* Thu Oct 6 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.33
+* Thu Oct 06 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.33
 - Fixes for XSA-410 CVE-2022-33746, XSA-411 CVE-2022-33748.
 - Activate DOITM (Data Operand Invariant Timing Mode) unilaterally on capable
   hardware (Intel IceLake/Gracemont and later) to keep properly-written crypto
@@ -1217,10 +1520,10 @@ fi
 - Rework specfile so tools get the default RPM CFLAGS/LDFLAGS, including
   various hardening settings.
 
-* Tue Aug 9 2022 Pau Ruiz Safont <pau.safont@citrix.com> - 4.13.4-10.30
+* Tue Aug 09 2022 Pau Ruiz Safont <pau.safont@citrix.com> - 4.13.4-10.30
 - Bump release and rebuild with OCaml 4.13.1-3 compiler.
 
-* Fri Aug 5 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.29
+* Fri Aug 05 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.29
 - Improve boot speed by using WC mappings for the VGA framebuffer.
 - Fix crash on boot on AMD Zen2/3 systems when x2apic is disabled by firmware.
 - Correct the RPM license fields.
@@ -1228,7 +1531,7 @@ fi
 * Tue Jul 26 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.28
 - Fix for XSA-408 CVE-2022-33745.
 
-* Fri Jul 8 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.27
+* Fri Jul 08 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.27
 - Fixes for XSA-407 CVE-2022-23816 CVE-2022-23825.
 - Switch to x2APIC physical destination mode by default.  Addresses problems
   with vector exhaustion on large systems.
@@ -1237,7 +1540,7 @@ fi
 * Thu Jun 16 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.26
 - Fixes for XSA-404 CVE-2022-21123 CVE-2022-21125 CVE-2022-21166.
 
-* Thu Jun 9 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.25
+* Thu Jun 09 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.25
 - Fixes for XSA-401 CVE-2022-26362, XSA-402 CVE-2022-26363 CVE-2022-26364.
 
 * Wed Apr 13 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.24
@@ -1257,7 +1560,7 @@ fi
 - Rebuild with OCaml 4.13.1 compiler.
 - CP-37343: Drop Ocaml/CPUID technical debt.
 
-* Tue Feb 8 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.19
+* Tue Feb 08 2022 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-10.19
 - Fixes for XSA-394 CVE-2022-23034, XSA-395 CVE-2022-23035.
 - Support for AMD MSR_SPEC_CTRL in HVM guests.
 - Logic to match the Intel Feb 2022 microcode.  De-featuring TSX on more
@@ -1279,7 +1582,7 @@ fi
 - Fix compat hypercall translation
 - Perf improvements at boot, for hypercalls, and for the XSM subsystem
 
-* Wed Oct 6 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-2
+* Wed Oct 06 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-2
 - Fix boot failure if a PCI Bridge is has a subordinate bus of 255.
 - Reduce overhead from the trace infrastructure.
 - Fix for XSA-386 CVE-2021-28702.
@@ -1287,11 +1590,11 @@ fi
 * Fri Sep 10 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.4-1
 - Update to RELEASE-4.13.4.
 
-* Wed Sep 8 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.16
+* Wed Sep 08 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.16
 - Fix for XSA-384 CVE-2021-28701.
 - Bugfixes to XSA-378 fix.
 
-* Wed Sep 1 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.15
+* Wed Sep 01 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.15
 - Fixes for XSA-378 CVE-2021-28694 CVE-2021-28695 CVE-2021-28696, XSA-379
   CVE-2021-28697, XSA-380 CVE-2021-28698, XSA-382 CVE-2021-28699.
 - Retain visibility of HLE/RTM CPUID bits in guests when resuming on a client
@@ -1326,7 +1629,7 @@ fi
 * Mon Jun 14 2021 Igor Druzhinin <igor.druzhinin@citrix.com> - 4.13.3-10.8
 - Fix another race with vCPU timers
 
-* Wed Jun 9 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.7
+* Wed Jun 09 2021 Andrew Cooper <andrew.cooper3@citrix.com> - 4.13.3-10.7
 - LBR and PMU fixes for Icelake Server
 - Don't assume that VT-d Register based invalidation is available.  Expected
   to be necessary to boot on Sapphire Rapids Server.

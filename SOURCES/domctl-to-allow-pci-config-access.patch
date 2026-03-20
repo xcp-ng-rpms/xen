@@ -1,0 +1,531 @@
+From: Jennifer Herbert <jennifer.herbert@cloud.com>
+Subject: Create a domctl to allow PCI config writes/reads
+
+As part of PCI passthrough, QEMU currently accesses
+/sys/bus/pci/devices/<domain>:<bus>:<dev>.<func>/config. This is problematic
+because it cannot be accessed when kernel lockdown mode is enabled.
+
+While it may be preferable to filter the accesses in the dom0 kernel, this is
+difficult for two reasons:
+1) The sysfs config space interface is generic which means it would instead
+require a new Xen-specific interface in the kernel to allow and filter these
+accesses.
+2) Filtering requires knowing which parts of config space userspace is allowed
+to access which requires knowing the domains to which devices are assigned.
+Keeping this information in sync with Xen in a race-free way may be difficult.
+
+Ultimately, the correct solution will probably be to reimplement passthrough
+using VFIO. In the meantime, resolve this issue with a local patch by creating
+a new domctl that allows QEMU to read/write the PCI device config space for
+devices assigned to a particular domain.
+
+This op would allow writing up to 8 bytes to the device at the given address.
+
+This interface would not allow writing to dom0's devices.
+
+Signed-off-by: Jennifer Herbert <jennifer.herbert@cloud.com>
+Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
+Signed-off-by: Frediano Ziglio <frediano.ziglio@cloud.com>
+
+diff --git a/tools/include/xenctrl.h b/tools/include/xenctrl.h
+index 4328b757c06f..d1f4a2cc2c25 100644
+--- a/tools/include/xenctrl.h
++++ b/tools/include/xenctrl.h
+@@ -1388,6 +1388,25 @@ int xc_domain_ioport_permission(xc_interface *xch,
+                                 uint32_t nr_ports,
+                                 uint32_t allow_access);
+ 
++/**
++ * Read or Write the PCI config for the given pci device.
++ * @parm xch a handle to an open xenctrl interface.
++ * @parm domid the domain id to be serviced
++ * @parm segment the PCI segment number of the emulated device
++ * @parm bus the PCI bus number of the emulated device
++ * @parm device the PCI device number of the emulated device
++ * @parm func PCI function number of the emulated device
++ * @parm size number of bytes to be access, 1 to 8.
++ * @parm dir if to read (1), write (2) or both (3)
++ * @parm pos the position within the config to access
++ * @parm a pointer to the data to be read or written
++ * @return 0 on success, -1 on failure.
++ */
++int xc_domain_pci_access(xc_interface *xch,
++                         domid_t domid, uint16_t segment, uint8_t bus,
++                         uint8_t device, uint8_t func, uint8_t size,
++                         uint8_t dir, uint32_t pos, uint64_t *pcidata);
++
+ int xc_domain_irq_permission(xc_interface *xch,
+                              uint32_t domid,
+                              uint32_t pirq,
+diff --git a/tools/libs/ctrl/xc_domain.c b/tools/libs/ctrl/xc_domain.c
+index af6348b6d957..24ba6d301d0d 100644
+--- a/tools/libs/ctrl/xc_domain.c
++++ b/tools/libs/ctrl/xc_domain.c
+@@ -1387,6 +1387,35 @@ int xc_domain_ioport_permission(xc_interface *xch,
+     return do_domctl(xch, &domctl);
+ }
+ 
++int xc_domain_pci_access(xc_interface *xch,
++                         domid_t domid, uint16_t segment, uint8_t bus,
++                         uint8_t device, uint8_t func, uint8_t size,
++                         uint8_t dir, uint32_t pos, uint64_t *pcidata)
++{
++    int rc;
++    struct xen_domctl domctl = {};
++    xen_domctl_pci_access_t *op = &domctl.u.pci_access;
++
++    domctl.cmd = XEN_DOMCTL_pci_access;
++    domctl.domain = domid;
++
++    op->seg = segment;
++    op->bus = bus;
++    op->dev = device;
++
++    op->func = func;
++    op->size = size;
++    op->direction = dir;
++    op->pos = pos;
++
++    op->data = *pcidata;
++
++    rc = do_domctl(xch, &domctl);
++
++    *pcidata = op->data;
++    return rc;
++}
++
+ int xc_availheap(xc_interface *xch,
+                  int min_width,
+                  int max_width,
+diff --git a/xen/arch/x86/domctl.c b/xen/arch/x86/domctl.c
+index 44055c8ede85..69c9b31c6915 100644
+--- a/xen/arch/x86/domctl.c
++++ b/xen/arch/x86/domctl.c
+@@ -147,6 +147,105 @@ void arch_get_domain_info(const struct domain *d,
+     info->gpaddr_bits = hap_paddr_bits;
+ }
+ 
++static int pci_access(struct domain *d,
++                      uint16_t seg, uint8_t bus, uint8_t dev, uint8_t func,
++                      uint8_t size, uint8_t dir, uint32_t pos, uint64_t *data)
++{
++    struct pci_dev *pdev;
++    int rc = 0;
++    pci_sbdf_t sbdf;
++
++    if ( is_hardware_domain(d) || is_control_domain(d) )
++        return -EACCES;
++
++    if ( size != 1 && size != 2 && size != 4 && size != 8 )
++        return -EFAULT;
++
++    if ( dir == 0 || dir & ~3 )
++        return -EINVAL;
++
++    sbdf = PCI_SBDF(seg, bus, dev, func);
++    pcidevs_lock();
++    pdev = pci_get_pdev(NULL, sbdf);
++
++    if ( !pdev )
++    {
++        rc = -ENXIO;
++        goto out;
++    }
++
++    if ( pdev->domain != d )
++    {
++        rc = -EACCES;
++        goto out;
++    }
++
++    if ( dir & XEN_DOMCTL_pci_write )
++    {
++        if ( !pdev_has_write_access(pdev, pos, size) )
++        {
++            rc = -EACCES;
++        }
++        else if ( size <= 4 )
++        {
++            rc = pci_conf_write_intercept(seg, sbdf.bdf, pos, size,
++                                          (uint32_t *)data);
++            if ( rc >= 0)
++            {
++                rc = 0;
++                switch (size)
++                {
++                case 1:
++                    pci_conf_write8(sbdf, pos, (uint8_t) *data);
++                    break;
++                case 2:
++                    pci_conf_write16(sbdf, pos, (uint16_t) *data);
++                    break;
++                case 4:
++                    pci_conf_write32(sbdf, pos, (uint32_t) *data);
++                    break;
++                }
++            }
++        }
++        else
++        {
++            if ( (rc = pci_conf_write_intercept(seg, sbdf.bdf, pos, 4,
++                                                (uint32_t *)data)) >= 0 &&
++                 (rc = pci_conf_write_intercept(seg, sbdf.bdf, pos + 4, 4,
++                                                ((uint32_t *)data) + 1)) >= 0 )
++            {
++                rc = 0;
++                pci_conf_write32(sbdf, pos, (uint32_t) *data);
++                pci_conf_write32(sbdf, pos + 4, (uint32_t) (*data >> 32) );
++            }
++        }
++    }
++
++    if ( dir & XEN_DOMCTL_pci_read )
++    {
++        switch (size)
++        {
++        case 1:
++            *data = (uint64_t) pci_conf_read8(sbdf,  pos);
++            break;
++        case 2:
++            *data = (uint64_t) pci_conf_read16(sbdf, pos);
++            break;
++        case 4:
++            *data = (uint64_t) pci_conf_read32(sbdf, pos);
++            break;
++        case 8:
++            *data = (uint64_t) pci_conf_read32(sbdf, pos);
++            *data |= ((uint64_t) pci_conf_read32(sbdf, pos + 4)) << 32;
++            break;
++        }
++    }
++
++out:
++    pcidevs_unlock();
++    return rc;
++}
++
+ static int do_vmtrace_op(struct domain *d, struct xen_domctl_vmtrace_op *op,
+                          XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
+ {
+@@ -219,6 +318,26 @@ long arch_do_domctl(
+         copyback = true;
+         break;
+ 
++    case XEN_DOMCTL_pci_access:
++    {
++        struct xen_domctl_pci_access *data =
++            &domctl->u.pci_access;
++
++        ret = -EINVAL;
++
++        if ( data->pad0 || data->pad1 )
++            break;
++
++        ret = pci_access(d, data->seg, data->bus,
++                         data->dev, data->func, data->size, data->direction,
++                         data->pos, &data->data);
++
++        if ( !ret && data->direction & XEN_DOMCTL_pci_read)
++            copyback = true;
++
++        break;
++    }
++
+     case XEN_DOMCTL_ioport_permission:
+     {
+         unsigned int fp = domctl->u.ioport_permission.first_port;
+diff --git a/xen/drivers/passthrough/pci.c b/xen/drivers/passthrough/pci.c
+index fefa0e107f6f..3e05215e1b66 100644
+--- a/xen/drivers/passthrough/pci.c
++++ b/xen/drivers/passthrough/pci.c
+@@ -28,6 +28,7 @@
+ #include <xen/event.h>
+ #include <xen/guest_access.h>
+ #include <xen/paging.h>
++#include <xen/rangeset.h>
+ #include <xen/radix-tree.h>
+ #include <xen/softirq.h>
+ #include <xen/tasklet.h>
+@@ -53,6 +54,8 @@ struct pci_seg {
+ 
+ static DEFINE_RSPINLOCK(_pcidevs_lock);
+ 
++static int pdev_config_writable_init(struct pci_dev *pdev);
++
+ /* Do not use, as it has no speculation barrier, use pcidevs_lock() instead. */
+ void pcidevs_lock_unsafe(void)
+ {
+@@ -340,6 +343,8 @@ static struct pci_dev *alloc_pdev(struct pci_seg *pseg, u8 bus, u8 devfn)
+     arch_pci_init_pdev(pdev);
+ 
+     rc = pdev_msi_init(pdev);
++    if ( !rc )
++        rc = pdev_config_writable_init(pdev);
+     if ( rc )
+     {
+         xfree(pdev);
+@@ -459,6 +464,8 @@ static void free_pdev(struct pci_seg *pseg, struct pci_dev *pdev)
+     if ( pdev->info.is_virtfn )
+         list_del(&pdev->vf_list);
+ 
++    rangeset_destroy(pdev->config_writable);
++
+     xfree(pdev);
+ }
+ 
+@@ -1976,6 +1983,178 @@ int pci_iterate_devices(int (*handler)(struct pci_dev *pdev, void *arg),
+     return pci_segments_iterate(iterate_all, &iter) ?: iter.rc;
+ }
+ 
++struct pci_dev_config {
++    uint16_t start:12;
++    uint16_t version:4;
++    uint16_t id;
++};
++
++static int add_write_accessible(struct rangeset *config_writable,
++                                uint16_t start, uint16_t len)
++{
++    /* some sanity check */
++    if ( start >= 4096 || start + len > 4096 )
++        return 0;
++
++    return rangeset_add_range(config_writable, start, start + len - 1);
++}
++
++static int add_accesses(struct pci_dev *pdev,
++                        struct pci_dev_config *configs, uint16_t num_configs)
++{
++    int rc;
++    struct rangeset *config_writable = rangeset_new(NULL, "config writable", 0);
++
++    if ( !config_writable )
++        return -ENOMEM;
++
++#define add_write_accessible(start, len) do { \
++        rc = add_write_accessible(config_writable, start, len); \
++        if ( rc < 0 ) goto fail; \
++    } while(0)
++
++    /* Base ones (offsets 0-0x40) */
++    add_write_accessible(PCI_COMMAND, 2);
++    add_write_accessible(PCI_STATUS, 2);
++
++    /* Scan various configurations */
++    for ( unsigned int i = 0; i < num_configs; ++i )
++    {
++        const struct pci_dev_config *const config = &configs[i];
++
++        if ( config->start < 0x100 && config->id == PCI_CAP_ID_MSIX )
++            add_write_accessible(config->start + PCI_MSIX_FLAGS, 2);
++        if ( config->start < 0x100 && config->id == PCI_CAP_ID_PM )
++            add_write_accessible(config->start + PCI_PM_CTRL, 2);
++        if ( config->start < 0x100 && config->id == PCI_CAP_ID_MSI )
++            add_write_accessible(config->start + PCI_MSI_FLAGS, 2);
++    }
++
++    /* Link to the device */
++    pdev->config_writable = config_writable;
++    return 0;
++
++ fail:
++    rangeset_destroy(config_writable);
++    return rc;
++}
++
++static int pdev_config_writable_init(struct pci_dev *pdev)
++{
++    /*
++     * Capabilities starts at a multiple of 4 bytes, use a bitmap to mark
++     * already encountered starts.
++     * We need to do this to avoid circular scanning, the order of the
++     * capability offsets is not always increasing.
++     */
++    enum { NUM_CAP_STARTS = 4096 / 4 };
++    struct pci_dev_config *configs = NULL;
++    uint16_t num_configs;
++    DECLARE_BITMAP(cap_starts, NUM_CAP_STARTS);
++    uint16_t status;
++    uint32_t header;
++    int rc;
++
++    bitmap_zero(cap_starts, NUM_CAP_STARTS);
++
++    /* Scan all capabilities */
++    status = pci_conf_read16(pdev->sbdf, PCI_STATUS);
++    if ( (status & PCI_STATUS_CAP_LIST) != 0 )
++    {
++        for ( uint8_t pos = PCI_CAPABILITY_LIST; ; pos += PCI_CAP_LIST_NEXT )
++        {
++            uint8_t id;
++
++            pos = pci_conf_read8(pdev->sbdf, pos);
++            if ( pos < 0x40 )
++                break;
++
++            pos &= ~3;
++            /* avoids recursion */
++            if ( test_bit(pos / 4, cap_starts) )
++                break;
++            set_bit(pos / 4, cap_starts);
++
++            id = pci_conf_read8(pdev->sbdf, pos + PCI_CAP_LIST_ID);
++
++            if ( id == 0xff )
++                break;
++        }
++    }
++
++    /* Scan all extended capabilities */
++    header = pci_conf_read32(pdev->sbdf, 0x100);
++
++    /*
++     * If we have no capabilities, this is indicated by cap ID,
++     * cap version and next pointer all being 0.
++     */
++    if ( header != 0 && header != -1 )
++    {
++        unsigned int pos = 0x100;
++
++        for ( ; ; )
++        {
++            /* avoids recursion */
++            if ( test_bit(pos / 4, cap_starts) )
++                break;
++            set_bit(pos / 4, cap_starts);
++
++            pos = PCI_EXT_CAP_NEXT(header);
++            if ( pos < 0x100 )
++                break;
++            header = pci_conf_read32(pdev->sbdf, pos);
++        }
++    }
++
++    num_configs = bitmap_weight(cap_starts, NUM_CAP_STARTS);
++    configs = xzalloc_array(struct pci_dev_config, num_configs);
++    if ( !configs )
++        return -ENOMEM;
++
++    for ( unsigned int start = find_first_bit(cap_starts, NUM_CAP_STARTS),
++          i = 0;
++          start < NUM_CAP_STARTS;
++          start = find_next_bit(cap_starts, NUM_CAP_STARTS, start + 1) )
++    {
++        const unsigned int pos = start * 4;
++        struct pci_dev_config *const config = &configs[i++];
++
++        config->start = pos;
++        if ( pos < 0x100 )
++        {
++            uint8_t id = pci_conf_read8(pdev->sbdf, pos + PCI_CAP_LIST_ID);
++
++            config->version = 0;
++            config->id = id;
++        }
++        else
++        {
++            uint32_t header = pci_conf_read32(pdev->sbdf, pos);
++
++            config->version = PCI_EXT_CAP_VER(header);
++            config->id = PCI_EXT_CAP_ID(header);
++        }
++    }
++
++    rc = add_accesses(pdev, configs, num_configs);
++    xfree(configs);
++
++    return min(rc, 0);
++}
++
++bool pdev_has_write_access(const struct pci_dev *pdev,
++                           uint32_t pos, uint8_t size)
++{
++    ASSERT(pdev->config_writable);
++
++    if ( pos >= 4096 )
++        return false;
++
++    /* Search entry in writable table */
++    return rangeset_contains_range(pdev->config_writable, pos, pos + size - 1);
++}
++
+ /*
+  * Local variables:
+  * mode: C
+diff --git a/xen/include/public/domctl.h b/xen/include/public/domctl.h
+index 13aeb650e17c..4cca5eefd6f5 100644
+--- a/xen/include/public/domctl.h
++++ b/xen/include/public/domctl.h
+@@ -399,6 +399,35 @@ struct xen_domctl_vcpuaffinity {
+     struct xenctl_bitmap cpumap_soft;
+ };
+ 
++/*
++ * XEN_DOMCTL_pci_access: Access the PCI config space of a device on behalf of
++ *                        domain.
++ *
++ * The PCI device must have already have been assigned to the domain passed.
++ */
++struct xen_domctl_pci_access {
++      /* IN */
++
++      /* PCI address */
++      uint16_t seg;      /* AKA PCI domain */
++      uint8_t bus;
++      uint8_t dev;
++      uint8_t func;
++
++      uint8_t size;      /* bytes to read/write 1/2/4/8 */
++      uint8_t direction; /* XEN_DMOP_pci_read or XEN_DMOP_pci_write */
++      uint8_t pad0;
++
++      uint32_t pos;      /* bytes into config to read/write */
++      uint32_t pad1;
++
++      /* IN/OUT */
++      uint64_t data;
++};
++typedef struct xen_domctl_pci_access xen_domctl_pci_access_t;
++
++#define XEN_DOMCTL_pci_read  1
++#define XEN_DOMCTL_pci_write 2
+ 
+ /*
+  * XEN_DOMCTL_max_vcpus:
+@@ -1278,6 +1307,7 @@ struct xen_domctl {
+ #define XEN_DOMCTL_setvcpucontext                12
+ #define XEN_DOMCTL_getvcpucontext                13
+ #define XEN_DOMCTL_getvcpuinfo                   14
++#define XEN_DOMCTL_pci_access                  1100
+ #define XEN_DOMCTL_max_vcpus                     15
+ #define XEN_DOMCTL_scheduler_op                  16
+ #define XEN_DOMCTL_setdomainhandle               17
+@@ -1366,6 +1396,7 @@ struct xen_domctl {
+         struct xen_domctl_vcpuaffinity      vcpuaffinity;
+         struct xen_domctl_shadow_op         shadow_op;
+         struct xen_domctl_max_mem           max_mem;
++        struct xen_domctl_pci_access        pci_access;
+         struct xen_domctl_vcpucontext       vcpucontext;
+         struct xen_domctl_getvcpuinfo       getvcpuinfo;
+         struct xen_domctl_max_vcpus         max_vcpus;
+diff --git a/xen/include/xen/pci.h b/xen/include/xen/pci.h
+index 93a07503f31d..76660381db8f 100644
+--- a/xen/include/xen/pci.h
++++ b/xen/include/xen/pci.h
+@@ -167,6 +167,8 @@ struct pci_dev {
+ 
+     /* Data for vPCI. */
+     struct vpci *vpci;
++
++    struct rangeset *config_writable;
+ };
+ 
+ #define for_each_pdev(domain, pdev) \
+@@ -289,4 +291,7 @@ static inline int arch_pci_clean_pirqs(struct domain *d)
+ }
+ #endif /* CONFIG_HVM */
+ 
++bool pdev_has_write_access(const struct pci_dev *pdev,
++                           uint32_t pos, uint8_t size);
++
+ #endif /* __XEN_PCI_H__ */

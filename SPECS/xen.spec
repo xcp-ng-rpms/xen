@@ -394,10 +394,11 @@ Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
 Requires: %{_sbindir}/oxenstored
-Requires: %{_libdir}/xen/bin/qemu-system-i386
+# XCP-ng: temporarily comment out until bitbake/alma bridge is ready
+#Requires: %{_libdir}/xen/bin/qemu-system-i386
 %ifarch x86_64
-Requires: %{_datadir}/edk2/OVMF-release.fd
-Requires: %{_datadir}/ipxe/ipxe.bin
+Requires: edk2
+Requires: ipxe
 %endif
 Requires(post): systemd
 Requires(preun): systemd
@@ -1159,6 +1160,7 @@ fi
 - do not fail build when revision contains a '+'
 - allow building for x86_64_v2
 - remove livepatch certificate support depending on unpublished XS packages
+- replace Requires: on non-exe back with package names, comment out qemu for now
 - update to 4.20.2-5 from XS:
   * Wed Jan 28 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-5
   - Fix error reporting with the iommu_op hypercall

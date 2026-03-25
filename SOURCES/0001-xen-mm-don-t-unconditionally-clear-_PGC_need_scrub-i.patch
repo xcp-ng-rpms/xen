@@ -21,6 +21,7 @@ This fixes returning dirty pages from alloc_domheap_pages() without the
 _PGC_need_scrub bit set for populate_physmap() to consume.
 
 Fixes: 83a784a15b47 ("xen/mm: allow deferred scrub of physmap populate allocated pages")
+Reported-by: Ayden Bottos <aydenbottos12@gmail.com>
 Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 diff --git a/xen/common/memory.c b/xen/common/memory.c
 index b60ece8583c6..3e04e28640f1 100644

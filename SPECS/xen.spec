@@ -390,9 +390,9 @@ Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
 Requires: %{_sbindir}/oxenstored
-Requires: %{_libdir}/xen/bin/qemu-system-i386
-Requires: %{_datadir}/edk2/OVMF-release.fd
-Requires: %{_datadir}/ipxe/ipxe.bin
+Requires: qemu
+Requires: edk2
+Requires: ipxe
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -1120,6 +1120,7 @@ fi
 - Do not fail build when revision contains a '+'
 - Allow building for x86_64_v2
 - Make sure init.d scripts are installed under /etc/rc.d/
+- Replace Requires: on non-exe back with package names
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

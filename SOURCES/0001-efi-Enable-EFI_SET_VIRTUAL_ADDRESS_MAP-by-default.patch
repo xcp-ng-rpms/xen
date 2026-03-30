@@ -1,0 +1,74 @@
+From 93eea4a654af19b47f0bd33bebf54e36eda27572 Mon Sep 17 00:00:00 2001
+Message-ID: <93eea4a654af19b47f0bd33bebf54e36eda27572.1775724164.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 23 Mar 2026 11:16:45 +0100
+Subject: [PATCH] efi: Enable EFI_SET_VIRTUAL_ADDRESS_MAP by default
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Many machines fails to boot if this option is disabled.
+It's off by default as it was deemed too risky for being enabled
+by default late in the Xen 4.13 cycle, but found out to be safe.
+As there are no known drawback by having this option on, enable
+it by default.
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Acked-by: Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>
+Upstream: https://gitlab.com/xen-project/xen/-/commit/05dbc316f6b72e8fe03fc5a8792bec22078a48be
+Backport: Apply the change to buildconfigs
+---
+ buildconfigs/config-debug   | 2 +-
+ buildconfigs/config-release | 2 +-
+ xen/common/Kconfig          | 3 +--
+ 3 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/buildconfigs/config-debug b/buildconfigs/config-debug
+index 50c96881e6..604d7940a6 100644
+--- a/buildconfigs/config-debug
++++ b/buildconfigs/config-debug
+@@ -85,7 +85,7 @@ CONFIG_HYPFS=y
+ CONFIG_HYPFS_CONFIG=y
+ CONFIG_IOREQ_SERVER=y
+ CONFIG_KEXEC=y
+-# CONFIG_EFI_SET_VIRTUAL_ADDRESS_MAP is not set
++CONFIG_EFI_SET_VIRTUAL_ADDRESS_MAP=y
+ # CONFIG_XENOPROF is not set
+ CONFIG_XSM=y
+ # CONFIG_XSM_FLASK is not set
+diff --git a/buildconfigs/config-release b/buildconfigs/config-release
+index c808a70869..54ddbc3654 100644
+--- a/buildconfigs/config-release
++++ b/buildconfigs/config-release
+@@ -85,7 +85,7 @@ CONFIG_HYPFS=y
+ CONFIG_HYPFS_CONFIG=y
+ CONFIG_IOREQ_SERVER=y
+ CONFIG_KEXEC=y
+-# CONFIG_EFI_SET_VIRTUAL_ADDRESS_MAP is not set
++CONFIG_EFI_SET_VIRTUAL_ADDRESS_MAP=y
+ # CONFIG_XENOPROF is not set
+ CONFIG_XSM=y
+ # CONFIG_XSM_FLASK is not set
+diff --git a/xen/common/Kconfig b/xen/common/Kconfig
+index 4d73c65cd3..dd4ec948ce 100644
+--- a/xen/common/Kconfig
++++ b/xen/common/Kconfig
+@@ -306,14 +306,13 @@ config KEXEC
+ 
+ config EFI_SET_VIRTUAL_ADDRESS_MAP
+     bool "EFI: call SetVirtualAddressMap()" if EXPERT
++    default y
+     ---help---
+       Call EFI SetVirtualAddressMap() runtime service to setup memory map for
+       further runtime services. According to UEFI spec, it isn't strictly
+       necessary, but many UEFI implementations misbehave when this call is
+       missing.
+ 
+-      If unsure, say N.
+-
+ config XENOPROF
+ 	def_bool y
+ 	prompt "Xen Oprofile Support" if EXPERT
+-- 
+2.53.0
+

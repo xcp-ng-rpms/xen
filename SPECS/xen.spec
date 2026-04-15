@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.20.2
-Release: %{?xsrel}.0.ydi.1%{?dist}
+Release: %{?xsrel}.0.ydi.4%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.20.2.tar.gz
@@ -1159,7 +1159,7 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-5.0.ydi.1 - WIP
+* Wed Dec 17 2025 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-5.0.ydi.4 - WIP
 - Merge former xcpng-8.3 and ydi/9 work
 - do not fail build when revision contains a '+'
 - allow building for x86_64_v2

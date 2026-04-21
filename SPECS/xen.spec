@@ -1094,6 +1094,28 @@ if [ -e %{_sysconfdir}/sysconfig/kernel ] && ! grep -q '^HYPERVISOR' %{_sysconfd
   cat %{_sysconfdir}/sysconfig/kernel-xen >> %{_sysconfdir}/sysconfig/kernel
 fi
 
+%post hypervisor-elf
+# Update the debug and release symlinks
+ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen-debug.gz
+ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen-release.gz
+
+# Point /boot/xen.gz appropriately
+if [ ! -e /boot/xen.gz ]; then
+    # Use a production hypervisor by default
+    ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+elif [ ! -L /boot/xen.gz ]; then
+    # Use the production hypervisor, but keep it unlinked
+    cp -f /boot/%{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+else
+    # Else look at the current link, and whether it is debug
+    path="`readlink -f /boot/xen.gz`"
+    if [ ${path} != ${path%%-d.gz} ]; then
+        ln -sf %{name}-%{version}-%{hv_rel}-d.gz /boot/xen.gz
+    else
+        ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
+    fi
+fi
+
 %post dom0-tools
 %systemd_post proc-xen.mount
 %systemd_post xen-init-dom0.service
@@ -1128,6 +1150,7 @@ fi
 - Ignore init.d scripts in both possible locations
 - Replace Requires: on non-exe back with package names
 - Set DEFAULT_LOCKDOWN to OFF for non-secureboot cases
+- Restore the creation of xen.gz in hypervisor-elf
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

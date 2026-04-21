@@ -223,6 +223,9 @@ Patch179: skip-flask-call.patch
 Patch180: public-abi.patch
 Patch181: elf-note-filtering.patch
 
+# XCP-ng patches
+Patch1000: xcpng-no-default-lockdown.patch
+
 ExclusiveArch: %{x86_64}
 
 BuildRequires: python3-devel
@@ -1124,6 +1127,7 @@ fi
 - Allow building for x86_64_v2
 - Ignore init.d scripts in both possible locations
 - Replace Requires: on non-exe back with package names
+- Set DEFAULT_LOCKDOWN to OFF for non-secureboot cases
 - *** Upstream changelog ***
   * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
   - Add elf note to check kernel supports hypercall filtering

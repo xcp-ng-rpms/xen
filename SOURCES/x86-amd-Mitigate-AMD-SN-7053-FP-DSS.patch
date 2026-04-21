@@ -1,0 +1,95 @@
+From 2f14ed584c5432a2e99189a90b86aea33c6e1e95 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 21 Apr 2026 09:36:18 +0200
+Subject: [PATCH] x86/amd: Mitigate AMD-SN-7053 / FP-DSS
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is XSA-488 / CVE-2025-54505
+
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+
+Backport from xsa488-4.17.patch to 4.17.6-6.1.
+
+6372a05b06cb ("x86/amd: Fix race editing DE_CFG") introduced only context
+conflicst: new function zenbleed_use_chickenbit() is part of the context
+now, as well as call to amd_init_de_cfg() in init_amd().
+
+Signed-off-by: Quentin Casasnovas <quentin.casasnovas@vates.tech>
+---
+ xen/arch/x86/cpu/amd.c               | 37 ++++++++++++++++++++++++++++
+ xen/arch/x86/include/asm/msr-index.h |  1 +
+ 2 files changed, 38 insertions(+)
+
+diff --git a/xen/arch/x86/cpu/amd.c b/xen/arch/x86/cpu/amd.c
+index 7b4315c91091..af9e909c7bdd 100644
+--- a/xen/arch/x86/cpu/amd.c
++++ b/xen/arch/x86/cpu/amd.c
+@@ -873,6 +873,42 @@ static void cf_check fam17_disable_c6(void *arg)
+ 	wrmsrl(MSR_AMD_CSTATE_CFG, val & mask);
+ }
+ 
++static void amd_init_fp_cfg(const struct cpuinfo_x86 *c)
++{
++    uint64_t val, new = 0;
++
++    /* If virtualised, we won't have mutable access even if we can read it. */
++    if ( cpu_has_hypervisor )
++        return;
++
++    /*
++     * On Zen1, mitigate SB-7053 / FP-DSS Floating Point Divider State
++     * Sampling by setting bit 9 as instructed.
++     */
++    if ( c->x86 == 0x17 && is_zen1_uarch() )
++        new |= 1 << 9;
++
++    /*
++     * Avoid reading FP_CFG if we don't intend to change anything.  The
++     * register doesn't exist on all families.
++     */
++    if ( !new )
++        return;
++
++    rdmsrl(MSR_AMD64_FP_CFG, val);
++
++    if ( (val & new) == new )
++        return;
++
++    /*
++     * FP_CFG is a Core-scoped MSR, and this write is racy.  However, both
++     * threads calculate the new value from state which expected to be
++     * consistent across CPUs and unrelated to the old value, so the result
++     * should be consistent.
++     */
++    wrmsrl(MSR_AMD64_FP_CFG, val | new);
++}
++
+ static bool zenbleed_use_chickenbit(void)
+ {
+     unsigned int curr_rev;
+@@ -1020,6 +1056,7 @@ static void cf_check init_amd(struct cpuinfo_x86 *c)
+ 
+ 	unsigned long long value;
+ 
++	amd_init_fp_cfg(c);
+ 	amd_init_de_cfg(c);
+ 
+ 	if (c == &boot_cpu_data)
+diff --git a/xen/arch/x86/include/asm/msr-index.h b/xen/arch/x86/include/asm/msr-index.h
+index db602fdbfeeb..a9d33250ba0c 100644
+--- a/xen/arch/x86/include/asm/msr-index.h
++++ b/xen/arch/x86/include/asm/msr-index.h
+@@ -392,6 +392,7 @@
+ #define MSR_AMD64_LS_CFG		0xc0011020
+ #define MSR_AMD64_IC_CFG		0xc0011021
+ #define MSR_AMD64_DC_CFG		0xc0011022
++#define MSR_AMD64_FP_CFG		0xc0011028
+ #define MSR_AMD64_DE_CFG		0xc0011029
+ #define AMD64_DE_CFG_LFENCE_SERIALISE	(_AC(1, ULL) << 1)
+ #define MSR_AMD64_EX_CFG		0xc001102c
+-- 
+2.43.0
+

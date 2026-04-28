@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -297,6 +297,9 @@ Patch253: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 Patch1000: 0001-xenguest-activate-nested-virt-when-requested.patch
 Patch1001: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+Patch1002: xsa483-4.17.patch
+Patch1003: xsa486-4.18.patch
+Patch1004: x86-amd-Mitigate-AMD-SN-7053-FP-DSS.patch
 
 ExclusiveArch: x86_64
 
@@ -1144,6 +1147,11 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Apr 28 2026 Quentin Casasnovas <quentin.casasnovas@vates.tech> - 4.17.6-6.2
+- Fix for XSA-483 / CVE-2026-23556
+- Fix for XSA-486 / CVE-2026-23558
+- Fix for XSA-488 / CVE-2025-54505
+
 * Wed Mar 25 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.6-6.1
 - Sync with XenServer 4.17.6-5
 - Use 0001-xen-mm-don-t-unconditionally-clear-_PGC_need_scrub-i.patch from

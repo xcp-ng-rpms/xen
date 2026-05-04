@@ -396,7 +396,8 @@ Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
 Requires: %{_sbindir}/oxenstored
-Requires: qemu
+# XCP-ng: temporarily comment out until bitbake/alma bridge is ready
+#Requires: %{_libdir}/xen/bin/qemu-system-i386
 Requires: edk2
 Requires: ipxe
 Requires(post): systemd

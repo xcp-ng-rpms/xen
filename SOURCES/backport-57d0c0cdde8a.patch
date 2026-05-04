@@ -1,7 +1,7 @@
-From 2f14ed584c5432a2e99189a90b86aea33c6e1e95 Mon Sep 17 00:00:00 2001
+From 57d0c0cdde8ad6c8d54251827edc7689347e6a3e Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
-Date: Tue, 21 Apr 2026 09:36:18 +0200
-Subject: [PATCH] x86/amd: Mitigate AMD-SN-7053 / FP-DSS
+Date: Fri, 10 Apr 2026 21:55:46 +0100
+Subject: x86/amd: Mitigate AMD-SN-7053 / FP-DSS
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -10,24 +10,13 @@ This is XSA-488 / CVE-2025-54505
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
-
-Backport from xsa488-4.17.patch to 4.17.6-6.1.
-
-6372a05b06cb ("x86/amd: Fix race editing DE_CFG") introduced only context
-conflicst: new function zenbleed_use_chickenbit() is part of the context
-now, as well as call to amd_init_de_cfg() in init_amd().
-
-Signed-off-by: Quentin Casasnovas <quentin.casasnovas@vates.tech>
----
- xen/arch/x86/cpu/amd.c               | 37 ++++++++++++++++++++++++++++
- xen/arch/x86/include/asm/msr-index.h |  1 +
- 2 files changed, 38 insertions(+)
+(cherry picked from commit 99912d346009fda1e7fb1510c9501fbab17e92a0)
 
 diff --git a/xen/arch/x86/cpu/amd.c b/xen/arch/x86/cpu/amd.c
-index 7b4315c91091..af9e909c7bdd 100644
+index 2838725bab98..3312d896dd90 100644
 --- a/xen/arch/x86/cpu/amd.c
 +++ b/xen/arch/x86/cpu/amd.c
-@@ -873,6 +873,42 @@ static void cf_check fam17_disable_c6(void *arg)
+@@ -982,6 +982,42 @@ static void cf_check fam17_disable_c6(void *arg)
  	wrmsrl(MSR_AMD_CSTATE_CFG, val & mask);
  }
  
@@ -67,22 +56,23 @@ index 7b4315c91091..af9e909c7bdd 100644
 +    wrmsrl(MSR_AMD64_FP_CFG, val | new);
 +}
 +
- static bool zenbleed_use_chickenbit(void)
+ static void amd_check_erratum_1485(void)
  {
-     unsigned int curr_rev;
-@@ -1020,6 +1056,7 @@ static void cf_check init_amd(struct cpuinfo_x86 *c)
+ 	uint64_t val, chickenbit = (1 << 5);
+@@ -1009,6 +1045,8 @@ static void cf_check init_amd(struct cpuinfo_x86 *c)
  
  	unsigned long long value;
  
 +	amd_init_fp_cfg(c);
- 	amd_init_de_cfg(c);
- 
- 	if (c == &boot_cpu_data)
++
+ 	/* Disable TLB flush filter by setting HWCR.FFDIS on K8
+ 	 * bit 6 of msr C001_0015
+ 	 *
 diff --git a/xen/arch/x86/include/asm/msr-index.h b/xen/arch/x86/include/asm/msr-index.h
-index db602fdbfeeb..a9d33250ba0c 100644
+index 521079191af7..bed0ab7b213c 100644
 --- a/xen/arch/x86/include/asm/msr-index.h
 +++ b/xen/arch/x86/include/asm/msr-index.h
-@@ -392,6 +392,7 @@
+@@ -386,6 +386,7 @@
  #define MSR_AMD64_LS_CFG		0xc0011020
  #define MSR_AMD64_IC_CFG		0xc0011021
  #define MSR_AMD64_DC_CFG		0xc0011022
@@ -90,6 +80,3 @@ index db602fdbfeeb..a9d33250ba0c 100644
  #define MSR_AMD64_DE_CFG		0xc0011029
  #define AMD64_DE_CFG_LFENCE_SERIALISE	(_AC(1, ULL) << 1)
  #define MSR_AMD64_EX_CFG		0xc001102c
--- 
-2.43.0
-

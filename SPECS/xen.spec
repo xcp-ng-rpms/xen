@@ -307,7 +307,7 @@ Patch264: xen-spec-ctrl-utility.patch
 Patch265: vtpm-ppi-acpi-dsm.patch
 
 # XCP-ng patches
-Patch1000: 0002-tools-golang-update-auto-generated-libxl-based-types.patch
+#Patch1000:
 
 ExclusiveArch: x86_64
 
@@ -1159,6 +1159,8 @@ fi
 - Sync with XenServer 4.17.6-8
 - Drop patches for nested-virt, XSA-483, XSA-486, XSA-488 from the XCP-ng patch queue,
   now provided in the main patch queue
+- Drop unused 0002-tools-golang-update-auto-generated-libxl-based-types.patch from the
+  XCP-ng patch queue
 - *** Upstream changelog ***
   * Wed Apr 22 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.6-8
   - Fix for XSA-483 CVE-2026-23556

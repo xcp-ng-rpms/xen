@@ -1,6 +1,6 @@
-%global package_speccommit 31454ec14593428f1a66a6c39878fe328b91afd1
+%global package_speccommit 9f872f8199c0212c9ea8bc5dc0331667950e5c9a
 %global usver 4.17.6
-%global xsver 8
+%global xsver 9
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -9,7 +9,7 @@
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 8
+%global hv_rel 9
 
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
@@ -233,78 +233,82 @@ Patch190: backport-c4d51191954c.patch
 Patch191: backport-305c6b901a44.patch
 Patch192: backport-986707b461eb.patch
 Patch193: backport-207e11f04f0f.patch
-Patch194: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch195: quirk-hp-gen8-rmrr.patch
-Patch196: quirk-pci-phantom-function-devices.patch
-Patch197: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch198: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch199: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
-Patch200: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch201: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch202: livepatch-ignore-duplicate-new.patch
-Patch203: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
-Patch204: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch205: pygrub-Ignore-GRUB2-if-statements.patch
-Patch206: libfsimage-Add-support-for-btrfs.patch
-Patch207: quiet-broke-irq-affinity.patch
-Patch208: xen-hide-AVX512-on-SKX-by-default.patch
-Patch209: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch210: vpci-drop-const.patch
-Patch211: pci-cache-memory-decode-bit.patch
-Patch212: pci-cache-msi-x-enabled-bit.patch
-Patch213: avoid-domctl-lock.patch
-Patch214: tlb-flush-1.patch
-Patch215: tlb-flush-2.patch
-Patch216: xen-tweak-cmdline-defaults.patch
-Patch217: xen-tweak-debug-overhead.patch
-Patch218: tweak-iommu-policy.patch
-Patch219: tweak-sc-policy.patch
-Patch220: disable-core-parking.patch
-Patch221: remove-info-leak.patch
-Patch222: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
-Patch223: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch224: hitachi-driver-domain-ssid.patch
-Patch225: install_targets_for_test_x86_emulator.patch
-Patch226: xen-define-offsets-for-kdump.patch
-Patch227: xen-scheduler-auto-privdom-weight.patch
-Patch228: xen-hvm-disable-tsc-ramping.patch
-Patch229: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch230: i8259-timers-pick-online-vcpu.patch
-Patch231: revert-ca2eee92df44.patch
-Patch232: libxc-cpuid-cores_per_socket.patch
-Patch233: libxc-cpu-clear-deps.patch
-Patch234: libxc-cpu-policies.patch
-Patch235: max-featureset-compat.patch
-Patch236: pygrub-add-disk-as-extra-group.patch
-Patch237: pygrub-add-default-and-extra-args.patch
-Patch238: pygrub-always-boot-default.patch
-Patch239: pygrub-friendly-no-fs.patch
-Patch240: pygrub-default-xenmobile-kernel.patch
-Patch241: pygrub-blacklist-support.patch
-Patch242: oem-bios-xensource.patch
-Patch243: misc-log-guest-consoles.patch
-Patch244: track-nonaffine-time.patch
-Patch245: mixed-domain-runstates.patch
-Patch246: xenguest.patch
-Patch247: xen-vmdebug.patch
-Patch248: 0001-x86-hvmloader-account-for-external-components-consum.patch
-Patch249: oxenstore-censor-sensitive-data.patch
-Patch250: oxenstore-large-packets.patch
-Patch251: nvidia-vga.patch
-Patch252: hvmloader-disable-pci-option-rom-loading.patch
-Patch253: xen-force-software-vmcs-shadow.patch
-Patch254: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch255: use-msr-ll-instead-of-vmcs-efer.patch
-Patch256: revert-4a7e71aa0851-partial.patch
-Patch257: add-pv-iommu-headers.patch
-Patch258: add-pv-iommu-local-domain-ops.patch
-Patch259: add-pv-iommu-foreign-support.patch
-Patch260: upstream-pv-iommu-tools.patch
-Patch261: Add-PV-IOMMU-elf-note.patch
-Patch262: allow-rombios-pci-config-on-any-host-bridge.patch
-Patch263: gvt-g-hvmloader+rombios.patch
-Patch264: xen-spec-ctrl-utility.patch
-Patch265: vtpm-ppi-acpi-dsm.patch
+Patch194: backport-acfd2631b95e.patch
+Patch195: backport-3e6bca616b34.patch
+Patch196: backport-bdb30883f352.patch
+Patch197: xsa490-4.17-2.patch
+Patch198: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch199: quirk-hp-gen8-rmrr.patch
+Patch200: quirk-pci-phantom-function-devices.patch
+Patch201: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch202: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch203: 0001-x86-time-Don-t-use-EFI-s-GetTime-call.patch
+Patch204: 0001-efi-Workaround-page-fault-during-runtime-service.patch
+Patch205: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch206: livepatch-ignore-duplicate-new.patch
+Patch207: 0001-lib-Add-a-generic-implementation-of-current_text_add.patch
+Patch208: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch209: pygrub-Ignore-GRUB2-if-statements.patch
+Patch210: libfsimage-Add-support-for-btrfs.patch
+Patch211: quiet-broke-irq-affinity.patch
+Patch212: xen-hide-AVX512-on-SKX-by-default.patch
+Patch213: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch214: vpci-drop-const.patch
+Patch215: pci-cache-memory-decode-bit.patch
+Patch216: pci-cache-msi-x-enabled-bit.patch
+Patch217: avoid-domctl-lock.patch
+Patch218: tlb-flush-1.patch
+Patch219: tlb-flush-2.patch
+Patch220: xen-tweak-cmdline-defaults.patch
+Patch221: xen-tweak-debug-overhead.patch
+Patch222: tweak-iommu-policy.patch
+Patch223: tweak-sc-policy.patch
+Patch224: disable-core-parking.patch
+Patch225: remove-info-leak.patch
+Patch226: 0001-Allocate-space-in-structs-pre-emptively-to-increase-.patch
+Patch227: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch228: hitachi-driver-domain-ssid.patch
+Patch229: install_targets_for_test_x86_emulator.patch
+Patch230: xen-define-offsets-for-kdump.patch
+Patch231: xen-scheduler-auto-privdom-weight.patch
+Patch232: xen-hvm-disable-tsc-ramping.patch
+Patch233: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch234: i8259-timers-pick-online-vcpu.patch
+Patch235: revert-ca2eee92df44.patch
+Patch236: libxc-cpuid-cores_per_socket.patch
+Patch237: libxc-cpu-clear-deps.patch
+Patch238: libxc-cpu-policies.patch
+Patch239: max-featureset-compat.patch
+Patch240: pygrub-add-disk-as-extra-group.patch
+Patch241: pygrub-add-default-and-extra-args.patch
+Patch242: pygrub-always-boot-default.patch
+Patch243: pygrub-friendly-no-fs.patch
+Patch244: pygrub-default-xenmobile-kernel.patch
+Patch245: pygrub-blacklist-support.patch
+Patch246: oem-bios-xensource.patch
+Patch247: misc-log-guest-consoles.patch
+Patch248: track-nonaffine-time.patch
+Patch249: mixed-domain-runstates.patch
+Patch250: xenguest.patch
+Patch251: xen-vmdebug.patch
+Patch252: 0001-x86-hvmloader-account-for-external-components-consum.patch
+Patch253: oxenstore-censor-sensitive-data.patch
+Patch254: oxenstore-large-packets.patch
+Patch255: nvidia-vga.patch
+Patch256: hvmloader-disable-pci-option-rom-loading.patch
+Patch257: xen-force-software-vmcs-shadow.patch
+Patch258: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch259: use-msr-ll-instead-of-vmcs-efer.patch
+Patch260: revert-4a7e71aa0851-partial.patch
+Patch261: add-pv-iommu-headers.patch
+Patch262: add-pv-iommu-local-domain-ops.patch
+Patch263: add-pv-iommu-foreign-support.patch
+Patch264: upstream-pv-iommu-tools.patch
+Patch265: Add-PV-IOMMU-elf-note.patch
+Patch266: allow-rombios-pci-config-on-any-host-bridge.patch
+Patch267: gvt-g-hvmloader+rombios.patch
+Patch268: xen-spec-ctrl-utility.patch
+Patch269: vtpm-ppi-acpi-dsm.patch
 
 ExclusiveArch: x86_64
 
@@ -1152,6 +1156,13 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed May  6 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.6-9
+- Fix for XSA-490 CVE-2025-54518
+- Fix crash on boot when setting up shadow stacks
+- Fix hang on boot when configuring the IOMMU on certain AMD platforms
+- Fix a bug on AMD systems where a guests CR2 register value gets lost on
+  migrate
+
 * Wed Apr 22 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.6-8
 - Fix for XSA-483 CVE-2026-23556
 - Fix for XSA-484 CVE-2026-23557

@@ -1,15 +1,15 @@
-%global package_speccommit 843d750a59610bd6f169313f0c0f67c819330d54
-%global usver 4.20.2
-%global xsver 8
+%global package_speccommit 9dedacec43ec5894d7ab2320fee65236f9adbd5b
+%global usver 4.21.1
+%global xsver 2
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
 # Commitish for Source0, required by tooling.
-%global package_srccommit RELEASE-4.20.2
+%global package_srccommit RELEASE-4.21.1
 
 # Hypervisor release.  Should match the tag in the repository and would be in
 # the Release field if it weren't for the %%{xsrel} automagic.
-%global hv_rel 8
+%global hv_rel 2
 
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
@@ -26,11 +26,11 @@
 
 Summary: Xen is a virtual machine monitor
 Name:    xen
-Version: 4.20.2
+Version: 4.21.1
 Release: %{?xsrel}%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
-Source0: xen-4.20.2.tar.gz
+Source0: xen-4.21.1.tar.gz
 Source1: sysconfig_kernel-xen
 Source2: xl.conf
 Source3: logrotate-xen-tools
@@ -39,184 +39,134 @@ Patch0: build-tweaks.patch
 Patch1: configure-build.patch
 Patch2: xenserver-configuration.patch
 Patch3: coverity-model.patch
-Patch4: backport-e2b5544a9298.patch
-Patch5: backport-1badcf503507.patch
-Patch6: backport-9fb2b66c60a5.patch
-Patch7: backport-601bbb00d267.patch
-Patch8: backport-f5b36e23ec45.patch
-Patch9: backport-bb897593b7a7.patch
-Patch10: backport-a13ce6cee8ea.patch
-Patch11: backport-c31086c50b9d.patch
-Patch12: backport-23989412fb76.patch
-Patch13: backport-219510a9d6ae.patch
-Patch14: backport-39748952e917.patch
-Patch15: backport-0cb467d86df3.patch
-Patch16: backport-f63a5ba705b9.patch
-Patch17: backport-f48e4904ab81.patch
-Patch18: backport-95c476191fbb.patch
-Patch19: backport-36bea7790339.patch
-Patch20: backport-7e10bb1501c0.patch
-Patch21: backport-b304f9484272.patch
-Patch22: backport-6143f6f64d45.patch
-Patch23: backport-80ff08137eac.patch
-Patch24: backport-70c933d44f71.patch
-Patch25: backport-8c12e47a5d3b.patch
-Patch26: backport-9a474fcceccf.patch
-Patch27: backport-8e60d47cf011.patch
-Patch28: backport-c9f62baee892.patch
-Patch29: backport-b3bf9646101e.patch
-Patch30: backport-15341fcac766.patch
-Patch31: backport-a05598bd1264.patch
-Patch32: backport-aea52ce607fe.patch
-Patch33: backport-ed9488a0d155.patch
-Patch34: backport-4c3ce492ede1.patch
-Patch35: backport-50bbacacb814.patch
-Patch36: backport-3125ca0da2d8.patch
-Patch37: backport-2d779cabddfa.patch
-Patch38: backport-2d497e97e20e.patch
-Patch39: backport-e773c257af85.patch
-Patch40: backport-96a587a05736.patch
-Patch41: backport-eac626eb4c9f.patch
-Patch42: backport-5f31c46139be.patch
-Patch43: backport-22650d605462.patch
-Patch44: backport-623c365951f9.patch
-Patch45: backport-e83364bc5147.patch
-Patch46: backport-196cdc097ff1.patch
-Patch47: backport-32b63424e4e4.patch
-Patch48: backport-7909fd5e7847.patch
-Patch49: backport-e5eeca2fcaa3.patch
-Patch50: backport-a492ec7b01ee.patch
-Patch51: backport-b541c627b227.patch
-Patch52: backport-fd23bc59c2db.patch
-Patch53: backport-31d9c88a3857.patch
-Patch54: backport-bd0b3a876d80.patch
-Patch55: backport-cb50e4033717.patch
-Patch56: backport-353e5952943f.patch
-Patch57: backport-c5c45bcbd6a1.patch
-Patch58: backport-f5aadd575bb5.patch
-Patch59: backport-ccb11468b69f.patch
-Patch60: backport-cb41b4ce14a9.patch
-Patch61: backport-59a1d6d3ea1e.patch
-Patch62: backport-85d7fe2e14e5.patch
-Patch63: backport-38a5e0d0317b.patch
-Patch64: backport-50baf2d9f7bb.patch
-Patch65: backport-bb3da1c885ff.patch
-Patch66: backport-7e95dab9eb63.patch
-Patch67: backport-a6fd4a1c55dd.patch
-Patch68: backport-f6c6f2679d49.patch
-Patch69: backport-75fa670e582c.patch
-Patch70: backport-c4abe30ca6e4.patch
-Patch71: backport-c71d8ef0cca3.patch
-Patch72: backport-5d492ce33d66.patch
-Patch73: backport-98cdab167938.patch
-Patch74: backport-3539308d8206.patch
-Patch75: backport-a4d92cf18955.patch
-Patch76: backport-d0193c6d6716.patch
-Patch77: backport-439ebb08081f.patch
-Patch78: backport-80fb43a1b583.patch
-Patch79: backport-dcfcc4acabf9.patch
-Patch80: backport-7672602df6c0.patch
-Patch81: backport-04ebc7b527a7.patch
-Patch82: backport-f34c96528110.patch
-Patch83: backport-a76278016ef7.patch
-Patch84: backport-381b4ff16f7f.patch
-Patch85: xsa480.patch
-Patch86: xsa481.patch
-Patch87: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
-Patch88: quirk-pci-phantom-function-devices.patch
-Patch89: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
-Patch90: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
-Patch91: 0001-efi-Workaround-page-fault-during-runtime-service.patch
-Patch92: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
-Patch93: livepatch-ignore-duplicate-new.patch
-Patch94: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
-Patch95: pygrub-Ignore-GRUB2-if-statements.patch
-Patch96: libfsimage-Add-support-for-btrfs.patch
-Patch97: quiet-broke-irq-affinity.patch
-Patch98: xen-hide-AVX512-on-SKX-by-default.patch
-Patch99: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
-Patch100: avoid-domctl-lock.patch
-Patch101: tlb-flush-1.patch
-Patch102: tlb-flush-2.patch
-Patch103: xen-tweak-cmdline-defaults.patch
-Patch104: xen-tweak-debug-overhead.patch
-Patch105: tweak-iommu-policy.patch
-Patch106: tweak-sc-policy.patch
-Patch107: disable-core-parking.patch
-Patch108: remove-info-leak.patch
-Patch109: strip_efi.patch
-Patch110: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
-Patch111: hitachi-driver-domain-ssid.patch
-Patch112: xen-define-offsets-for-kdump.patch
-Patch113: xen-scheduler-auto-privdom-weight.patch
-Patch114: xen-hvm-disable-tsc-ramping.patch
-Patch115: xen-default-cpufreq-governor-to-performance-on-intel.patch
-Patch116: i8259-timers-pick-online-vcpu.patch
-Patch117: revert-ca2eee92df44.patch
-Patch118: libxc-cpuid-cores_per_socket.patch
-Patch119: libxc-cpu-clear-deps.patch
-Patch120: libxc-cpu-policies.patch
-Patch121: max-featureset-compat.patch
-Patch122: pygrub-add-disk-as-extra-group.patch
-Patch123: pygrub-add-default-and-extra-args.patch
-Patch124: pygrub-always-boot-default.patch
-Patch125: pygrub-friendly-no-fs.patch
-Patch126: pygrub-default-xenmobile-kernel.patch
-Patch127: pygrub-blacklist-support.patch
-Patch128: oem-bios-xensource.patch
-Patch129: misc-log-guest-consoles.patch
-Patch130: track-nonaffine-time.patch
-Patch131: mixed-domain-runstates.patch
-Patch132: xenguest.patch
-Patch133: xen-vmdebug.patch
-Patch134: 0003-xen-page_alloc-Add-static-per-NUMA-node-counts-of.patch
-Patch135: 0005-xen-page_alloc-Implement-per-NUMA-node-outstandin.patch
-Patch136: tools-xc_domain_claim_pages_node.patch
-Patch137: add-domain_adjust_tot_pages-param.patch
-Patch138: add-domain-node_tot_pages.patch
-Patch139: tools-xc_domain_numa_get_node_pages.patch
-Patch140: add-avail_node_heap_pages-param.patch
-Patch141: ocaml-numa_get_distances.patch
-Patch142: tools-xc_numa_meminfo.patch
-Patch143: 0001-x86-hvmloader-account-for-external-components-consum.patch
-Patch144: oxenstore-censor-sensitive-data.patch
-Patch145: oxenstore-large-packets.patch
-Patch146: nvidia-vga.patch
-Patch147: hvmloader-disable-pci-option-rom-loading.patch
-Patch148: xen-force-software-vmcs-shadow.patch
-Patch149: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
-Patch150: use-msr-ll-instead-of-vmcs-efer.patch
-Patch151: revert-4a7e71aa0851-partial.patch
-Patch152: add-pv-iommu-headers.patch
-Patch153: add-pv-iommu-local-domain-ops.patch
-Patch154: add-pv-iommu-foreign-support.patch
-Patch155: upstream-pv-iommu-tools.patch
-Patch156: Add-PV-IOMMU-elf-note.patch
-Patch157: xen-spec-ctrl-utility.patch
-Patch158: vtpm-ppi-acpi-dsm.patch
-Patch159: add-sbat-section.patch
-Patch160: align_all_sections_to_4kb.patch
-Patch161: 0006-discard-.text.header-for-PE-binary.patch
-Patch162: 0007-discard-multiboot-related-entry-code.patch
-Patch163: 0009-avoid-a-relocation-in-efi_arch_post_exit_boot.patch
-Patch164: split-init-section.patch
-Patch165: move-trampoline-to-data-section.patch
-Patch166: correct-sections-permissions.patch
-Patch167: add-lockdown-mode.patch
-Patch168: disallow-most-command-line-options.patch
-Patch169: add-kexec-purgatory.patch
-Patch170: kexec-implement-new-load-types.patch
-Patch171: kexec-block-other-load-types.patch
-Patch172: kexec-support-non-page-aligned-segments.patch
-Patch173: livepatch-embed-public-key.patch
-Patch174: livepatch-check-payload-signatures.patch
-Patch175: restrict-arbitrary-ioport-mapping.patch
-Patch176: domctl-to-allow-pci-config-access.patch
-Patch177: prevent-device-assign-to-dom0.patch
-Patch178: restrict-arbitrary-iomem-mapping.patch
-Patch179: skip-flask-call.patch
-Patch180: public-abi.patch
-Patch181: elf-note-filtering.patch
+Patch4: backport-90b20547b756.patch
+Patch5: backport-8482a1ce0866.patch
+Patch6: backport-a011ca9e0839.patch
+Patch7: backport-761aba980ab7.patch
+Patch8: backport-e2981e073fa9.patch
+Patch9: backport-feb99494bf59.patch
+Patch10: backport-f35f0ac0c8bc.patch
+Patch11: backport-afb919ff6ae3.patch
+Patch12: backport-8f3dcdcf9f25.patch
+Patch13: backport-b2352be94159.patch
+Patch14: backport-6b8be120c8dd.patch
+Patch15: backport-9c79644d359b.patch
+Patch16: backport-76b359a8784c.patch
+Patch17: backport-2d1a11a50dcf.patch
+Patch18: backport-27748a734393.patch
+Patch19: backport-54db249531ac.patch
+Patch20: backport-17a78430548b.patch
+Patch21: backport-f732e91aa8da.patch
+Patch22: backport-43e32ae4f928.patch
+Patch23: backport-0d8b25d1fc17.patch
+Patch24: backport-dcfcc4acabf9.patch
+Patch25: backport-7672602df6c0.patch
+Patch26: backport-04ebc7b527a7.patch
+Patch27: backport-f34c96528110.patch
+Patch28: backport-a76278016ef7.patch
+Patch29: backport-83a784a15b47.patch
+Patch30: backport-e1604ea82700.patch
+Patch31: backport-009401506e3d.patch
+Patch32: backport-36522685435f.patch
+Patch33: backport-cd0413bfacf2.patch
+Patch34: backport-acfd2631b95e.patch
+Patch35: backport-3e6bca616b34.patch
+Patch36: backport-4ff927133ebc.patch
+Patch37: backport-bdb30883f352.patch
+Patch38: xsa490-4.21.patch
+Patch39: 0006-x86-vpt-fix-injection-to-remote-vCPU.patch
+Patch40: quirk-pci-phantom-function-devices.patch
+Patch41: 0002-libxc-retry-shadow-ops-if-EBUSY-is-returned.patch
+Patch42: avoid-gnt-unmap-tlb-flush-if-not-accessed.patch
+Patch43: 0001-libxl-Don-t-insert-PCI-device-into-xenstore-for-HVM-.patch
+Patch44: livepatch-ignore-duplicate-new.patch
+Patch45: 0002-sched-Remove-dependency-on-__LINE__-for-release-buil.patch
+Patch46: pygrub-Ignore-GRUB2-if-statements.patch
+Patch47: libfsimage-Add-support-for-btrfs.patch
+Patch48: quiet-broke-irq-affinity.patch
+Patch49: xen-hide-AVX512-on-SKX-by-default.patch
+Patch50: 0001-common-page_alloc-don-t-idle-scrub-before-microcode-.patch
+Patch51: avoid-domctl-lock.patch
+Patch52: tlb-flush-2.patch
+Patch53: xen-tweak-cmdline-defaults.patch
+Patch54: xen-tweak-debug-overhead.patch
+Patch55: tweak-iommu-policy.patch
+Patch56: tweak-sc-policy.patch
+Patch57: disable-core-parking.patch
+Patch58: remove-info-leak.patch
+Patch59: strip_efi.patch
+Patch60: 0001-x86-mm-partially-revert-37201c62-make-logdirty-and-i.patch
+Patch61: hitachi-driver-domain-ssid.patch
+Patch62: xen-define-offsets-for-kdump.patch
+Patch63: xen-scheduler-auto-privdom-weight.patch
+Patch64: xen-hvm-disable-tsc-ramping.patch
+Patch65: xen-default-cpufreq-governor-to-performance-on-intel.patch
+Patch66: i8259-timers-pick-online-vcpu.patch
+Patch67: revert-ca2eee92df44.patch
+Patch68: libxc-cpuid-cores_per_socket.patch
+Patch69: libxc-cpu-clear-deps.patch
+Patch70: libxc-cpu-policies.patch
+Patch71: max-featureset-compat.patch
+Patch72: pygrub-add-disk-as-extra-group.patch
+Patch73: pygrub-add-default-and-extra-args.patch
+Patch74: pygrub-always-boot-default.patch
+Patch75: pygrub-friendly-no-fs.patch
+Patch76: pygrub-default-xenmobile-kernel.patch
+Patch77: pygrub-blacklist-support.patch
+Patch78: oem-bios-xensource.patch
+Patch79: misc-log-guest-consoles.patch
+Patch80: track-nonaffine-time.patch
+Patch81: mixed-domain-runstates.patch
+Patch82: xenguest.patch
+Patch83: xen-vmdebug.patch
+Patch84: 0003-xen-page_alloc-Add-static-per-NUMA-node-counts-of.patch
+Patch85: 0005-xen-page_alloc-Implement-per-NUMA-node-outstandin.patch
+Patch86: tools-xc_domain_claim_pages_node.patch
+Patch87: add-domain_adjust_tot_pages-param.patch
+Patch88: add-domain-node_tot_pages.patch
+Patch89: tools-xc_domain_numa_get_node_pages.patch
+Patch90: add-avail_node_heap_pages-param.patch
+Patch91: ocaml-numa_get_distances.patch
+Patch92: tools-xc_numa_meminfo.patch
+Patch93: 0001-x86-hvmloader-account-for-external-components-consum.patch
+Patch94: oxenstore-censor-sensitive-data.patch
+Patch95: oxenstore-large-packets.patch
+Patch96: nvidia-vga.patch
+Patch97: hvmloader-disable-pci-option-rom-loading.patch
+Patch98: xen-force-software-vmcs-shadow.patch
+Patch99: 0001-x86-vvmx-add-initial-PV-EPT-support-in-L0.patch
+Patch100: use-msr-ll-instead-of-vmcs-efer.patch
+Patch101: revert-4a7e71aa0851-partial.patch
+Patch102: add-pv-iommu-headers.patch
+Patch103: add-pv-iommu-local-domain-ops.patch
+Patch104: add-pv-iommu-foreign-support.patch
+Patch105: upstream-pv-iommu-tools.patch
+Patch106: Add-PV-IOMMU-elf-note.patch
+Patch107: xen-spec-ctrl-utility.patch
+Patch108: vtpm-ppi-acpi-dsm.patch
+Patch109: add-sbat-section.patch
+Patch110: align_all_sections_to_4kb.patch
+Patch111: 0006-discard-.text.header-for-PE-binary.patch
+Patch112: 0007-discard-multiboot-related-entry-code.patch
+Patch113: 0009-avoid-a-relocation-in-efi_arch_post_exit_boot.patch
+Patch114: split-init-section.patch
+Patch115: move-trampoline-to-data-section.patch
+Patch116: correct-sections-permissions.patch
+Patch117: add-lockdown-mode.patch
+Patch118: disallow-most-command-line-options.patch
+Patch119: add-kexec-purgatory.patch
+Patch120: kexec-implement-new-load-types.patch
+Patch121: kexec-block-other-load-types.patch
+Patch122: kexec-support-non-page-aligned-segments.patch
+Patch123: livepatch-embed-public-key.patch
+Patch124: livepatch-check-payload-signatures.patch
+Patch125: restrict-arbitrary-ioport-mapping.patch
+Patch126: domctl-to-allow-pci-config-access.patch
+Patch127: prevent-device-assign-to-dom0.patch
+Patch128: restrict-arbitrary-iomem-mapping.patch
+Patch129: elf-note-filtering.patch
+Patch130: skip-flask-call.patch
+Patch131: public-abi.patch
 
 ExclusiveArch: x86_64
 
@@ -448,8 +398,7 @@ echo "${base_cset:0:12}, pq ${pq_cset:0:12}" > .scmversion
 export XEN_TARGET_ARCH=%{_arch}
 export PYTHON="%{__python}"
 
-%configure --disable-qemu-traditional \
-           --disable-seabios \
+%configure --disable-seabios \
            --disable-stubdom \
            --disable-xsmpolicy \
            --disable-pvshim \
@@ -608,6 +557,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_includedir}/%{name}/arch-x86_32.h
 %{_includedir}/%{name}/arch-x86_64.h
 %{_includedir}/%{name}/argo.h
+%{_includedir}/%{name}/bootfdt.h
 %{_includedir}/%{name}/callback.h
 %{_includedir}/%{name}/device_tree_defs.h
 %{_includedir}/%{name}/dom0_ops.h
@@ -683,13 +633,13 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/libxengnttab.so.1
 %{_libdir}/libxengnttab.so.1.2
 %{_libdir}/libxenstore.so.4
-%{_libdir}/libxenstore.so.4.0
+%{_libdir}/libxenstore.so.4.1
 %{_libdir}/libxentoolcore.so.1
 %{_libdir}/libxentoolcore.so.1.0
 %{_libdir}/libxentoollog.so.1
 %{_libdir}/libxentoollog.so.1.0
-%{_libdir}/libxenvchan.so.4.20
-%{_libdir}/libxenvchan.so.4.20.0
+%{_libdir}/libxenvchan.so.4.21
+%{_libdir}/libxenvchan.so.4.21.0
 
 %files libs-devel
 
@@ -779,6 +729,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %exclude %{_sysconfdir}/%{name}/xlexample.pvhlinux
 %exclude %{_sysconfdir}/%{name}/xlexample.pvlinux
 %config %{_sysconfdir}/xen/xl.conf
+%{_systemd_util_dir}/system-sleep/xen-watchdog-sleep.sh
 %{_bindir}/vchan-socket-proxy
 %{_bindir}/xen-cpuid
 %{_bindir}/xen-detect
@@ -886,24 +837,26 @@ install_xen -%{hv_rel}-d build-xen-debug
 %files dom0-libs
 %{_libdir}/libxencall.so.1
 %{_libdir}/libxencall.so.1.3
-%{_libdir}/libxenctrl.so.4.20
-%{_libdir}/libxenctrl.so.4.20.0
+%{_libdir}/libxenctrl.so.4.21
+%{_libdir}/libxenctrl.so.4.21.0
 %{_libdir}/libxendevicemodel.so.1
 %{_libdir}/libxendevicemodel.so.1.4
 %{_libdir}/libxenforeignmemory.so.1
 %{_libdir}/libxenforeignmemory.so.1.4
-%{_libdir}/libxenfsimage.so.4.20
-%{_libdir}/libxenfsimage.so.4.20.0
-%{_libdir}/libxenguest.so.4.20
-%{_libdir}/libxenguest.so.4.20.0
+%{_libdir}/libxenfsimage.so.4.21
+%{_libdir}/libxenfsimage.so.4.21.0
+%{_libdir}/libxenguest.so.4.21
+%{_libdir}/libxenguest.so.4.21.0
 %{_libdir}/libxenhypfs.so.1
 %{_libdir}/libxenhypfs.so.1.0
-%{_libdir}/libxenlight.so.4.20
-%{_libdir}/libxenlight.so.4.20.0
-%{_libdir}/libxenstat.so.4.20
-%{_libdir}/libxenstat.so.4.20.0
-%{_libdir}/libxlutil.so.4.20
-%{_libdir}/libxlutil.so.4.20.0
+%{_libdir}/libxenlight.so.4.21
+%{_libdir}/libxenlight.so.4.21.0
+%{_libdir}/libxenmanage.so.1
+%{_libdir}/libxenmanage.so.1.0
+%{_libdir}/libxenstat.so.4.21
+%{_libdir}/libxenstat.so.4.21.0
+%{_libdir}/libxlutil.so.4.21
+%{_libdir}/libxlutil.so.4.21.0
 %{_libdir}/xenfsimage/btrfs/fsimage.so
 %{_libdir}/xenfsimage/ext2fs-lib/fsimage.so
 %{_libdir}/xenfsimage/fat/fsimage.so
@@ -966,6 +919,11 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libdir}/pkgconfig/xenlight.pc
 %{_libdir}/pkgconfig/xlutil.pc
 
+%{_includedir}/xenmanage.h
+%{_libdir}/libxenmanage.a
+%{_libdir}/libxenmanage.so
+%{_libdir}/pkgconfig/xenmanage.pc
+
 %{_includedir}/xenstat.h
 %{_libdir}/libxenstat.a
 %{_libdir}/libxenstat.so
@@ -1025,12 +983,13 @@ install_xen -%{hv_rel}-d build-xen-debug
 %exclude %{_libdir}/ocaml/xenstore/xenstore.cmxa
 
 %files dom0-tests
-%exclude %{_libexecdir}/%{name}/bin/depriv-fd-checker
 %{_libexecdir}/%{name}/tests/test-cpu-policy
+%{_libexecdir}/%{name}/tests/test-domid
 %{_libexecdir}/%{name}/tests/test-mem-claim
 %{_libexecdir}/%{name}/tests/test-paging-mempool
 %{_libexecdir}/%{name}/tests/test-pdx-mask
 %{_libexecdir}/%{name}/tests/test-pdx-offset
+%{_libexecdir}/%{name}/tests/test-rangeset
 %{_libexecdir}/%{name}/tests/test-resource
 %{_libexecdir}/%{name}/tests/test-tsx
 %{_libexecdir}/%{name}/tests/test-xenstore
@@ -1093,6 +1052,26 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed May  6 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.21.1-2
+- Fix for XSA-490 CVE-2025-54518
+- Fix crash on boot when setting up shadow stacks
+- Fix crash on boot when using xAPIC mode on a system with more than 255 CPUs
+- Fix hang on boot when configuring the IOMMU on certain AMD platforms
+- Fix a bug on AMD systems where a guests CR2 register value gets lost on
+  migrate
+
+* Tue Apr 28 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.21.1-1
+- Update to Xen 4.21.1
+
+* Mon Apr 20 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-10
+- Fix for XSA-483 CVE-2026-23556
+- Fix for XSA-484 CVE-2026-23557
+- Fix for XSA-486 CVE-2026-23558
+- Fix crash on boot during RAM scrubbing
+
+* Fri Apr 17 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.20.2-9
+- Fix for XSA-488 CVE-2025-54505
+
 * Mon Mar 09 2026 Frediano Ziglio <frediano.ziglio@citrix.com> - 4.20.2-8
 - Add elf note to check kernel supports hypercall filtering
 

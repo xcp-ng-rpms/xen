@@ -1,0 +1,103 @@
+From aff096eb57c3be0c642dd2a0c59a29a5c3d0a8f4 Mon Sep 17 00:00:00 2001
+From: Jan Beulich <jbeulich@suse.com>
+Date: Fri, 5 Jun 2026 15:40:19 +0200
+Subject: [PATCH 05/18] x86/domain: locking for ioport_caps accesses
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+In order to be able to pull at least the XEN_DOMCTL_ioport_mapping
+handling out of the domctl-locked region, the new separate (per-domain)
+lock is used to synchronize in particular with
+XEN_DOMCTL_ioport_permission.
+
+Locking is added only as far as domctl-s are affected. Uses presently
+outside of the domctl lock may want dealing with subsequently (perhaps
+limited to non-__init code).
+
+This is part of XSA-492.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+---
+ xen/arch/x86/domctl.c | 21 ++++++++++++---------
+ xen/arch/x86/setup.c  |  4 ++++
+ 2 files changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/xen/arch/x86/domctl.c b/xen/arch/x86/domctl.c
+index 67dc26dce7..0359e490de 100644
+--- a/xen/arch/x86/domctl.c
++++ b/xen/arch/x86/domctl.c
+@@ -249,6 +249,8 @@ long arch_do_domctl(
+         unsigned int np = domctl->u.ioport_permission.nr_ports;
+         int allow = domctl->u.ioport_permission.allow_access;
+ 
++        iocaps_double_lock(d, true);
++
+         if ( (fp + np) <= fp || (fp + np) > MAX_IOPORTS )
+             ret = -EINVAL;
+         else if ( !ioports_access_permitted(currd, fp, fp + np - 1) ||
+@@ -258,6 +260,8 @@ long arch_do_domctl(
+             ret = ioports_permit_access(d, fp, fp + np - 1);
+         else
+             ret = ioports_deny_access(d, fp, fp + np - 1);
++
++        iocaps_double_unlock(d, true);
+         break;
+     }
+ 
+@@ -628,16 +632,13 @@ long arch_do_domctl(
+             break;
+         }
+ 
+-        ret = -EPERM;
+-        if ( !ioports_access_permitted(currd, fmp, fmp + np - 1) )
+-            break;
+-
+-        ret = xsm_ioport_mapping(XSM_HOOK, d, fmp, fmp + np - 1, add);
+-        if ( ret )
+-            break;
+-
+         hvm = &d->arch.hvm;
+-        if ( add )
++        iocaps_double_lock(d, true);
++
++        if ( !ioports_access_permitted(currd, fmp, fmp + np - 1) ||
++             (ret = xsm_ioport_mapping(XSM_HOOK, d, fmp, fmp + np - 1, add)) )
++            ret = ret ?: -EPERM;
++        else if ( add )
+         {
+             printk(XENLOG_G_INFO
+                    "ioport_map:add: dom%d gport=%x mport=%x nr=%x\n",
+@@ -698,6 +699,8 @@ long arch_do_domctl(
+                        "ioport_map: error %ld denying dom%d access to [%x,%x]\n",
+                        ret, d->domain_id, fmp, fmp + np - 1);
+         }
++
++        iocaps_double_unlock(d, true);
+         break;
+     }
+ 
+diff --git a/xen/arch/x86/setup.c b/xen/arch/x86/setup.c
+index 1768852f6e..2ebc3db2e2 100644
+--- a/xen/arch/x86/setup.c
++++ b/xen/arch/x86/setup.c
+@@ -2187,9 +2187,13 @@ void __hwdom_init setup_io_bitmap(struct domain *d)
+     if ( is_hvm_domain(d) )
+     {
+         bitmap_fill(d->arch.hvm.io_bitmap, 0x10000);
++
++        read_lock(&d->caps_lock);
+         rc = rangeset_report_ranges(d->arch.ioport_caps, 0, 0x10000,
+                                     io_bitmap_cb, d);
+         BUG_ON(rc);
++        read_unlock(&d->caps_lock);
++
+         /*
+          * NB: we need to trap accesses to 0xcf8 in order to intercept
+          * 4 byte accesses, that need to be handled by Xen in order to
+-- 
+2.53.0
+

@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -311,7 +311,29 @@ Patch268: xen-spec-ctrl-utility.patch
 Patch269: vtpm-ppi-acpi-dsm.patch
 
 # XCP-ng patches
-#Patch1000:
+# XSA-491
+Patch1000: 0001-x86-HVM-add-locking-to-I-O-port-translation-list-tra.patch
+# XSA-492
+Patch1001: 0001-xen-xsm-make-getdomaininfo-xsm-dummy-checks-more-str.patch
+Patch1002: 0002-sched-use-sequence-counter-to-enlighten-vcpu_runstat.patch
+Patch1003: 0003-domctl-handle-XEN_DOMCTL_getdomaininfo-without-acqui.patch
+Patch1004: 0004-domain-locking-for-iomem_caps-accesses.patch
+Patch1005: 0005-x86-domain-locking-for-ioport_caps-accesses.patch
+Patch1006: 0006-domain-locking-for-irq_caps-accesses.patch
+Patch1007: 0007-domctl-handle-XEN_DOMCTL_memory_mapping-without-acqu.patch
+Patch1008: 0008-domctl-handle-XEN_DOMCTL_ioport_mapping-without-acqu.patch
+Patch1009: 0009-domctl-handle-XEN_DOMCTL_-un-bind_pt_irq-without-acq.patch
+Patch1010: 0010-domctl-handle-XEN_DOMCTL_io-mem-port-_permission-wit.patch
+Patch1011: 0011-domctl-handle-XEN_DOMCTL_irq_permission-without-acqu.patch
+Patch1012: 0012-domctl-XSM-drop-vm_event_control-hook.patch
+Patch1013: 0013-domctl-XSM-pass-full-struct-xen_domctl-to-xsm_domctl.patch
+Patch1014: 0014-domctl-XSM-drop-scheduler_op-hook.patch
+Patch1015: 0015-domctl-XSM-drop-shadow_control_op-hook.patch
+Patch1016: 0016-domctl-handle-XEN_DOMCTL_get_device_group-without-ac.patch
+Patch1017: 0017-domctl-XSM-drop-de-assign_-dt-device-hooks.patch
+Patch1018: 0018-domctl-handle-XEN_DOMCTL_set_target-without-acquirin.patch
+# XSA-494
+Patch1019: 0001-x86-mm-accurately-track-which-vCPU-page-tables-are-l.patch
 
 ExclusiveArch: x86_64
 
@@ -1159,6 +1181,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Jun 05 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.6-9.2
+- Backport patches for XSA-491, XSA-492, and XSA-494
+
 * Wed May 13 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.6-9.1
 - Sync with XenServer 4.17.6-9
 - *** Upstream changelog ***

@@ -313,6 +313,9 @@ Patch269: vtpm-ppi-acpi-dsm.patch
 # XCP-ng patches
 #Patch1000:
 
+# Yann's Debug patches
+Patch2000: 0001-debug-print-if-hvmloader-detects-a-PCI-bar-of-size-0.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

@@ -1,0 +1,28 @@
+From b7a13d19a46c4f83fd78a95fa35bd2018d0d11f4 Mon Sep 17 00:00:00 2001
+From: Yann Sionneau <yann.sionneau@vates.tech>
+Date: Wed, 3 Jun 2026 17:22:42 +0200
+Subject: [PATCH] debug: print if hvmloader detects a PCI bar of size 0
+
+---
+ tools/firmware/hvmloader/pci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/tools/firmware/hvmloader/pci.c b/tools/firmware/hvmloader/pci.c
+index ee1911ac29..ea771e1fa8 100644
+--- a/tools/firmware/hvmloader/pci.c
++++ b/tools/firmware/hvmloader/pci.c
+@@ -322,8 +322,10 @@ void pci_setup(void)
+                 bar_sz = (bar_sz_upper << 32) | bar_sz;
+             }
+             bar_sz &= ~(bar_sz - 1);
+-            if ( bar_sz == 0 )
++            if ( bar_sz == 0 ) {
++		printf("skipping bar_reg %02x dev %04x because bar_sz==0\n");
+                 continue;
++            }
+ 
+             if ( !xenpci_bar_uc &&
+                  ((bar_data & PCI_BASE_ADDRESS_SPACE) ==
+-- 
+2.53.0
+

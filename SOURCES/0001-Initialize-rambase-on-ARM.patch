@@ -1,0 +1,27 @@
+From fab74c3ec7d445134a617e6be9d5ecdcabcbe096 Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Thu, 6 Nov 2025 11:43:20 +0000
+Subject: [PATCH] Initialize rambase on ARM
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/xenguest/xenguest_stubs.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
+index e03e77f280..ac938f11ca 100644
+--- a/tools/xenguest/xenguest_stubs.c
++++ b/tools/xenguest/xenguest_stubs.c
+@@ -1636,6 +1636,12 @@ int stub_xc_hvm_build(int mem_max_mib, int mem_start_mib,
+ 
+     if ( xc_dom_boot_xen_init(dom, xch, domid) )
+         failwith_oss_xc("xc_dom_boot_xen_init");
++
++#ifdef GUEST_RAM_BASE
++    if ( xc_dom_rambase_init(dom, GUEST_RAM_BASE) )
++        failwith_oss_xc("xc_dom_rambase_init");
++#endif
++
+     if ( xc_dom_parse_image(dom) )
+         failwith_oss_xc("xc_dom_parse_image");
+ 

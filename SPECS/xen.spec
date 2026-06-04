@@ -227,7 +227,26 @@ Patch181: elf-note-filtering.patch
 Patch1000: xcpng-no-default-lockdown.patch
 %endif
 
-ExclusiveArch: %{x86_64}
+# ARM patches
+Patch1001: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch1002: 0001-xen-configs-introduce-mtcollins_defconfig.patch
+Patch1003: forge_a_debug_config_for_mtcollins.patch
+Patch1004: patch_wip-no-viridian-arm.patch
+Patch1005: patch_workaround-current_text_addr-x86-asm.patch
+Patch1006: arm-build.patch
+Patch1007: 0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch1008: 0001-fixup-xenctrl-stubs.patch
+Patch1009: from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
+Patch1010: 0001-Remove-x86-only-libacpi-option.patch
+Patch1011: 0001-patch-xenguest-for-arm.patch
+Patch1012: 0001-Initialize-rambase-on-ARM.patch
+Patch1013: increase-membanks.patch
+Patch1014: increase-bootmemregions.patch
+Patch1015: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
+Patch1016: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
+# Patch1018: workaround-pdx-unused-var.patch
+
+ExclusiveArch: %{x86_64} aarch64
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
@@ -461,19 +480,34 @@ echo "${base_cset:0:12}, pq ${pq_cset:0:12}" > .scmversion
 %build
 
 %{?_devtoolset_enable}
+%ifarch aarch64
+export XEN_TARGET_ARCH=arm64
+%else
 export XEN_TARGET_ARCH=%{_arch}
+%endif
 export PYTHON="%{__python}"
+
+%ifarch x86_64
+ARCHOPTS=" \
+           --enable-rombios \
+           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
+"
+%else
+ARCHOPTS=" \
+           --disable-rombios \
+           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-aarch64 \
+"
+%endif
 
 %configure --disable-qemu-traditional \
            --disable-seabios \
            --disable-stubdom \
            --disable-xsmpolicy \
            --disable-pvshim \
-           --enable-rombios \
            --enable-systemd \
            --with-initddir=%{_sysconfdir}/rc.d/init.d \
            --with-xenstored=oxenstored \
-           --with-system-qemu=%{_libdir}/xen/bin/qemu-system-i386 \
+           $ARCHOPTS \
            --with-system-ipxe=%{_datadir}/ipxe/ipxe.bin \
            --with-system-ovmf=%{_datadir}/edk2/OVMF-release.fd
 
@@ -484,15 +518,18 @@ export PYTHON="%{__python}"
 openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
 %endif
 
+%ifarch x86_64
 # Format sbat.csv with version/release
 sed -i -e 's/@@VERSION@@/%{version}/g' \
        -e 's/@@RELEASE@@/%{release}/g' xen/arch/x86/sbat.csv
+%endif
 
 # Take a snapshot of the configured source tree for livepatches
 mkdir ../livepatch-src
 cp -a . ../livepatch-src/
 echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
 
+%ifarch x86_64
 # Check if there are any changes in the public headers.
 # Any changes here must be checked. If necessary, update the hypercall
 # filter code in the dom0 kernel. To resolve this, copy xen/include/public to
@@ -500,6 +537,7 @@ echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
 # If the hypercall changes are not backwards compatible, bump the filter ABI
 # version in xen/include/xen/lockdown.h file (PRIVCMD_FILTERING_ABI_VERSION).
 diff -Naur public-abi xen/include/public
+%endif
 
 # Build tools and man pages
 %{?_cov_wrap} %{make_build} build-tools
@@ -530,15 +568,24 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
 }
 
 # Builds of Xen
+%ifarch x86_64
 build_xen -%{hv_rel}   config-release         build-xen-release
 build_xen -%{hv_rel}-d config-debug           build-xen-debug      cov
 build_xen ""           config-pvshim          build-shim
+%else
+build_xen -%{hv_rel}   config-release-mtcollins build-xen-release
+build_xen -%{hv_rel}-d config-debug-mtcollins   build-xen-debug      cov
+%endif
 
 
 %install
 
 %{?_devtoolset_enable}
+%ifarch aarch64
+export XEN_TARGET_ARCH=arm64
+%else
 export XEN_TARGET_ARCH=%{_arch}
+%endif
 export PYTHON="%{__python}"
 
 # The existence of this directory causes ocamlfind to put things in it
@@ -549,24 +596,41 @@ mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs
 %{make_build} DESTDIR=%{buildroot} -C docs install-man-pages
 
 # Install artifacts for livepatches
+%ifarch x86_64
 %{__install} -p -D -m 644 xen/build-xen-release/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms
 %{__install} -p -D -m 644 xen/build-xen-debug/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms-d
+%else
+%{__install} -p -D -m 644 xen/build-xen-release/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms
+%{__install} -p -D -m 644 xen/build-xen-debug/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms-d
+%endif
 cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
 
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
-    %{__install} -p -D -m 644 xen/$2/xen.gz     %{buildroot}/boot/xen-%{version}$1.gz
-    %{__install} -p -D -m 644 xen/$2/System.efi.map %{buildroot}/boot/xen-%{version}$1.map
-    %{__install} -p -D -m 644 xen/$2/.config    %{buildroot}/boot/xen-%{version}$1.config
-    %{__install} -p -D -m 644 xen/$2/xen.efi.elf   %{buildroot}/boot/xen-syms-%{version}$1
-    %{__install} -p -D -m 644 xen/$2/xen.efi    %{buildroot}/boot/xen-%{version}$1.efi
+%ifarch x86_64
+    %{__install} -p -D -m 644 xen/$2/xen.gz         %{buildroot}/boot/xen-%{version}$1.gz
+    %{__install} -p -D -m 644 xen/$2/System.efi.map  %{buildroot}/boot/xen-%{version}$1.map
+%else
+    %{__install} -p -D -m 644 xen/$2/xen             %{buildroot}/boot/xen-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/System.map       %{buildroot}/boot/xen-%{version}$1.map
+%endif
+    %{__install} -p -D -m 644 xen/$2/.config          %{buildroot}/boot/xen-%{version}$1.config
+%ifarch x86_64
+    %{__install} -p -D -m 644 xen/$2/xen.efi.elf     %{buildroot}/boot/xen-syms-%{version}$1
+    %{__install} -p -D -m 644 xen/$2/xen.efi         %{buildroot}/boot/xen-%{version}$1.efi
+    %{__install} -p -D -m 644 xen/$2/xen.efi.map     %{buildroot}/boot/xen-%{version}$1.efi.map
+%else
+    %{__install} -p -D -m 644 xen/$2/xen-syms        %{buildroot}/boot/xen-syms-%{version}$1
+%endif
 }
 install_xen -%{hv_rel}   build-xen-release
 install_xen -%{hv_rel}-d build-xen-debug
 
+%ifarch x86_64
 # Install release shim
 %{__install} -p -D -m 644 xen/build-shim/xen      %{buildroot}%{_libexecdir}/%{name}/boot/xen-shim
 %{__install} -p -D -m 644 xen/build-shim/xen-syms %{buildroot}%{_libexecdir}/%{name}/boot/xen-shim-syms
+%endif
 
 # Build test case metadata
 %{__python} %{SOURCE5} \
@@ -574,16 +638,28 @@ install_xen -%{hv_rel}-d build-xen-debug
     -i %{buildroot}%{_libexecdir}/%{name}/tests \
     -o %{buildroot}%{_datadir}/xen-dom0-tests-metadata.json
 
+%ifarch aarch64
+# dom0less is not supported on ARM in this configuration
+rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
+%endif
+
 %{__install} -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sysconfig/kernel-xen
 %{__install} -D -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/xen/xl.conf
 %{__install} -D -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xen-tools
 %{?_cov_install}
 
 %files hypervisor
+%ifarch x86_64
 /boot/%{name}-%{version}-%{hv_rel}.efi
+/boot/%{name}-%{version}-%{hv_rel}.efi.map
+/boot/%{name}-%{version}-%{hv_rel}-d.efi
+/boot/%{name}-%{version}-%{hv_rel}-d.efi.map
+%else
+/boot/%{name}-%{version}-%{hv_rel}
+/boot/%{name}-%{version}-%{hv_rel}-d
+%endif
 /boot/%{name}-%{version}-%{hv_rel}.map
 /boot/%{name}-%{version}-%{hv_rel}.config
-/boot/%{name}-%{version}-%{hv_rel}-d.efi
 /boot/%{name}-%{version}-%{hv_rel}-d.map
 /boot/%{name}-%{version}-%{hv_rel}-d.config
 %config %{_sysconfdir}/sysconfig/kernel-xen
@@ -593,11 +669,15 @@ install_xen -%{hv_rel}-d build-xen-debug
 %files hypervisor-debuginfo
 /boot/%{name}-syms-%{version}-%{hv_rel}
 /boot/%{name}-syms-%{version}-%{hv_rel}-d
+%ifarch x86_64
 %{_libexecdir}/%{name}/boot/xen-shim-syms
+%endif
 
 %files hypervisor-elf
+%ifarch x86_64
 /boot/%{name}-%{version}-%{hv_rel}.gz
 /boot/%{name}-%{version}-%{hv_rel}-d.gz
+%endif
 
 %files tools
 %{_bindir}/xenstore
@@ -831,8 +911,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/bin/xendomains
 %{_libexecdir}/%{name}/bin/xenguest
 %{_libexecdir}/%{name}/bin/xenpaging
+%ifarch x86_64
 %{_libexecdir}/%{name}/boot/hvmloader
 %{_libexecdir}/%{name}/boot/xen-shim
+%endif
 %{_libexecdir}/%{name}/ocaml/xsd_glue/xenctrl_plugin/domain_getinfo_v1.cmxs
 %{_sbindir}/flask-get-bool
 %{_sbindir}/flask-getenforce
@@ -1067,6 +1149,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %doc
 
 %post hypervisor
+%ifarch x86_64
 # Update the debug and release symlinks
 ln -sf %{name}-%{version}-%{hv_rel}-d.efi /boot/xen-debug.efi
 ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen-release.efi
@@ -1087,11 +1170,13 @@ else
         ln -sf %{name}-%{version}-%{hv_rel}.efi /boot/xen.efi
     fi
 fi
+%endif
 
 if [ -e %{_sysconfdir}/sysconfig/kernel ] && ! grep -q '^HYPERVISOR' %{_sysconfdir}/sysconfig/kernel ; then
   cat %{_sysconfdir}/sysconfig/kernel-xen >> %{_sysconfdir}/sysconfig/kernel
 fi
 
+%ifarch x86_64
 %if 0%{?xcpng}
 %post hypervisor-elf
 # Update the debug and release symlinks
@@ -1114,6 +1199,7 @@ else
         ln -sf %{name}-%{version}-%{hv_rel}.gz /boot/xen.gz
     fi
 fi
+%endif
 %endif
 
 %post dom0-tools

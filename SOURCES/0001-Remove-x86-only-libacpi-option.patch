@@ -1,0 +1,32 @@
+From a072e9ce35b88308b98ee9bbccfa6a8daaab2080 Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Mon, 3 Nov 2025 16:43:53 +0000
+Subject: [PATCH] Remove x86-only libacpi option
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/libacpi/Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tools/libacpi/Makefile b/tools/libacpi/Makefile
+index b21a64c6b4..c1dbda9ead 100644
+--- a/tools/libacpi/Makefile
++++ b/tools/libacpi/Makefile
+@@ -43,7 +43,7 @@ $(ACPI_BUILD_DIR)/dsdt_anycpu_qemu_xen.asl: dsdt.asl dsdt_acpi_info.asl $(MK_DSD
+ 	# Remove last bracket
+ 	awk 'NR > 1 {print s} {s=$$0}' $< > $@.$(TMP_SUFFIX)
+ 	cat dsdt_acpi_info.asl >> $@.$(TMP_SUFFIX)
+-	$(MK_DSDT) --debug=$(debug) --dm-version qemu-xen >> $@.$(TMP_SUFFIX)
++	$(MK_DSDT) --debug=$(debug) >> $@.$(TMP_SUFFIX)
+ 	mv -f $@.$(TMP_SUFFIX) $@
+ 
+ # NB. awk invocation is a portable alternative to 'head -n -1'
+@@ -57,7 +57,7 @@ $(ACPI_BUILD_DIR)/dsdt_%cpu.asl: dsdt.asl dsdt_acpi_info.asl  $(MK_DSDT)
+ $(ACPI_BUILD_DIR)/dsdt_pvh.asl: dsdt_acpi_info.asl $(MK_DSDT)
+ 	printf "DefinitionBlock (\"DSDT.aml\", \"DSDT\", 5, \"Xen\", \"HVM\", 0)\n{" > $@
+ 	cat dsdt_acpi_info.asl >> $@
+-	$(MK_DSDT) --debug=$(debug) --maxcpu any --dm-version none >> $@
++	$(MK_DSDT) --debug=$(debug) --maxcpu any >> $@
+ 
+ $(ACPI_BUILD_DIR)/dsdt_anycpu_arm.asl: $(MK_DSDT)
+ 	printf "DefinitionBlock (\"DSDT.aml\", \"DSDT\", 3, \"Xen\", \"ARM\", 1)\n{" > $@.$(TMP_SUFFIX)

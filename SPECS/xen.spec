@@ -244,6 +244,7 @@ Patch1013: increase-membanks.patch
 Patch1014: increase-bootmemregions.patch
 Patch1015: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
 Patch1016: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
+Patch1017: 0001-ARM-Drop-ThumbEE-support.patch
 # Patch1018: workaround-pdx-unused-var.patch
 
 ExclusiveArch: %{x86_64} aarch64

@@ -213,9 +213,7 @@ Patch238: 0001-patch-xenguest-for-arm.patch
 Patch239: 0001-Initialize-rambase-on-ARM.patch
 Patch240: increase-membanks.patch
 Patch241: increase-bootmemregions.patch
-#Patch242: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
-Patch243: 0001-mmu-pm2.c-Add-ENOMEM-logging.patch
-Patch244: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
+Patch242: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
 
 ################################################################################
 # Debugging patches

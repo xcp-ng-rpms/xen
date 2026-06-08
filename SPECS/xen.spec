@@ -222,6 +222,7 @@ Patch178: restrict-arbitrary-iomem-mapping.patch
 Patch179: skip-flask-call.patch
 Patch180: public-abi.patch
 Patch181: elf-note-filtering.patch
+Patch182: fixup-memory-exchange-numa-guard.patch
 
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch

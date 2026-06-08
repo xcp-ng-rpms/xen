@@ -118,8 +118,8 @@ index 00aa7e43006d..c5ea58873c0e 100644
 +#ifdef CONFIG_X86
 +# include <asm/e820.h>
 +# define MAX_PFN_RANGES E820MAX
-+#elif defined(CONFIG_HAS_DEVICE_TREE_DISCOVERY)
-+# include <xen/bootinfo.h>
++#elif defined(CONFIG_ARM)
++# include <xen/bootfdt.h>
 +# define MAX_PFN_RANGES NR_MEM_BANKS
 +#endif
 +

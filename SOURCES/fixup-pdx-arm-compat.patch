@@ -1,0 +1,80 @@
+From c10b1b35d88a33df6067a62b348743eb1c89770c Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Mon, 8 Jun 2026 11:07:08 +0200
+Subject: [PATCH] arm: fix pdx init for backported generic compression API
+
+CONFIG_HAS_DEVICE_TREE_DISCOVERY does not exist in Xen 4.20; use
+CONFIG_ARM with the 4.20 header (bootfdt.h) instead.
+
+Update arm/setup.c init_pdx() to use the new pfn_pdx_add_region() /
+pfn_pdx_compression_setup() API introduced by the backport of
+fd23bc59c2db, matching upstream behaviour.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/arch/arm/setup.c | 35 +++++++++++++++++++----------------
+ xen/common/pdx.c     |  4 ++--
+ 2 files changed, 21 insertions(+), 18 deletions(-)
+
+diff --git a/xen/arch/arm/setup.c b/xen/arch/arm/setup.c
+index c1f2d1b89d..484eb6486e 100644
+--- a/xen/arch/arm/setup.c
++++ b/xen/arch/arm/setup.c
+@@ -253,6 +253,11 @@ void __init init_pdx(void)
+ {
+     const struct membanks *mem = bootinfo_get_mem();
+     paddr_t bank_start, bank_size, bank_end;
++    unsigned int bank;
++
++#ifndef CONFIG_PDX_NONE
++    for ( bank = 0 ; bank < mem->nr_banks; bank++ )
++        pfn_pdx_add_region(mem->bank[bank].start, mem->bank[bank].size);
+ 
+     /*
+      * Arm does not have any restrictions on the bits to compress. Pass 0 to
+@@ -261,27 +266,25 @@ void __init init_pdx(void)
+      * If the logic changes in pfn_pdx_hole_setup we might have to
+      * update this function too.
+      */
+-    uint64_t mask = pdx_init_mask(0x0);
+-    int bank;
++    pfn_pdx_compression_setup(0);
+ 
+     for ( bank = 0 ; bank < mem->nr_banks; bank++ )
+     {
+-        bank_start = mem->bank[bank].start;
+-        bank_size = mem->bank[bank].size;
++        const struct membank *m = &mem->bank[bank];
+ 
+-        mask |= bank_start | pdx_region_mask(bank_start, bank_size);
+-    }
+-
+-    for ( bank = 0 ; bank < mem->nr_banks; bank++ )
+-    {
+-        bank_start = mem->bank[bank].start;
+-        bank_size = mem->bank[bank].size;
+-
+-        if (~mask & pdx_region_mask(bank_start, bank_size))
+-            mask = 0;
++        if ( !pdx_is_region_compressible(m->start,
++                                         PFN_UP(m->start + m->size) -
++                                         PFN_DOWN(m->start)) )
++        {
++            pfn_pdx_compression_reset();
++            printk(XENLOG_WARNING
++                   "PFN compression disabled, RAM region [%#" PRIpaddr
++                   ", %#" PRIpaddr "] not covered\n",
++                   m->start, m->start + m->size - 1);
++            break;
++        }
+     }
+-
+-    pfn_pdx_hole_setup(mask >> PAGE_SHIFT);
++#endif
+ 
+     for ( bank = 0 ; bank < mem->nr_banks; bank++ )
+     {
+ 
+-- 
+2.53.0
+

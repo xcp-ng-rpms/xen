@@ -1,0 +1,128 @@
+From a5ea65b33f9350f5d24f3d169777d7efa1a63bb5 Mon Sep 17 00:00:00 2001
+From: Jan Beulich <jbeulich@suse.com>
+Date: Fri, 5 Jun 2026 15:40:19 +0200
+Subject: [PATCH 03/18] domctl: handle XEN_DOMCTL_getdomaininfo without
+ acquiring domctl lock
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset = "utf-8"
+Content-Transfert-Encoding: 8bit
+
+getdomaininfo() is not called under consistently the same lock. Thus,
+with caller side locking irrelevant, it can as well be called with the
+domctl lock not held. (Callers not pausing the domain they want to
+retrieve information for already need to be aware that not all of the
+data returned can be relied on as being consistent; most data will also
+be stale by the time the caller gets to look at it.)
+
+Move the handling not only ahead of acquiring the lock, but also ahead
+of the XSM check, leveraging that the sub-op has its own hook.
+
+This is part of XSA-492.
+
+Fixes: 5513bd0b4675 ("add xenstore domain flag to hypervisor")
+Reported-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+Acked-by: Daniel P. Smith <dpsmith@apertussolutions.com>
+
+Backport notes:
+Backported to xen 4.17.6-9.1 from RELEASE-4.17.6
+Conflicts in xen/common/domctl.c due to a9dc384c64 ("domctl: Modify
+XEN_DOMCTL_getdomaininfo to fail if domid is not found").
+
+Backported-by: Thierry Escande <thierry.escande@vates.tech>
+Backported-by: Quentin Casasnovas <quentin.casasnovas@vates.tech>
+---
+ xen/common/domctl.c     | 30 +++++++++++++++++++-----------
+ xen/include/xsm/dummy.h |  5 ++++-
+ xen/xsm/flask/hooks.c   |  6 +++++-
+ 3 files changed, 28 insertions(+), 13 deletions(-)
+
+diff --git a/xen/common/domctl.c b/xen/common/domctl.c
+index c9348c0d36..2c49d63a84 100644
+--- a/xen/common/domctl.c
++++ b/xen/common/domctl.c
+@@ -319,6 +319,25 @@ long do_domctl(XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
+             return -ESRCH;
+     }
+ 
++    /* Handle sub-ops not requiring the domctl lock. */
++    switch ( op->cmd )
++    {
++    case XEN_DOMCTL_getdomaininfo:
++        ret = xsm_getdomaininfo(XSM_XS_PRIV, d);
++        if ( ret )
++            goto domctl_out_unlock_domonly;
++
++        getdomaininfo(d, &op->u.getdomaininfo);
++
++        op->domain = op->u.getdomaininfo.domain;
++        copyback = 1;
++        goto domctl_out_unlock_domonly;
++
++    default:
++        /* Everything else handled further down. */
++        break;
++    }
++
+     ret = xsm_domctl(XSM_OTHER, d, op->cmd,
+                      /* SSIDRef only applicable for cmd == createdomain */
+                      op->u.createdomain.ssidref);
+@@ -536,17 +555,6 @@ long do_domctl(XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
+         copyback = 1;
+         break;
+ 
+-    case XEN_DOMCTL_getdomaininfo:
+-        ret = xsm_getdomaininfo(XSM_XS_PRIV, d);
+-        if ( ret )
+-            break;
+-
+-        getdomaininfo(d, &op->u.getdomaininfo);
+-
+-        op->domain = op->u.getdomaininfo.domain;
+-        copyback = 1;
+-        break;
+-
+     case XEN_DOMCTL_getvcpucontext:
+     {
+         vcpu_guest_context_u c = { .nat = NULL };
+diff --git a/xen/include/xsm/dummy.h b/xen/include/xsm/dummy.h
+index 1c56ccb014..d5da82b011 100644
+--- a/xen/include/xsm/dummy.h
++++ b/xen/include/xsm/dummy.h
+@@ -172,8 +172,11 @@ static XSM_INLINE int cf_check xsm_domctl(
+     case XEN_DOMCTL_bind_pt_irq:
+     case XEN_DOMCTL_unbind_pt_irq:
+         return xsm_default_action(XSM_DM_PRIV, current->domain, d);
++
+     case XEN_DOMCTL_getdomaininfo:
+-        return xsm_default_action(XSM_XS_PRIV, current->domain, d);
++        ASSERT_UNREACHABLE();
++        return -EILSEQ;
++
+     default:
+         return xsm_default_action(XSM_PRIV, current->domain, d);
+     }
+diff --git a/xen/xsm/flask/hooks.c b/xen/xsm/flask/hooks.c
+index 2737c4f2cc..dcc040b31c 100644
+--- a/xen/xsm/flask/hooks.c
++++ b/xen/xsm/flask/hooks.c
+@@ -678,8 +678,12 @@ static int cf_check flask_domctl(struct domain *d, unsigned int cmd,
+          */
+         return avc_current_has_perm(ssidref, SECCLASS_DOMAIN, DOMAIN__CREATE, NULL);
+ 
+-    /* These have individual XSM hooks (common/domctl.c) */
++    /* These have individual XSM hooks and don't make it here. */
+     case XEN_DOMCTL_getdomaininfo:
++        ASSERT_UNREACHABLE();
++        return -EILSEQ;
++
++    /* These have individual XSM hooks (common/domctl.c) */
+     case XEN_DOMCTL_scheduler_op:
+     case XEN_DOMCTL_irq_permission:
+     case XEN_DOMCTL_iomem_permission:
+-- 
+2.53.0
+

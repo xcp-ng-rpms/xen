@@ -1,0 +1,34 @@
+From 65a07f8afe4db12bad2c7ae11a5ed239a0cdd5b4 Mon Sep 17 00:00:00 2001
+Message-ID: <65a07f8afe4db12bad2c7ae11a5ed239a0cdd5b4.1776788104.git.teddy.astie@vates.tech>
+In-Reply-To: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1776788104.git.teddy.astie@vates.tech>
+References: <54f2ee06f456a50a7ed0c3345354cdf51bc32257.1776788104.git.teddy.astie@vates.tech>
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Mon, 23 Feb 2026 10:44:07 +0100
+Subject: [PATCH] libxc: Report EINVAL in invalid xc_resource_op use
+
+xc_report_op doesn't update errno when called with 0 operations
+(even though it returns -1).
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Reviewed-by: Anthony PERARD <anthony.perard@vates.tech>
+---
+Upstream: https://gitlab.com/xen-project/xen/-/commit/9ccbd902df66bc44c0b442137f51d5a51b9349fd
+---
+ tools/libs/ctrl/xc_resource.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/libs/ctrl/xc_resource.c b/tools/libs/ctrl/xc_resource.c
+index 3394cc1833..e6e6c4f7af 100644
+--- a/tools/libs/ctrl/xc_resource.c
++++ b/tools/libs/ctrl/xc_resource.c
+@@ -137,6 +137,7 @@ int xc_resource_op(xc_interface *xch, uint32_t nr_ops, xc_resource_op_t *ops)
+     if ( nr_ops > 1 )
+         return xc_resource_op_multi(xch, nr_ops, ops);
+ 
++    errno = EINVAL;
+     return -1;
+ }
+ 
+-- 
+2.52.0
+

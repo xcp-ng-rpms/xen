@@ -340,8 +340,9 @@ Patch1020: dts-0001-x86-cpu-policy-move-invocation-of-recalculate_misc.patch
 Patch1021: dts-0002-x86-cpu-policy-define-bits-of-leaf-6.patch
 Patch1022: dts-0003-x86-platform-Expose-DTS-sensors-MSR.patch
 Patch1023: dts-0004-x86-platform-Adjust-temperature-sensors-MSRs.patch
-Patch1024: dts-0005-libxc-Report-consistent-errors-in-xc_resource_op.patch
-Patch1025: dts-0006-xenpm-Add-get-core-temp-subcommand.patch
+Patch1024: dts-0005-libxc-Report-EINVAL-in-invalid-xc_resource_op-use.patch
+Patch1025: dts-0006-xenpm-Use-EXIT_-SUCCESS-FAILURE-instead-of-errno-as-.patch
+Patch1026: dts-0007-xenpm-Add-get-core-temp-subcommand.patch
 
 ExclusiveArch: x86_64
 
@@ -1189,7 +1190,7 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Wed Jun 09 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.6-9.3
+* Thu Jun 11 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.6-9.3
 - Add support for Intel Digital Thermal Sensors.
 - Introduce xenpm get-core-temp command.
 

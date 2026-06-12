@@ -225,6 +225,8 @@ Patch181: elf-note-filtering.patch
 
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch
+# Fix xenguest EMP path (xg_emu.c) to accept mem_pnode from emu-manager
+Patch1001: xenguest-xg_emu-mem_pnode.patch
 %endif
 
 ExclusiveArch: %{x86_64}
@@ -1140,6 +1142,8 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Jun 23 2026 Julian Vetter <julian.vetter@vates.tech> - 4.20.2-8.1 WIP
+- Added new mem_pnode argument to xenguest EMP path
 * Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1 WIP
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS

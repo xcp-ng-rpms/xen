@@ -1,0 +1,54 @@
+From 815e20e1904c51bf1233af086bccf326977fa4b9 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Tue, 23 Jun 2026 11:24:02 +0200
+Subject: [PATCH] Add mem_pnode support to xenguest EMP path (xg_emu.c)
+
+xenguest.patch added mem_pnode to the CLI option parser and the
+build/restore paths. However the EMP server path (used by
+xcp-emu-manager) receives arguments via cmd_set_args / setable_args,
+which did not include mem_pnode. When xenopsd 25.33+ passes -mem_pnode
+to emu-manager, emu-manager forwards it via cmd_set_args and xenguest
+replies "Bad Args" and the restore fails.
+
+Add arg_mem_pnode to xg_emu.c, register it in setable_args, and
+propagate it to opt_mem_pnode before calling stub_xc_domain_restore so
+that the same NUMA placement logic used by the CLI path is exercised
+over the EMP path too.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ tools/xenguest/xg_emu.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tools/xenguest/xg_emu.c b/tools/xenguest/xg_emu.c
+index 959ba6cf1e..f1cfd192ed 100644
+--- a/tools/xenguest/xg_emu.c
++++ b/tools/xenguest/xg_emu.c
+@@ -16,6 +16,7 @@ static int stream_fd = -1;
+ 
+ static int arg_store_port = -1;
+ static int arg_console_port = -1;
++static int arg_mem_pnode = -1;
+ 
+ /* timeout in seconds */
+ #define COMMAND_TIMEOUT (60 * 2)
+@@ -195,6 +196,8 @@ static void do_cmd_restore(emp_call_args *args)
+ 
+     emp_send_return(args->cli, NULL);
+ 
++    opt_mem_pnode = (arg_mem_pnode >= 0) ? (unsigned int)arg_mem_pnode
++                                         : XC_NUMA_NO_NODE;
+     stub_xc_domain_restore(stream_fd, arg_store_port, arg_console_port, !pv_mode,
+                            &store_mfn, &console_mfn);
+ 
+@@ -230,6 +233,7 @@ struct arg_list
+ const static struct arg_list setable_args[] = {
+     {"store_port",   int_type,  .a_int = &arg_store_port},
+     {"console_port", int_type,  .a_int = &arg_console_port},
++    {"mem_pnode",    int_type,  .a_int = &arg_mem_pnode},
+     {"pv",           bool_type, .a_bool = &pv_mode},
+     {"vgpu",         bool_type, .a_bool = &opt_vgpu},
+     {}
+-- 
+2.53.0
+

@@ -1,0 +1,66 @@
+From 404c7d1ab4f6b8260d010a26901baa974e71821c Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Fri, 5 Jun 2026 14:48:51 +0200
+Subject: [PATCH] arm/mm: skip redundant TLB flush on grant unmap
+
+ARM uses stage-2 page tables for all guests (no PV guests exist).
+guest_physmap_remove_page() acquires the P2M write lock, which calls
+p2m_tlb_flush_sync() on release, so the TLB invalidation is already
+complete before replace_grant_host_mapping() returns.
+
+Set *page_accessed = 0 so gnttab_unmap_grant_ref() skips the redundant
+gnttab_flush_tlb() call added by the
+'avoid-gnt-unmap-tlb-flush-if-not-accessed.patch'.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/arch/arm/include/asm/grant_table.h |  3 ++-
+ xen/arch/arm/mm.c                      | 11 ++++++++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/arm/include/asm/grant_table.h b/xen/arch/arm/include/asm/grant_table.h
+index d3c518a926..7ed16e6d37 100644
+--- a/xen/arch/arm/include/asm/grant_table.h
++++ b/xen/arch/arm/include/asm/grant_table.h
+@@ -39,7 +39,8 @@ static inline bool gnttab_release_host_mappings(const struct domain *d)
+ int create_grant_host_mapping(uint64_t gpaddr, mfn_t frame,
+                               unsigned int flags, unsigned int cache_flags);
+ int replace_grant_host_mapping(uint64_t gpaddr, mfn_t frame,
+-                               uint64_t new_gpaddr, unsigned int flags);
++                               uint64_t new_gpaddr, unsigned int flags,
++                               int *page_accessed);
+ 
+ /*
+  * The region used by Xen on the memory will never be mapped in DOM0
+diff --git a/xen/arch/arm/mm.c b/xen/arch/arm/mm.c
+index a56e20ba2b..c0cc9f5df6 100644
+--- a/xen/arch/arm/mm.c
++++ b/xen/arch/arm/mm.c
+@@ -361,7 +361,8 @@ int create_grant_host_mapping(uint64_t gpaddr, mfn_t frame,
+ }
+ 
+ int replace_grant_host_mapping(uint64_t gpaddr, mfn_t frame,
+-                               uint64_t new_gpaddr, unsigned int flags)
++                               uint64_t new_gpaddr, unsigned int flags,
++                               int *page_accessed)
+ {
+     gfn_t gfn = gaddr_to_gfn(gpaddr);
+     struct domain *d = current->domain;
+@@ -372,6 +373,14 @@ int replace_grant_host_mapping(uint64_t gpaddr, mfn_t frame,
+ 
+     rc = guest_physmap_remove_page(d, gfn, frame, 0);
+ 
++    /*
++     * ARM uses stage-2 page tables; the P2M write-unlock path calls
++     * p2m_tlb_flush_sync(), so the TLB invalidation is already done
++     * inside guest_physmap_remove_page().  No additional flush via
++     * gnttab_flush_tlb() is needed.
++     */
++    *page_accessed = 0;
++
+     return rc ? GNTST_general_error : GNTST_okay;
+ }
+ 
+-- 
+2.53.0
+

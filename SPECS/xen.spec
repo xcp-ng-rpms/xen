@@ -223,6 +223,9 @@ Patch179: skip-flask-call.patch
 Patch180: public-abi.patch
 Patch181: elf-note-filtering.patch
 Patch182: fixup-memory-exchange-numa-guard.patch
+Patch183: fixup-pv-iommu-and-check-iomem-arm.patch
+Patch184: pci-stub-check_iomem_access-for-non-PCI-builds.patch
+Patch185: fixup-arm-grant-tlb-flush.patch
 
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch
@@ -317,8 +320,10 @@ BuildRequires: libblkid-devel
 # For xentop
 BuildRequires: ncurses-devel
 
+%ifarch x86_64
 # For RomBIOS
 BuildRequires: dev86
+%endif
 
 # For ocaml components
 BuildRequires: ocaml >= 4.13.1-3
@@ -338,13 +343,15 @@ BuildRequires: systemd-rpm-macros
 
 # XCP-ng: no live-patching, no need for their certificates
 %if ! 0%{?xcpng}
+%ifnarch aarch64
 # For embedded live patching certificate
 BuildRequires: openssl
 BuildRequires: nss-tools
 BuildRequires: python3-xssign
 
 # For signing
-BuildRequires: xssign-macros
+BuildRequires: xcpsign-macros
+%endif
 %endif
 
 # Need cov-analysis if coverity is enabled

@@ -1,0 +1,39 @@
+From 0abc91fc0b93fbc1be5773d389c5b266b4673bc4 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Mon, 8 Jun 2026 13:56:50 +0200
+Subject: [PATCH] xen/pci: stub check_iomem_access for non-PCI builds
+
+check_iomem_access() is defined in drivers/passthrough/pci.c which is
+only compiled when CONFIG_HAS_PCI is set, but its declaration in pci.h
+and call site in common/domctl.c are unconditional. Add an inline stub
+returning 0 for non-PCI builds.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/include/xen/pci.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/xen/include/xen/pci.h b/xen/include/xen/pci.h
+index a19118d55a..5728ee8c99 100644
+--- a/xen/include/xen/pci.h
++++ b/xen/include/xen/pci.h
+@@ -285,8 +285,16 @@ const char *parse_pci_seg(const char *s, unsigned int *seg_p,
+ int check_ioport_access(const struct domain *d, unsigned int port_start,
+                         unsigned int port_end);
+ 
++#ifdef CONFIG_HAS_PCI
+ int check_iomem_access(const struct domain *d, xen_pfn_t mfn_start,
+                        xen_pfn_t mfn_end);
++#else
++static inline int check_iomem_access(const struct domain *d,
++                                     xen_pfn_t mfn_start, xen_pfn_t mfn_end)
++{
++    return 0;
++}
++#endif
+ 
+ #define PCI_BAR_VF      (1u << 0)
+ #define PCI_BAR_LAST    (1u << 1)
+-- 
+2.53.0
+

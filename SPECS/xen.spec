@@ -257,12 +257,9 @@ ExclusiveArch: %{x86_64} aarch64
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
+BuildRequires: python3-setuptools
 %global py_sitearch %{python3_sitearch}
 %global __python %{__python3}
-
-%if 0%{?xcpng}
-BuildRequires: python3-setuptools
-%endif
 
 # These build dependencies are needed for building the xen.gz as
 # well as live patches.

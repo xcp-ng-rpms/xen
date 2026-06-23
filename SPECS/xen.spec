@@ -308,6 +308,7 @@ BuildRequires: zlib-devel
 # For libxl
 BuildRequires: json-c-devel
 BuildRequires: libuuid-devel
+BuildRequires: yajl-devel
 BuildRequires: perl-interpreter
 
 # For libacpi

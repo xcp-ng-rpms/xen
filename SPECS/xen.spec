@@ -528,8 +528,10 @@ ARCHOPTS=" \
 
 # XCP-ng: no live-patching, no need for their certificates
 %if ! 0%{?xcpng}
+%ifnarch aarch64
 %fetchcert -c XEN_LP_SIGN_KEY_XS9 -o livepatch.cer
 openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.pem
+%endif
 %endif
 
 %ifarch x86_64

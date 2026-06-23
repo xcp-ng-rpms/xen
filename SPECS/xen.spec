@@ -354,6 +354,10 @@ BuildRequires: xcpsign-macros
 %endif
 %endif
 
+%ifarch aarch64
+BuildRequires: libfdt-devel
+%endif
+
 # Need cov-analysis if coverity is enabled
 %{?_cov_buildrequires}
 

@@ -226,6 +226,7 @@ Patch181: elf-note-filtering.patch
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch
 %endif
+Patch1001: arm-drop-thumbee-support.patch
 
 ExclusiveArch: %{x86_64}
 

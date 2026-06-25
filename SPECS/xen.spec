@@ -226,6 +226,7 @@ Patch181: elf-note-filtering.patch
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch
 %endif
+Patch1001: common-exclude-pv_iommu-from-non-x86-builds.patch
 
 ExclusiveArch: %{x86_64}
 

@@ -252,6 +252,7 @@ Patch1017: 0001-ARM-Drop-ThumbEE-support.patch
 Patch1018: fixup-pdx-arm-compat.patch
 Patch1019: workaround-pdx-unused-var.patch
 Patch1020: tools-libxl-Fix-libxl_nocpuid.c-build-with-json-c.patch
+Patch1021: xen-numa-add-missing-headers-for-non-NUMA-numa_domct.patch
 
 ExclusiveArch: %{x86_64} aarch64
 

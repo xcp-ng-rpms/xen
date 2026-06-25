@@ -1,0 +1,37 @@
+From 31d393fd03f51ecee24ef2fc6a4503617f3f8dea Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Thu, 25 Jun 2026 11:35:36 +0200
+Subject: [PATCH] xen/numa: add missing headers for non-NUMA numa_domctl stub
+
+On aarch64 CONFIG_NUMA is not set, so the #else stub is compiled for
+any TU that includes numa.h. The stub uses EOPNOTSUPP and
+struct xen_domctl_numa_op which are not in scope via the
+asm-offsets.c -> sched.h -> domain.h -> numa.h include chain.
+
+Add xen/errno.h for EOPNOTSUPP and a forward declaration for
+struct xen_domctl_numa_op to fix the build.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/include/xen/numa.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/xen/include/xen/numa.h b/xen/include/xen/numa.h
+index 6737ade864..d9596c2a7e 100644
+--- a/xen/include/xen/numa.h
++++ b/xen/include/xen/numa.h
+@@ -2,6 +2,11 @@
+ #define _XEN_NUMA_H
+ 
+ #include <xen/mm-frame.h>
++#include <xen/errno.h>
++
++/* Defined in public/domctl.h; forward-declared here to avoid pulling in all
++ * of domctl.h from this low-level header. */
++struct xen_domctl_numa_op;
+ 
+ #ifdef CONFIG_NUMA
+ #include <xen/pdx.h>
+-- 
+2.53.0
+

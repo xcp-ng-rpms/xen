@@ -427,9 +427,11 @@ Requires: xen-dom0-libs = %{version}
 Requires: xen-tools = %{version}
 Obsoletes: xen-installer-files <= 4.13.5-10.42
 Requires: %{_sbindir}/oxenstored
+%ifarch x86_64
 Requires: qemu
 Requires: edk2
 Requires: ipxe
+%endif
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -899,8 +901,10 @@ rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
 %exclude %{_sysconfdir}/%{name}/xlexample.pvlinux
 %config %{_sysconfdir}/xen/xl.conf
 %{_bindir}/vchan-socket-proxy
+%ifarch x86_64
 %{_bindir}/xen-cpuid
 %{_bindir}/xen-detect
+%endif
 %{_bindir}/xenalyze
 %{_bindir}/xencov_split
 
@@ -914,21 +918,23 @@ rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
 %{py_sitearch}/xen/
 
 %{_libexecdir}/%{name}/bin/convert-legacy-stream
+%ifarch x86_64
 %{_libexecdir}/%{name}/bin/init-xenstore-domain
-%{_libexecdir}/%{name}/bin/libxl-save-helper
 %{_libexecdir}/%{name}/bin/lsevtchn
-%{_libexecdir}/%{name}/bin/pygrub
 %{_libexecdir}/%{name}/bin/readnotes
+%{_libexecdir}/%{name}/bin/xenpaging
+%{_libexecdir}/%{name}/boot/hvmloader
+%endif
+%{_libexecdir}/%{name}/bin/xenguest
+%{_libexecdir}/%{name}/bin/libxl-save-helper
+%{_libexecdir}/%{name}/bin/pygrub
 %{_libexecdir}/%{name}/bin/verify-stream-v2
 %{_libexecdir}/%{name}/bin/xen-9pfsd
 %{_libexecdir}/%{name}/bin/xen-init-dom0
 %{_libexecdir}/%{name}/bin/xenconsole
 %{_libexecdir}/%{name}/bin/xenctx
 %{_libexecdir}/%{name}/bin/xendomains
-%{_libexecdir}/%{name}/bin/xenguest
-%{_libexecdir}/%{name}/bin/xenpaging
 %ifarch x86_64
-%{_libexecdir}/%{name}/boot/hvmloader
 %{_libexecdir}/%{name}/boot/xen-shim
 %endif
 %{_libexecdir}/%{name}/ocaml/xsd_glue/xenctrl_plugin/domain_getinfo_v1.cmxs
@@ -938,22 +944,30 @@ rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
 %{_sbindir}/flask-loadpolicy
 %{_sbindir}/flask-set-bool
 %{_sbindir}/flask-setenforce
+%ifarch x86_64
 %{_sbindir}/gdbsx
+%endif
 %{_sbindir}/xen-access
 %{_sbindir}/xen-diag
+%ifarch x86_64
 %{_sbindir}/xen-hptool
 %{_sbindir}/xen-hvmcrash
 %{_sbindir}/xen-hvmctx
 %{_sbindir}/xen-kdd
+%endif
 %{_sbindir}/xen-livepatch
+%ifarch x86_64
 %{_sbindir}/xen-lowmemd
 %{_sbindir}/xen-mceinj
 %{_sbindir}/xen-memshare
 %{_sbindir}/xen-mfndump
 %{_sbindir}/xen-spec-ctrl
 %{_sbindir}/xen-ucode
+%endif
 %{_sbindir}/xen-vmdebug
+%ifarch x86_64
 %{_sbindir}/xen-vmtrace
+%endif
 %{_sbindir}/xenbaked
 %{_sbindir}/xenconsoled
 %{_sbindir}/xencov
@@ -1031,7 +1045,9 @@ rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
 %{_libdir}/xenfsimage/iso9660/fsimage.so
 %{_libdir}/xenfsimage/reiserfs/fsimage.so
 %{_libdir}/xenfsimage/ufs/fsimage.so
+%ifarch x86_64
 %{_libdir}/xenfsimage/xfs/fsimage.so
+%endif
 %{_libdir}/xenfsimage/zfs/fsimage.so
 
 %files dom0-libs-devel
@@ -1147,16 +1163,18 @@ rm %{buildroot}%{_libexecdir}/%{name}/bin/init-dom0less
 
 %files dom0-tests
 %exclude %{_libexecdir}/%{name}/bin/depriv-fd-checker
-%{_libexecdir}/%{name}/tests/test-cpu-policy
 %{_libexecdir}/%{name}/tests/test-mem-claim
 %{_libexecdir}/%{name}/tests/test-paging-mempool
 %{_libexecdir}/%{name}/tests/test-pdx-mask
 %{_libexecdir}/%{name}/tests/test-pdx-offset
 %{_libexecdir}/%{name}/tests/test-resource
-%{_libexecdir}/%{name}/tests/test-tsx
 %{_libexecdir}/%{name}/tests/test-xenstore
 %{_libexecdir}/%{name}/tests/test_vpci
+%ifarch x86_64
+%{_libexecdir}/%{name}/tests/test-cpu-policy
+%{_libexecdir}/%{name}/tests/test-tsx
 %{_libexecdir}/%{name}/tests/test_x86_emulator
+%endif
 %{_datadir}/xen-dom0-tests-metadata.json
 
 %files lp-devel_%{version}_%{release}

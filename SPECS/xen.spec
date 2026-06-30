@@ -223,9 +223,9 @@ Patch179: skip-flask-call.patch
 Patch180: public-abi.patch
 Patch181: elf-note-filtering.patch
 
-%if 0%{?xcpng}
-Patch1000: xcpng-no-default-lockdown.patch
-%endif
+#%if 0%{?xcpng}
+#Patch1000: xcpng-no-default-lockdown.patch
+#%endif
 
 ExclusiveArch: %{x86_64}
 
@@ -320,10 +320,11 @@ BuildRequires: systemd-rpm-macros
 BuildRequires: openssl
 BuildRequires: nss-tools
 BuildRequires: python3-xssign
+%endif
 
 # For signing
-BuildRequires: xssign-macros
-%endif
+BuildRequires: xcpsign-macros-test
+BuildRequires: sbsigntools
 
 # Need cov-analysis if coverity is enabled
 %{?_cov_buildrequires}
@@ -520,13 +521,14 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
     $mk build MAP
+    
 # XCP-ng: no SB yet
-%if ! 0%{?xcpng}
+#%if ! 0%{?xcpng}
     if [ -f xen/$3/xen.efi ]; then
-        %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
+        %sign -c XEN_SIGN_KEY_XCP9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
         mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
     fi
-%endif
+#%endif
 }
 
 # Builds of Xen
@@ -1140,6 +1142,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Jun 30 2026 Corentin Oparowski <corentin.oparowski@vates.tech> - 4.20.2-8.0.cop.1
+- WIP Enable secureboot signing 
+- WIP Enable Lockdown by default 
+
 * Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1 WIP
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS

@@ -347,6 +347,8 @@ Patch1026: dts-0007-xenpm-Add-get-core-temp-subcommand.patch
 # EFI_SET_VIRTUAL_ADDRESS_MAP
 Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 
+Patch1028: 0001-xenbus-Fix-handling-of-requests-with-xsd_sockmsg.len.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

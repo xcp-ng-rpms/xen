@@ -1,0 +1,68 @@
+From 7df7011062f585883aef8d36e8a2ece9141d87be Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Thu, 9 Jul 2026 08:56:01 +0000
+Subject: [PATCH] xenbus: Fix handling of requests with xsd_sockmsg.len = 0 for
+ socket connections
+
+Following the report at https://lore.kernel.org/xen-devel/CAFLBxZaeTMcF4tcV45MJdCVx4A6qbzQdjKei_Quh_iLrtARVFA@mail.gmail.com/
+
+Without this fix, the backend would be stuck waiting on the zero-sized
+body until the next request comes in.
+
+Instead return the request immediately after reading the header, there's
+no need to wait for another call to .has_more_input and .input
+
+Reported-by: George Dunlap <dunlapg@umich.edu>
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/ocaml/libs/xb/xb.ml | 25 +++++++++++++++++++------
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/tools/ocaml/libs/xb/xb.ml b/tools/ocaml/libs/xb/xb.ml
+index b292ed7a87..822e62b5a7 100644
+--- a/tools/ocaml/libs/xb/xb.ml
++++ b/tools/ocaml/libs/xb/xb.ml
+@@ -249,6 +249,11 @@ let can_input con = Queue.can_push con.pkt_out CommandReply
+ 
+ (* NB: can throw Reconnect *)
+ let input con =
++        let reset_and_return partial_pkt =
++                let pkt = Packet.of_partialpkt partial_pkt in
++                con.partial_in <- init_partial_in ();
++                Some pkt
++        in
+ 	if not (can_input con) then None
+ 	else
+ 	let to_read = to_read con in
+@@ -264,17 +269,25 @@ let input con =
+ 		if sz > 0 then
+ 			Partial.append partial_pkt (Bytes.to_string b) sz;
+ 		if Partial.to_complete partial_pkt = 0 then (
+-			let pkt = Packet.of_partialpkt partial_pkt in
+-			con.partial_in <- init_partial_in ();
+-			Some pkt
++                        reset_and_return partial_pkt
+ 		) else None
+ 	| NoHdr (i, buf)      ->
+ 		(* we complete the partial header *)
+ 		if sz > 0 then
+ 			Bytes.blit b 0 buf (Partial.header_size () - i) sz;
+-		con.partial_in <- if sz = i then
+-			HaveHdr (Partial.of_string (Bytes.to_string buf)) else NoHdr (i - sz, buf);
+-		None
++                if sz = i then
++                        let partial_pkt = Partial.of_string (Bytes.to_string buf) in
++                        (* If there is no body, we can return the full request immediately *)
++                        if Partial.to_complete partial_pkt = 0 then
++                                reset_and_return partial_pkt
++                        else (
++                                con.partial_in <- HaveHdr partial_pkt;
++                                None
++                        )
++                else (
++			con.partial_in <- NoHdr (i - sz, buf);
++                        None
++                )
+ 	)
+ 
+ let classify t =

@@ -1,0 +1,173 @@
+From d75ffbef3be21aabe0e3174c464e99327ae7b61d Mon Sep 17 00:00:00 2001
+Message-ID: <d75ffbef3be21aabe0e3174c464e99327ae7b61d.1782890521.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>
+Date: Mon, 10 Jul 2023 12:17:45 +0200
+Subject: [PATCH] multiboot2: parse vga= option when setting GOP mode
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Introduce support for passing the command line to the efi_multiboot2()
+helper, and parse the vga= option if present.
+
+Add support for the 'gfx' and 'current' vga options, ignore the 'keep'
+option, and print a warning message about other options not being
+currently implemented.
+
+Note that the multboot2 command line string must always be
+zero-terminated according to the multiboot2 specification, and hence
+there's no need to pass the string size to efi_multiboot2().
+
+Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit c93aa5c5d0a9f92c0a62c1992d5e52435fa24f15)
+---
+ xen/arch/x86/boot/head.S          | 13 +++++-
+ xen/arch/x86/efi/efi-boot.h       | 74 ++++++++++++++++++++++++++++++-
+ xen/arch/x86/x86_64/asm-offsets.c |  1 +
+ 3 files changed, 84 insertions(+), 4 deletions(-)
+
+diff --git a/xen/arch/x86/boot/head.S b/xen/arch/x86/boot/head.S
+index 3678f615bc..4999705395 100644
+--- a/xen/arch/x86/boot/head.S
++++ b/xen/arch/x86/boot/head.S
+@@ -240,9 +240,10 @@ __efi64_mb2_start:
+         jmp     x86_32_switch
+ 
+ .Lefi_multiboot2_proto:
+-        /* Zero EFI SystemTable and EFI ImageHandle addresses. */
++        /* Zero EFI SystemTable, EFI ImageHandle addresses and cmdline. */
+         xor     %esi,%esi
+         xor     %edi,%edi
++        xor     %edx,%edx
+ 
+         /* Skip Multiboot2 information fixed part. */
+         lea     (MB2_fixed_sizeof+MULTIBOOT2_TAG_ALIGN-1)(%rbx),%ecx
+@@ -280,6 +281,13 @@ __efi64_mb2_start:
+         cmove   MB2_efi64_ih(%rcx),%rdi
+         je      .Lefi_mb2_next_tag
+ 
++        /* Get command line from Multiboot2 information. */
++        cmpl    $MULTIBOOT2_TAG_TYPE_CMDLINE, MB2_tag_type(%rcx)
++        jne     .Lno_cmdline
++        lea     MB2_tag_string(%rcx), %rdx
++        jmp     .Lefi_mb2_next_tag
++.Lno_cmdline:
++
+         /* Is it the end of Multiboot2 information? */
+         cmpl    $MULTIBOOT2_TAG_TYPE_END,MB2_tag_type(%rcx)
+         je      .Lrun_bs
+@@ -343,7 +351,8 @@ __efi64_mb2_start:
+ 
+         /*
+          * efi_multiboot2() is called according to System V AMD64 ABI:
+-         *   - IN:  %rdi - EFI ImageHandle, %rsi - EFI SystemTable.
++         *   - IN:  %rdi - EFI ImageHandle, %rsi - EFI SystemTable,
++         *          %rdx - MB2 cmdline
+          */
+         call    efi_multiboot2
+ 
+diff --git a/xen/arch/x86/efi/efi-boot.h b/xen/arch/x86/efi/efi-boot.h
+index 64c1a02cf1..88e715f4dd 100644
+--- a/xen/arch/x86/efi/efi-boot.h
++++ b/xen/arch/x86/efi/efi-boot.h
+@@ -795,7 +795,30 @@ static bool __init efi_arch_use_config_file(EFI_SYSTEM_TABLE *SystemTable)
+ 
+ static void __init efi_arch_flush_dcache_area(const void *vaddr, UINTN size) { }
+ 
+-void __init efi_multiboot2(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
++/* Return a pointer to the character after the first occurrence of opt in cmd */
++static const char *__init get_option(const char *cmd, const char *opt)
++{
++    const char *s = cmd, *o = NULL;
++
++    if ( !cmd || !opt )
++        return NULL;
++
++    while ( (s = strstr(s, opt)) != NULL )
++    {
++        if ( s == cmd || *(s - 1) == ' ' || *(s - 1) == '\t' )
++        {
++            o = s + strlen(opt);
++            break;
++        }
++
++        s += strlen(opt);
++    }
++
++    return o;
++}
++
++void __init efi_multiboot2(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable,
++                           const char *cmdline)
+ {
+     EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
+     EFI_HANDLE gop_handle;
+@@ -816,7 +839,54 @@ void __init efi_multiboot2(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
+ 
+     if ( gop )
+     {
+-        gop_mode = efi_find_gop_mode(gop, 0, 0, 0);
++        const char *cur = cmdline;
++        unsigned int width = 0, height = 0, depth = 0;
++        bool keep_current = false;
++
++        while ( (cur = get_option(cur, "vga=")) != NULL )
++        {
++#define VALID_TERMINATOR(c) \
++    (*(c) == ' ' || *(c) == '\t' || *(c) == '\0' || *(c) == ',')
++            if ( !strncmp(cur, "gfx-", 4) )
++            {
++                width = simple_strtoul(cur + 4, &cur, 10);
++
++                if ( *cur == 'x' )
++                    height = simple_strtoul(cur + 1, &cur, 10);
++                else
++                    goto error;
++
++                if ( *cur == 'x' )
++                    depth = simple_strtoul(cur + 1, &cur, 10);
++                else
++                    goto error;
++
++                if ( !VALID_TERMINATOR(cur) )
++                {
++                error:
++                    PrintErr(L"Warning: Invalid gfx- option detected\r\n");
++                    width = height = depth = 0;
++                }
++                keep_current = false;
++            }
++            else if ( !strncmp(cur, "current", 7) && VALID_TERMINATOR(cur + 7) )
++                keep_current = true;
++            else if ( !strncmp(cur, "keep", 4) && VALID_TERMINATOR(cur + 4) )
++            {
++                /* Ignore, handled in later vga= parsing. */
++            }
++            else
++            {
++                /* Fallback to defaults if unimplemented. */
++                width = height = depth = 0;
++                keep_current = false;
++                PrintErr(L"Warning: Cannot use selected vga option\r\n");
++            }
++#undef VALID_TERMINATOR
++        }
++
++        if ( !keep_current )
++            gop_mode = efi_find_gop_mode(gop, width, height, depth);
+ 
+         efi_arch_edid(gop_handle);
+     }
+diff --git a/xen/arch/x86/x86_64/asm-offsets.c b/xen/arch/x86/x86_64/asm-offsets.c
+index 15496fedb7..690fa8def5 100644
+--- a/xen/arch/x86/x86_64/asm-offsets.c
++++ b/xen/arch/x86/x86_64/asm-offsets.c
+@@ -282,6 +282,7 @@ void __dummy__(void)
+     OFFSET(MB2_mem_lower, multiboot2_tag_basic_meminfo_t, mem_lower);
+     OFFSET(MB2_efi64_st, multiboot2_tag_efi64_t, pointer);
+     OFFSET(MB2_efi64_ih, multiboot2_tag_efi64_ih_t, pointer);
++    OFFSET(MB2_tag_string, multiboot2_tag_string_t, string);
+     BLANK();
+ 
+     OFFSET(DOMAIN_vm_assist, struct domain, vm_assist);

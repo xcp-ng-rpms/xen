@@ -1,0 +1,41 @@
+From 75d8b5c71a2a975ceb231207a0a31d66e3af196d Mon Sep 17 00:00:00 2001
+Message-ID: <75d8b5c71a2a975ceb231207a0a31d66e3af196d.1782890521.git.teddy.astie@vates.tech>
+In-Reply-To: <d75ffbef3be21aabe0e3174c464e99327ae7b61d.1782890521.git.teddy.astie@vates.tech>
+References: <d75ffbef3be21aabe0e3174c464e99327ae7b61d.1782890521.git.teddy.astie@vates.tech>
+From: =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>
+Date: Mon, 10 Jul 2023 12:18:39 +0200
+Subject: [PATCH] multiboot2: do not set StdOut mode unconditionally
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Only initialize StdOut if the current StdOut mode is unusable.  This
+avoids forcefully switching StdOut to the maximum supported
+resolution, and thus very likely changing the GOP mode without having
+first parsed the command line options.
+
+Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+ xen/arch/x86/efi/efi-boot.h | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/x86/efi/efi-boot.h b/xen/arch/x86/efi/efi-boot.h
+index 88e715f4dd..92f4cfe8bd 100644
+--- a/xen/arch/x86/efi/efi-boot.h
++++ b/xen/arch/x86/efi/efi-boot.h
+@@ -829,7 +829,13 @@ void __init efi_multiboot2(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
+ 
+     efi_init(ImageHandle, SystemTable);
+ 
+-    efi_console_set_mode();
++    if ( StdOut->QueryMode(StdOut, StdOut->Mode->Mode,
++                           &cols, &rows) != EFI_SUCCESS )
++        /*
++         * If active StdOut mode is invalid init ConOut (StdOut) to the max
++         * supported size.
++         */
++        efi_console_set_mode();
+ 
+     if ( StdOut->QueryMode(StdOut, StdOut->Mode->Mode,
+                            &cols, &rows) == EFI_SUCCESS )

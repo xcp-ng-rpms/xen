@@ -228,6 +228,7 @@ Patch1000: xcpng-no-default-lockdown.patch
 # Fix xenguest EMP path (xg_emu.c) to accept mem_pnode from emu-manager
 Patch1001: xenguest-xg_emu-mem_pnode.patch
 %endif
+Patch1001: common-exclude-pv_iommu-from-non-x86-builds.patch
 
 ExclusiveArch: %{x86_64}
 

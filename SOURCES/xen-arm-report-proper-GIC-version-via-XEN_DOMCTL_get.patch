@@ -1,0 +1,45 @@
+From a5907f8dfc1243d222a94dc4df149d47bf01f6b6 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Thu, 9 Jul 2026 14:52:41 +0200
+Subject: [PATCH] xen/arm: report proper GIC version via
+ XEN_DOMCTL_getdomaininfo
+
+When creating a domain on ARM, and passing XEN_DOMCTL_CONFIG_GIC_NATIVE
+for the gic_version field in the struct xen_arch_domainconfig,
+arch_sanitise_domain_config() resolves this to the approrpiate GIC_V2 or
+GIC_V3 version the domain actually has, based on the host's
+gic_hw_version(). That value is stored in the domain as
+d->arch.vgic.version, but can't be queried through any other domctl
+later. Toolstacks that create and build a domain in the same call
+already have this info from the createdomain reply and never need to ask
+again.
+
+Toolstacks that create a domain and build it later from a separate
+process do need to ask again. But, the ARM implementation only fills in
+info->flags and info->gpaddr_bits. info->arch_config is left zeroed, so
+XEN_DOMCTL_getdomaininfo always reports gic_version as
+XEN_DOMCTL_CONFIG_GIC_NATIVE (0) regardless of what was actually
+configured earlier.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
+---
+ xen/arch/arm/domctl.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/xen/arch/arm/domctl.c b/xen/arch/arm/domctl.c
+index 27eb1ededd..64d9353657 100644
+--- a/xen/arch/arm/domctl.c
++++ b/xen/arch/arm/domctl.c
+@@ -24,6 +24,8 @@ void arch_get_domain_info(const struct domain *d,
+     info->flags |= XEN_DOMINF_hap;
+ 
+     info->gpaddr_bits = p2m_ipa_bits;
++
++    info->arch_config.gic_version = d->arch.vgic.version;
+ }
+ 
+ static int handle_vuart_init(struct domain *d, 
+-- 
+2.53.0
+

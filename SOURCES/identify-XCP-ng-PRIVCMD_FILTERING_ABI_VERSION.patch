@@ -1,0 +1,39 @@
+From fc8f9e6680306d3f9fe3219512a7833a4dbbab78 Mon Sep 17 00:00:00 2001
+From: Corentin Oparowski <corentin.oparowski@vates.tech>
+Date: Mon, 20 Jul 2026 12:20:41 +0200
+Subject: [PATCH] identify XCP-ng PRIVCMD_FILTERING_ABI_VERSION
+
+Add the XCP-ng vendor identifier in the reserved upper bits of the
+PRIVCMD_FILTERING_ABI_VERSION ELF note.
+
+Keep the existing 0x90001 ABI value used for XenServer hypercall
+filtering compatibility, but mark the note as XCP-ng-specific to prevent
+confusion between downstream ABI implementations.
+
+The vendor namespace is independent from the ABI version and allows
+future XCP-ng-specific filtering changes without conflicting with other
+downstream users.
+---
+ xen/include/xen/lockdown.h | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/xen/include/xen/lockdown.h b/xen/include/xen/lockdown.h
+index 0966050724..10840cb59d 100644
+--- a/xen/include/xen/lockdown.h
++++ b/xen/include/xen/lockdown.h
+@@ -19,6 +19,11 @@ void lockdown_init(const char *cmdline);
+  * If we update the hypercall ABI in a way that is not compatible with
+  * the kernel filtering code "nn" should be increased.
+  */
+-#define PRIVCMD_FILTERING_ABI_VERSION 0x090001UL
++
++/* XCP-ng vendor ID */
++#define FILTER_VENDOR_XCPNG  (1UL << 31)
++
++#define PRIVCMD_FILTERING_ABI_VERSION \
++    (FILTER_VENDOR_XCPNG | _AC(0x90001, UL))
+ 
+ #endif /* XEN__LOCKDOWN_H */
+-- 
+2.47.3
+

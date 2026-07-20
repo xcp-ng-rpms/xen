@@ -225,6 +225,7 @@ Patch181: elf-note-filtering.patch
 
 %if 0%{?xcpng}
 Patch1000: xcpng-no-default-lockdown.patch
+Patch1001: identify-XCP-ng-PRIVCMD_FILTERING_ABI_VERSION.patch
 %endif
 
 ExclusiveArch: %{x86_64}
@@ -1140,6 +1141,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Jul 20 2026 Corentin Oparowski <corentin.oparowski@vates.tech> - 4.20.2-8.0.cop.1
+- add filter-elf-note xcp-ng identification 
+
 * Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1 WIP
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS

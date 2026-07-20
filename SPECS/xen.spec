@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.5%{?dist}
+Release: %{?xsrel}.6%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -1197,6 +1197,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Jul 20 2026 Andrii Sultanov <andriy.sultanov@vates.tech> - 4.17.6-9.6
+- Rebuild against new ocaml, ocaml-findlib versions
+
 * Tue Jun 30 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.6-9.5
 - Backport UEFI GOP bugfixes fixing ignored vga=... cmdline and erroneously
   forced maximum resolution.

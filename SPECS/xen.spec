@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.3%{?dist}
+Release: %{?xsrel}.3.1%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -343,6 +343,15 @@ Patch1023: dts-0004-x86-platform-Adjust-temperature-sensors-MSRs.patch
 Patch1024: dts-0005-libxc-Report-EINVAL-in-invalid-xc_resource_op-use.patch
 Patch1025: dts-0006-xenpm-Use-EXIT_-SUCCESS-FAILURE-instead-of-errno-as-.patch
 Patch1026: dts-0007-xenpm-Add-get-core-temp-subcommand.patch
+
+# XSA-497,500,501,503,504,505,507
+Patch1027: xsa497.patch
+Patch1028: xsa500.patch
+Patch1029: xsa501.patch
+Patch1030: xsa503.patch
+Patch1031: xsa504.patch
+Patch1032: xsa505.patch
+Patch1033: xsa507.patch
 
 ExclusiveArch: x86_64
 
@@ -1190,6 +1199,16 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Jul 27 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.6-9.3.1
+- Fix for XSA-497 (CVE-2026-42494, CVE-2026-42495, CVE-2026-62423,
+  CVE-2026-62424, CVE-2026-62425)
+- Fix for XSA-500 (CVE-2026-62428)
+- Fix for XSA-501
+- Fix for XSA-503 (CVE-2026-62430)
+- Fix for XSA-504 (CVE-2026-62431)
+- Fix for XSA-505 (CVE-2026-62432)
+- Fix for XSA-507 (CVE-2026-62434)
+
 * Thu Jun 11 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.6-9.3
 - Add support for Intel Digital Thermal Sensors.
 - Introduce xenpm get-core-temp command.

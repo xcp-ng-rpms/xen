@@ -158,8 +158,10 @@ Patch119: add-kexec-purgatory.patch
 Patch120: kexec-implement-new-load-types.patch
 Patch121: kexec-block-other-load-types.patch
 Patch122: kexec-support-non-page-aligned-segments.patch
+%if ! 0%{?xcpng}
 Patch123: livepatch-embed-public-key.patch
 Patch124: livepatch-check-payload-signatures.patch
+%endif
 Patch125: restrict-arbitrary-ioport-mapping.patch
 Patch126: domctl-to-allow-pci-config-access.patch
 Patch127: prevent-device-assign-to-dom0.patch

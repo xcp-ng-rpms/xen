@@ -174,6 +174,7 @@ ExclusiveArch: x86_64 aarch64
 
 BuildRequires: python3-devel
 BuildRequires: python3-rpm-macros
+BuildRequires: python3-setuptools
 %global py_sitearch %{python3_sitearch}
 %global __python %{__python3}
 

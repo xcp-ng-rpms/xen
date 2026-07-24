@@ -1,0 +1,94 @@
+From a661de0da934fc0480788d6672110d77ce4e4411 Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Wed, 5 Nov 2025 09:35:16 +0000
+Subject: [PATCH] fixup xenctrl stubs
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+---
+ tools/ocaml/libs/xc/xenctrl_stubs.c | 24 ++++++++++++++++++------
+ 1 file changed, 18 insertions(+), 6 deletions(-)
+
+diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
+index 76bffd695d..d43ec5529d 100644
+--- a/tools/ocaml/libs/xc/xenctrl_stubs.c
++++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
+@@ -200,6 +200,7 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ 	CAMLlocal2(l, arch_domconfig);
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 
++
+ 	/* Mnemonics for the named fields inside domctl_create_config */
+ #define VAL_SSIDREF             Field(config, 0)
+ #define VAL_HANDLE              Field(config, 1)
+@@ -261,9 +262,11 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ /*#define VAL_TEE_TYPE             Field(arch_domconfig, 4)*/
+ /*#define VAL_SCI_TYPE             Field(arch_domconfig, 5)*/
+ 
+-                cfg.arch.gic_version = VAL_GIC_VERSION;
++                /*cfg.arch.gic_version = Int32_val(VAL_GIC_VERSION);*/
++                cfg.arch.gic_version = 2;
+                 /*cfg.arch.sve_vl = VAL_SVE_VL;*/
+-                cfg.arch.nr_spis = VAL_NR_SPIS;
++                /*cfg.arch.nr_spis = Int32_val(VAL_NR_SPIS);*/
++                cfg.arch.nr_spis = (~(uint32_t)0);
+                 /*cfg.arch.tee_type = VAL_TEE_TYPE; NONE is 0 */
+                 /*cfg.arch.arm_sci_type = VAL_SCI_TYPE; NONE is 0*/
+ 
+@@ -316,16 +319,19 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ #undef VAL_FLAGS
+ #undef VAL_HANDLE
+ #undef VAL_SSIDREF
++#undef VAL_GIC_VERSION
++#undef VAL_NR_SPIS
++#undef VAL_CLOCK_FREQ
+ 
+ 	caml_enter_blocking_section();
+ 	result = xc_domain_create(xch, &domid, &cfg);
+ 	caml_leave_blocking_section();
+ 
+-#if defined(__arm__) || defined(__aarch64__)
++/*#if defined(__arm__) || defined(__aarch64__)*/
+         /* Return the OUT (and IN/OUT) parameters */
+-        VAL_GIC_VERSION = cfg.arch.gic_version;
+-        VAL_CLOCK_FREQ = cfg.arch.clock_frequency;
+-#endif
++	/*Store_field(arch_domconfig, 0, Val_int(cfg.arch.gic_version));*/
++	/*Store_field(arch_domconfig, 2, Val_int(cfg.arch.clock_frequency));*/
++/*#endif*/
+ 
+ 	if (result < 0)
+ 		failwith_xc(xch);
+@@ -1182,6 +1188,7 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ {
+ 	CAMLparam2(xch_val, domid);
+ 	CAMLlocal1(mb);
++#if defined(__i386__) || defined(__x86_64__)
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1195,6 +1202,9 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ 		failwith_xc(xch);
+ 
+ 	mb = Val_int(c_mb);
++#elif defined(__arm__) || defined(__aarch64__)
++	mb = Val_int(0);
++#endif
+ 	CAMLreturn(mb);
+ }
+ 
+@@ -1202,6 +1212,7 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 					  value mb)
+ {
+ 	CAMLparam3(xch_val, domid, mb);
++#if defined(__i386__) || defined(__x86_64__)
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1215,6 +1226,7 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 	if (ret != 0)
+ 		failwith_xc(xch);
+ 
++#endif
+ 	CAMLreturn(Val_unit);
+ }
+ 

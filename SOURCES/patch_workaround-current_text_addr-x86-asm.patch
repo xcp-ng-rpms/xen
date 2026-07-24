@@ -1,0 +1,17 @@
+patch workaround-current_text_addr-x86-asm.patch
+
+From: Yann Dirson <yann.dirson@vates.tech>
+
+diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
+index 46055f103f..a2998d0161 100644
+--- a/xen/include/xen/sched.h
++++ b/xen/include/xen/sched.h
+@@ -862,7 +862,7 @@ void vcpu_end_shutdown_deferral(struct vcpu *v);
+  */
+ void __domain_crash(struct domain *d);
+ 
+-#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH)
++#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH) && defined(CONFIG_X86)
+ #define print_domain_crash(func) \
+     printk(#func " called from %pS\n", \
+            ({ void *ip; asm ("lea (%%rip), %0" : "=r" (ip)); ip; }))

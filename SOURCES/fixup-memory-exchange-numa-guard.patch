@@ -1,0 +1,132 @@
+From 5a0eef0a48b4bee776f73ef058f7e9d2f47bac60 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Mon, 8 Jun 2026 11:19:20 +0200
+Subject: [PATCH] common/memory: guard node_tot_pages usage with CONFIG_NUMA
+
+ARM does not select CONFIG_NUMA in Xen 4.20, so struct domain has no
+node_tot_pages[] member. Guard all per-node tracking in
+memory_exchange() with #ifdef CONFIG_NUMA and provide a simple
+total_adjustment scalar for the non-NUMA path so d->tot_pages is still
+correctly maintained.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/common/memory.c | 34 +++++++++++++++++++++++++++++++++-
+ 1 file changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/xen/common/memory.c b/xen/common/memory.c
+index cb186ea2c2..8844f9ccf2 100644
+--- a/xen/common/memory.c
++++ b/xen/common/memory.c
+@@ -662,8 +662,12 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+     long          rc = 0;
+     struct domain *d;
+     struct page_info *page;
+-    /* Shadow page count adjustments. */
++#ifdef CONFIG_NUMA
++    /* Shadow page count adjustments per NUMA node. */
+     long node_tot_pages_adjustments[MAX_NUMNODES] = {};
++#else
++    long total_adjustment = 0;
++#endif
+ 
+     if ( copy_from_guest(&exch, arg, 1) )
+         return -EFAULT;
+@@ -815,7 +819,11 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+ 
+                 page_list_add(page, &in_chunk_list);
+                 /* Account the removed page for updating the per-node pages */
++#ifdef CONFIG_NUMA
+                 node_tot_pages_adjustments[page_to_nid(page)]--;
++#else
++                total_adjustment--;
++#endif
+ #ifdef CONFIG_X86
+                 put_gfn(d, gmfn + k);
+ #endif
+@@ -876,6 +884,7 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+                  */
+ 
+                 nrspin_lock(&d->page_alloc_lock);
++#ifdef CONFIG_NUMA
+                 for_each_online_node ( k )
+                 {
+                     if ( !node_tot_pages_adjustments[k] )
+@@ -894,6 +903,13 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+                     drop_dom_ref = !d->tot_pages;
+                 }
+                 ASSERT_NUMA_PAGE_COUNT(d);
++#else
++                if ( total_adjustment )
++                {
++                    d->tot_pages += total_adjustment;
++                    drop_dom_ref = !d->tot_pages;
++                }
++#endif
+                 nrspin_unlock(&d->page_alloc_lock);
+ 
+                 if ( drop_dom_ref )
+@@ -903,8 +919,12 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+                 goto dying;
+             }
+             /* Account the assigned page for updating the per-node pages */
++#ifdef CONFIG_NUMA
+             node_tot_pages_adjustments[page_to_nid(page)] +=
+                 1 << exch.out.extent_order;
++#else
++            total_adjustment += 1 << exch.out.extent_order;
++#endif
+ 
+             if ( __copy_from_guest_offset(&gpfn, exch.out.extent_start,
+                                           (i << out_chunk_order) + j, 1) )
+@@ -928,6 +948,7 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+         if ( rc )
+             goto fail;
+ 
++#ifdef CONFIG_NUMA
+         nrspin_lock(&d->page_alloc_lock);
+         /* Success: Adjust d->node_tot_pages[]. d->tot_pages did not change. */
+         for_each_online_node ( k )
+@@ -937,6 +958,9 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+         nrspin_unlock(&d->page_alloc_lock);
+         memset(node_tot_pages_adjustments, 0,
+                sizeof(node_tot_pages_adjustments));
++#else
++        total_adjustment = 0;
++#endif
+     }
+ 
+     exch.nr_exchanged = exch.in.nr_extents;
+@@ -963,7 +987,11 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+             free_domheap_page(page);
+         }
+         else
++#ifdef CONFIG_NUMA
+             node_tot_pages_adjustments[page_to_nid(page)] += 1;
++#else
++            total_adjustment += 1;
++#endif
+     }
+ 
+     /*
+@@ -971,6 +999,7 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+      * domain.
+      */
+     nrspin_lock(&d->page_alloc_lock);
++#ifdef CONFIG_NUMA
+     for_each_online_node ( k )
+     {
+         if ( !node_tot_pages_adjustments[k] )
+@@ -979,6 +1008,9 @@ static long memory_exchange(XEN_GUEST_HANDLE_PARAM(xen_memory_exchange_t) arg)
+         d->tot_pages += node_tot_pages_adjustments[k];
+     }
+     ASSERT_NUMA_PAGE_COUNT(d);
++#else
++    d->tot_pages += total_adjustment;
++#endif
+     nrspin_unlock(&d->page_alloc_lock);
+     ASSERT(page_list_empty(&out_chunk_list));
+ 
+-- 
+2.53.0
+

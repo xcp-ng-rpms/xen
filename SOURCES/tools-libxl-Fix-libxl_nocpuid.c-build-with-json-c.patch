@@ -1,0 +1,43 @@
+From ca7906501ee8d5d0744fbcfe092633559dedd7f5 Mon Sep 17 00:00:00 2001
+From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Fri, 8 May 2026 16:53:46 +0100
+Subject: [PATCH 1/2] tools/libxl: Fix libxl_nocpuid.c build with json-c
+
+libxl_nocpuid.c needs the same treatment as libxl_cpuid.c
+
+Fixes: f6c6f2679d49 ("libxl: Convert libxl__object_to_json() to json-c")
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Anthony PERARD <anthony.perard@vates.tech>
+---
+ tools/libs/light/libxl_nocpuid.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/tools/libs/light/libxl_nocpuid.c b/tools/libs/light/libxl_nocpuid.c
+index 0630959e76..ce334633b3 100644
+--- a/tools/libs/light/libxl_nocpuid.c
++++ b/tools/libs/light/libxl_nocpuid.c
+@@ -40,11 +40,21 @@ int libxl__cpuid_legacy(libxl_ctx *ctx, uint32_t domid, bool restore,
+     return 0;
+ }
+ 
++#ifdef HAVE_LIBJSONC
++int libxl_cpuid_policy_list_gen_jso(json_object **jso_r, libxl_cpuid_policy_list *pl)
++{
++    *jso_r = NULL;
++    return 0;
++}
++#endif
++
++#ifdef HAVE_LIBYAJL
+ yajl_gen_status libxl_cpuid_policy_list_gen_json(yajl_gen hand,
+                                 libxl_cpuid_policy_list *pcpuid)
+ {
+     return 0;
+ }
++#endif
+ 
+ int libxl__cpuid_policy_list_parse_json(libxl__gc *gc,
+                                         const libxl__json_object *o,
+-- 
+2.53.0
+

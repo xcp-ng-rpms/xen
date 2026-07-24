@@ -170,6 +170,33 @@ Patch129: elf-note-filtering.patch
 Patch130: skip-flask-call.patch
 Patch131: public-abi.patch
 
+# ARM patches
+Patch1000: fixup-memory-exchange-numa-guard.patch
+Patch1001: fixup-pv-iommu-and-check-iomem-arm.patch
+Patch1002: pci-stub-check_iomem_access-for-non-PCI-builds.patch
+Patch1003: fixup-arm-grant-tlb-flush.patch
+Patch1005: 0002-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch1006: 0001-xen-configs-introduce-mtcollins_defconfig.patch
+Patch1007: forge_a_debug_config_for_mtcollins.patch
+Patch1008: patch_wip-no-viridian-arm.patch
+Patch1009: patch_workaround-current_text_addr-x86-asm.patch
+Patch1010: arm-build.patch
+Patch1011: 0001-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch1012: 0001-fixup-xenctrl-stubs.patch
+Patch1013: from_8768eb17b362121b228224e788983188a075b4a8_mon_sep_17_00_00_00_2001_patch_xen-arm__re-use_the_same_hosts_gicc_header_length.patch
+Patch1014: 0001-Remove-x86-only-libacpi-option.patch
+Patch1015: 0001-patch-xenguest-for-arm.patch
+Patch1016: 0001-Initialize-rambase-on-ARM.patch
+Patch1017: increase-membanks.patch
+Patch1018: increase-bootmemregions.patch
+Patch1019: 0001-xenguest-Add-xc_set_paging_mempool_size.patch
+Patch1020: 0001-xenguest-Toggle-xc_dom_image-claim_enabled.patch
+Patch1021: workaround-pdx-unused-var.patch
+Patch1022: tools-libxl-Fix-libxl_nocpuid.c-build-with-json-c.patch
+Patch1023: xen-numa-add-missing-headers-for-non-NUMA-numa_domct.patch
+Patch1024: xen-arm-report-proper-GIC-version-via-XEN_DOMCTL_get.patch
+Patch1025: tools-xenguest-create-a-guest-device-tree-for-ARM-do.patch
+
 ExclusiveArch: x86_64 aarch64
 
 BuildRequires: python3-devel

@@ -510,10 +510,12 @@ build_xen () { # $1=vendorversion $2=buildconfig $3=outdir $4=cov
     mkdir xen/$3 && cp -a buildconfigs/$2 xen/$3/.config
     $mk olddefconfig
     $mk build MAP
+%ifarch x86_64
     if [ -f xen/$3/xen.efi ]; then
         %sign -c XEN_SIGN_KEY_XS9 -i xen/$3/xen.efi -o xen/$3/xen-signed.efi
         mv -f xen/$3/xen-signed.efi xen/$3/xen.efi
     fi
+%endif
 }
 
 # Builds of Xen

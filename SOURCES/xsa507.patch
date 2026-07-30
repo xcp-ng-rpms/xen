@@ -1,7 +1,7 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From c1fe7d10e8b489dd66ad5a2d7508e98e9c8dabc6 Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger.pau@citrix.com>
 Date: Tue, 14 Jul 2026 17:05:45 +0200
-Subject: [PATCH] x86/pod: do not reclaim special pages for PoD cache
+Subject: x86/pod: do not reclaim special pages for PoD cache
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -21,10 +21,10 @@ Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/xen/arch/x86/mm/p2m-pod.c b/xen/arch/x86/mm/p2m-pod.c
-index e903db9d9367..380b69dba587 100644
+index 22dde913cc3c..f3744496e916 100644
 --- a/xen/arch/x86/mm/p2m-pod.c
 +++ b/xen/arch/x86/mm/p2m-pod.c
-@@ -559,12 +559,13 @@ decrease_reservation(struct domain *d, gfn_t gfn, unsigned int order)
+@@ -536,12 +536,13 @@ decrease_reservation(struct domain *d, gfn_t gfn, unsigned int order)
          p2m_access_t a;
          p2m_type_t t;
          unsigned int cur_order;
@@ -40,7 +40,7 @@ index e903db9d9367..380b69dba587 100644
              ram += n;
      }
  
-@@ -667,6 +668,9 @@ decrease_reservation(struct domain *d, gfn_t gfn, unsigned int order)
+@@ -644,6 +645,9 @@ decrease_reservation(struct domain *d, gfn_t gfn, unsigned int order)
              ASSERT(mfn_valid(mfn));
  
              page = mfn_to_page(mfn);

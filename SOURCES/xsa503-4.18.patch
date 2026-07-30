@@ -1,7 +1,7 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 26452e289eb6f64e85d630c06a9f3de7d0188cd7 Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger.pau@citrix.com>
 Date: Wed, 15 Jul 2026 12:44:37 +0200
-Subject: [PATCH] x86/vrtc: fix race in CMOS index checking
+Subject: x86/vrtc: fix race in CMOS index checking
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

@@ -1,8 +1,7 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From b3fe7bd3bf6c2ac7324ea0b33ca6afc38d81f159 Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger.pau@citrix.com>
 Date: Fri, 10 Jul 2026 15:18:12 +0200
-Subject: [PATCH] x86/viridian: ensure count is always set when starting a
- timer
+Subject: x86/viridian: ensure count is always set when starting a timer
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -22,10 +21,10 @@ Signed-off-by: Roger Pau Monné <roger.pau@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 
 diff --git a/xen/arch/x86/hvm/viridian/time.c b/xen/arch/x86/hvm/viridian/time.c
-index 3c94fb0814e9..0577707d1202 100644
+index 9311858d63c0..15f629af0f39 100644
 --- a/xen/arch/x86/hvm/viridian/time.c
 +++ b/xen/arch/x86/hvm/viridian/time.c
-@@ -156,6 +156,14 @@ static void start_stimer(struct viridian_stimer *vs)
+@@ -155,6 +155,14 @@ static void start_stimer(struct viridian_stimer *vs)
          printk(XENLOG_G_INFO "%pv: VIRIDIAN STIMER%u: enabled\n", v,
                 stimerx);
  
@@ -40,7 +39,7 @@ index 3c94fb0814e9..0577707d1202 100644
      if ( vs->config.periodic )
      {
          /*
-@@ -365,7 +373,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
+@@ -364,7 +372,7 @@ int viridian_time_wrmsr(struct vcpu *v, uint32_t idx, uint64_t val)
  
          vs->config.as_uint64 = val;
  
@@ -49,7 +48,7 @@ index 3c94fb0814e9..0577707d1202 100644
              vs->config.enable = 0;
  
          if ( vs->config.enable )
-@@ -576,6 +584,9 @@ void viridian_time_load_vcpu_ctxt(
+@@ -575,6 +583,9 @@ void viridian_time_load_vcpu_ctxt(
  
          vs->config.as_uint64 = ctxt->stimer_config_msr[i];
          vs->count = ctxt->stimer_count_msr[i];

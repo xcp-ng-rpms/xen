@@ -1,7 +1,5 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
-Date: Tue, 21 Jul 2026 12:34:26 +0000
-Subject: [PATCH] gnttab: check values against active entry when copying an
+Subject: gnttab: check values against active entry when copying an
  already-pinned one
 
 acquire_grant_for_copy() passes to its caller both an MFN and a struct
@@ -24,10 +22,10 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Juergen Gross <jgross@suse.com>
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index 312d5117ac73..13705c7332e4 100644
+index cc7f2bd82103..bf1b0d367746 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -2781,6 +2781,21 @@ acquire_grant_for_copy(
+@@ -2755,6 +2755,21 @@ acquire_grant_for_copy(
              act->trans_gref = trans_gref;
              act->mfn = grant_mfn;
          }

@@ -1,10 +1,5 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger.pau@citrix.com>
-Date: Tue, 21 Jul 2026 12:35:16 +0000
-Subject: [PATCH] xen/evtchn: fix race between FIFO expand and reset operations
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Subject: xen/evtchn: fix race between FIFO expand and reset operations
 
 evtchn_fifo_expand_array() will check for the domain evtchn_fifo being
 populated without holding the event_lock, which can lead to a race with a
@@ -21,7 +16,7 @@ Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 
 diff --git a/xen/common/event_fifo.c b/xen/common/event_fifo.c
-index 6cebc3868a07..ea613cfdcaf5 100644
+index 37cba9bc4564..cae08a594e9f 100644
 --- a/xen/common/event_fifo.c
 +++ b/xen/common/event_fifo.c
 @@ -692,13 +692,11 @@ static int add_page_to_event_array(struct domain *d, unsigned long gfn)

@@ -1,8 +1,5 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Syed Abdul Khaliq <abdul@bugqore.com>
-Date: Tue, 21 Jul 2026 12:32:30 +0000
-Subject: [PATCH] libfsimage/iso9660: harden Rock Ridge SUSP parsing against
- malformed lengths
+Subject: libfsimage/iso9660: harden Rock Ridge SUSP parsing against malformed lengths
 
 The directory and Rock Ridge / SUSP walk in iso9660_dir() derives several
 lengths directly from attacker-controlled on-disk fields without validating

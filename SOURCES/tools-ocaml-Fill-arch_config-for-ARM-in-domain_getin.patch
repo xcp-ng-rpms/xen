@@ -1,0 +1,47 @@
+From 67b8cbe2093d37f9e795de5db33d68b282558527 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Tue, 28 Jul 2026 16:48:30 +0100
+Subject: [PATCH] tools/ocaml: Fill arch_config for ARM in
+ domain_getinfo{,list}()
+
+Add the missing ARM logic, populating xen_arm_arch_domainconfig
+from the raw xc_domaininfo_t the same way the x86 branch does for
+xen_x86_arch_domainconfig.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+---
+ tools/ocaml/libs/xc/xenctrl_stubs.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
+index a133142d14..4d482375c6 100644
+--- a/tools/ocaml/libs/xc/xenctrl_stubs.c
++++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
+@@ -475,9 +475,21 @@ static value alloc_domaininfo(xc_domaininfo_t * info)
+ 
+ 	Store_field(result, 15, tmp);
+ 
+-#if defined(__i386__) || defined(__x86_64__)
++#if defined(__arm__) || defined(__aarch64__)
+ 
+-	tag = 1; /* tag x86 */
++	tag = 0; /* tag ARM */
++
++        /* xen_arm_arch_domainconfig */
++        arch_config = caml_alloc_tuple(3);
++        Field(arch_config, 0) = Val_int(info->arch_config.gic_version);
++        Field(arch_config, 1) = Val_int(info->arch_config.nr_spis);
++
++	tmp = caml_copy_int32(info->arch_config.clock_frequency);
++        Field(arch_config, 2) = tmp;
++
++#elif defined(__i386__) || defined(__x86_64__)
++
++        tag = 1; /* tag x86 */
+ 
+ 	/*
+ 	 * emulation_flags: x86_arch_emulation_flags list;
+-- 
+2.53.0
+

@@ -196,6 +196,8 @@ Patch1022: tools-libxl-Fix-libxl_nocpuid.c-build-with-json-c.patch
 Patch1023: xen-numa-add-missing-headers-for-non-NUMA-numa_domct.patch
 Patch1024: xen-arm-report-proper-GIC-version-via-XEN_DOMCTL_get.patch
 Patch1025: tools-xenguest-create-a-guest-device-tree-for-ARM-do.patch
+Patch1026: tools-ocaml-Fix-crash-in-Xenctrl.domain_getinfo-list.patch
+Patch1027: tools-ocaml-Fill-arch_config-for-ARM-in-domain_getin.patch
 
 ExclusiveArch: x86_64 aarch64
 

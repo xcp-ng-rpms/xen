@@ -351,6 +351,15 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
+# XSA-497,500,501,503,504,505,507
+Patch1030: xsa497.patch
+Patch1031: xsa500.patch
+Patch1032: xsa501.patch
+Patch1033: xsa503.patch
+Patch1034: xsa504.patch
+Patch1035: xsa505.patch
+Patch1036: xsa507.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel
@@ -1197,6 +1206,19 @@ fi
 %{?_cov_results_package}
 
 %changelog
+# Next
+#- Sync with v8.3-fasttrack-2026-07-27 branch
+#- *** Fasttrack branch changelog ***
+#  * Mon Jul 27 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.6-9.3.1
+#  - Fix for XSA-497 (CVE-2026-42494, CVE-2026-42495, CVE-2026-62423,
+#    CVE-2026-62424, CVE-2026-62425)
+#  - Fix for XSA-500 (CVE-2026-62428)
+#  - Fix for XSA-501
+#  - Fix for XSA-503 (CVE-2026-62430)
+#  - Fix for XSA-504 (CVE-2026-62431)
+#  - Fix for XSA-505 (CVE-2026-62432)
+#  - Fix for XSA-507 (CVE-2026-62434)
+
 * Mon Jul 20 2026 Andrii Sultanov <andriy.sultanov@vates.tech> - 4.17.6-9.6
 - Rebuild against new ocaml, ocaml-findlib versions
 

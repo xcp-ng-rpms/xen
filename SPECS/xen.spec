@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -1211,6 +1211,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Aug 04 2026 Gael Duperrey <gduperrey@vates.tech> - 4.17.6-9.12.2
+- Rebuild against OpenSSL 3.0
+
 * Thu Jul 30 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.6-9.12.1
 - Sync with v8.3-fasttrack-2026-07-27 branch
 - *** Fasttrack branch changelog ***

@@ -1,3 +1,11 @@
+CP-311608: Add elf note to check kernel supports hypercall filtering
+
+From: Frediano Ziglio <frediano.ziglio@citrix.com>
+
+This is required for Shim review.
+
+Signed-off-by: Frediano Ziglio <frediano.ziglio@citrix.com>
+
 diff --git a/xen/arch/x86/dom0_build.c b/xen/arch/x86/dom0_build.c
 index 6e30acce9e2c..964d644930ee 100644
 --- a/xen/arch/x86/dom0_build.c
@@ -91,6 +99,6 @@ index b2baa31caac8..39b51f77092a 100644
 + * If we update the hypercall ABI in a way that is not compatible with
 + * the kernel filtering code "nn" should be increased.
 + */
-+#define PRIVCMD_FILTERING_ABI_VERSION 0x090002UL
++#define PRIVCMD_FILTERING_ABI_VERSION 0x090003UL
 +
  #endif /* XEN__LOCKDOWN_H */

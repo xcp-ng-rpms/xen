@@ -1,0 +1,866 @@
+diff --git a/tools/include/xen-sys/Linux/privcmd.h b/tools/include/xen-sys/Linux/privcmd.h
+index bc60e8fd55..0ecefe0ca6 100644
+--- a/tools/include/xen-sys/Linux/privcmd.h
++++ b/tools/include/xen-sys/Linux/privcmd.h
+@@ -95,6 +95,14 @@ typedef struct privcmd_mmap_resource {
+ 	__u64 addr;
+ } privcmd_mmap_resource_t;
+ 
++typedef struct privcmd_foreigncopy {
++	domid_t dom;          /* Foreign domain. */
++	__u16 dir;            /* Direction,  0 from, 1 to. */
++	__u32 num;            /* Number of pages to copy. */
++	const xen_pfn_t __user *pfns; /* Array of pfns. */
++	void __user *buffer;  /* Buffer to copy to/from. */
++} privcmd_foreigncopy_t;
++
+ /*
+  * @cmd: IOCTL_PRIVCMD_HYPERCALL
+  * @arg: &privcmd_hypercall_t
+@@ -114,6 +122,8 @@ typedef struct privcmd_mmap_resource {
+ 	_IOC(_IOC_NONE, 'P', 6, sizeof(domid_t))
+ #define IOCTL_PRIVCMD_MMAP_RESOURCE				\
+ 	_IOC(_IOC_NONE, 'P', 7, sizeof(privcmd_mmap_resource_t))
++#define IOCTL_PRIVCMD_FOREIGNCOPY				\
++	_IOWR('P', 8, privcmd_foreigncopy_t)
+ #define IOCTL_PRIVCMD_UNIMPLEMENTED				\
+ 	_IOC(_IOC_NONE, 'P', 0xFF, 0)
+ 
+diff --git a/tools/libs/guest/xg_sr_common.c b/tools/libs/guest/xg_sr_common.c
+index 17567ab133..6f10101032 100644
+--- a/tools/libs/guest/xg_sr_common.c
++++ b/tools/libs/guest/xg_sr_common.c
+@@ -156,6 +156,99 @@ static void __attribute__((unused)) build_assertions(void)
+     BUILD_BUG_ON(sizeof(struct xc_sr_rec_hvm_params)        != 8);
+ }
+ 
++static int xg_foreignmemory_copy(xc_interface *xch, domid_t domid,
++                                 int dir, size_t nr_pages, void *buffer,
++                                 const xen_pfn_t foreign_pfns[nr_pages])
++{
++    if ( nr_pages == 0 )
++        return 0;
++
++    if ( !buffer || !foreign_pfns )
++    {
++        errno = EINVAL;
++        return -1;
++    }
++
++    /*
++     * If foreign copy is supported, -1 not initialized, 0 not supported,
++     * 1 supported.
++     */
++    static int8_t foreign_copy_supported = -1;
++
++    if ( foreign_copy_supported )
++    {
++        int rc;
++        privcmd_foreigncopy_t copy = {
++            .dom = domid,
++            .dir = dir,
++            .num = nr_pages,
++            .buffer = buffer,
++        };
++        DECLARE_HYPERCALL_BOUNCE_IN(foreign_pfns, nr_pages * sizeof(xen_pfn_t));
++
++        if ( xc_hypercall_bounce_pre(xch, foreign_pfns) )
++            return -1;
++
++        copy.pfns = (xen_pfn_t *)HYPERCALL_BUFFER_AS_ARG(foreign_pfns);
++
++        DPRINTF("issuing foreigncopy hypercall");
++
++        rc = ioctl(xencall_fd(xch->xcall), IOCTL_PRIVCMD_FOREIGNCOPY, &copy);
++        DPRINTF("got rc %d, errno %d", rc, errno);
++        if ( foreign_copy_supported < 0 )
++            foreign_copy_supported =
++                (!rc || (errno != ENOTTY && errno != ENOSYS));
++
++        xc_hypercall_bounce_post(xch, foreign_pfns);
++
++        if ( foreign_copy_supported )            
++            return rc;
++
++        DPRINTF("foreigncopy not supported after issuing hypercall");
++    }
++
++    DPRINTF("falling back to emulation");
++
++    /* Fallback, emulate. */
++    int err[nr_pages];
++    const int prot = (dir == XENMEM_foreigncopy_from) ? PROT_READ : PROT_READ|PROT_WRITE;
++
++    void *p = xenforeignmemory_map(xch->fmem, domid, prot, nr_pages, foreign_pfns, err);
++    if ( !p )
++        return -1;
++
++    for ( size_t n = 0; n < nr_pages; ++n )
++        if ( err[n] )
++        {
++            xenforeignmemory_unmap(xch->fmem, p, nr_pages);
++            errno = -err[n];
++            return -1;
++        }
++
++    if ( dir == XENMEM_foreigncopy_from )
++        memcpy(buffer, p, nr_pages * XC_PAGE_SIZE);
++    else
++        memcpy(p, buffer, nr_pages * XC_PAGE_SIZE);
++
++    return xenforeignmemory_unmap(xch->fmem, p, nr_pages);
++}
++
++int xg_foreignmemory_copy_from(xc_interface *xch, domid_t dom,
++                               size_t nr_pages, void *dest,
++                               const xen_pfn_t source[nr_pages])
++{
++    return xg_foreignmemory_copy(xch, dom, XENMEM_foreigncopy_from,
++                                 nr_pages, dest, source);
++}
++
++int xg_foreignmemory_copy_to(xc_interface *xch, domid_t dom,
++                             size_t nr_pages, const xen_pfn_t dest[nr_pages],
++                             const void *source)
++{
++    return xg_foreignmemory_copy(xch, dom, XENMEM_foreigncopy_to,
++                                 nr_pages, (void *) source, dest);
++}
++
+ /*
+  * Local variables:
+  * mode: C
+diff --git a/tools/libs/guest/xg_sr_common.h b/tools/libs/guest/xg_sr_common.h
+index 2f058ee3a6..a59b6ed372 100644
+--- a/tools/libs/guest/xg_sr_common.h
++++ b/tools/libs/guest/xg_sr_common.h
+@@ -246,6 +246,7 @@ struct xc_sr_context
+             unsigned long *deferred_pages;
+             unsigned long nr_deferred_pages;
+             xc_hypercall_buffer_t dirty_bitmap_hbuf;
++            xc_hypercall_buffer_t priv_buf;
+         } save;
+ 
+         struct /* Restore data. */
+@@ -256,6 +257,7 @@ struct xc_sr_context
+             int send_back_fd;
+             unsigned long p2m_size;
+             xc_hypercall_buffer_t dirty_bitmap_hbuf;
++            xc_hypercall_buffer_t verify_buf;
+ 
+             /* From Image Header. */
+             uint32_t format_version;
+@@ -540,6 +542,15 @@ static inline bool page_type_has_stream_data(uint32_t type)
+     }
+ }
+ 
++/* Copy memory from a foreign domain. */
++int xg_foreignmemory_copy_from(xc_interface *xch, domid_t dom,
++                               size_t nr_pages, void *dest,
++                               const xen_pfn_t source[nr_pages]);
++/* Copy memory to a foreign domain. */
++int xg_foreignmemory_copy_to(xc_interface *xch, domid_t dom,
++                             size_t nr_pages, const xen_pfn_t dest[nr_pages],
++                             const void *source);
++
+ #endif
+ /*
+  * Local variables:
+diff --git a/tools/libs/guest/xg_sr_restore.c b/tools/libs/guest/xg_sr_restore.c
+index ec985eb924..004b747184 100644
+--- a/tools/libs/guest/xg_sr_restore.c
++++ b/tools/libs/guest/xg_sr_restore.c
+@@ -256,18 +256,17 @@ static int process_page_data(struct xc_sr_context *ctx, unsigned int count,
+ {
+     xc_interface *xch = ctx->xch;
+     xen_pfn_t *mfns = malloc(count * sizeof(*mfns));
+-    int *map_errs = malloc(count * sizeof(*map_errs));
+     int rc;
+-    void *mapping = NULL, *guest_page = NULL;
+-    unsigned int i, /* i indexes the pfns from the record. */
+-        j,          /* j indexes the subset of pfns we decide to map. */
+-        nr_pages = 0;
++    void *guest_page = NULL;
++    void *const source = page_data;
++    unsigned int i;
++    unsigned nr_pages = 0;
+ 
+-    if ( !mfns || !map_errs )
++    if ( !mfns )
+     {
+         rc = -1;
+         ERROR("Failed to allocate %zu bytes to process page data",
+-              count * (sizeof(*mfns) + sizeof(*map_errs)));
++              count * sizeof(*mfns));
+         goto err;
+     }
+ 
+@@ -278,42 +277,26 @@ static int process_page_data(struct xc_sr_context *ctx, unsigned int count,
+         goto err;
+     }
+ 
++    /* Construct array of pages to be copied with pages containing real data. */
+     for ( i = 0; i < count; ++i )
+     {
+         ctx->restore.ops.set_page_type(ctx, pfns[i], types[i]);
+ 
+-        if ( page_type_has_stream_data(types[i]) )
+-            mfns[nr_pages++] = ctx->restore.ops.pfn_to_gfn(ctx, pfns[i]);
++        if ( !page_type_has_stream_data(types[i]) )
++            continue;
++        
++        mfns[nr_pages] = ctx->restore.ops.pfn_to_gfn(ctx, pfns[i]);
++        pfns[nr_pages] = pfns[i];
++        types[nr_pages] = types[i];
++        nr_pages++;
+     }
+ 
+     /* Nothing to do? */
+     if ( nr_pages == 0 )
+         goto done;
+ 
+-    mapping = guest_page = xenforeignmemory_map(
+-        xch->fmem, ctx->domid, PROT_READ | PROT_WRITE,
+-        nr_pages, mfns, map_errs);
+-    if ( !mapping )
+-    {
+-        rc = -1;
+-        PERROR("Unable to map %u mfns for %u pages of data",
+-               nr_pages, count);
+-        goto err;
+-    }
+-
+-    for ( i = 0, j = 0; i < count; ++i )
++    for ( i = 0; i < nr_pages; ++i )
+     {
+-        if ( !page_type_has_stream_data(types[i]) )
+-            continue;
+-
+-        if ( map_errs[j] )
+-        {
+-            rc = -1;
+-            ERROR("Mapping pfn %#"PRIpfn" (mfn %#"PRIpfn", type %#"PRIx32") failed with %d",
+-                  pfns[i], mfns[j], types[i], map_errs[j]);
+-            goto err;
+-        }
+-
+         /* Undo page normalisation done by the saver. */
+         rc = ctx->restore.ops.localise_page(ctx, types[i], page_data);
+         if ( rc )
+@@ -323,32 +306,43 @@ static int process_page_data(struct xc_sr_context *ctx, unsigned int count,
+             goto err;
+         }
+ 
+-        if ( ctx->restore.verify )
++        page_data += PAGE_SIZE;
++    }
++
++    if ( !ctx->restore.verify )
++    {
++        /* Copy the data into the guest. */
++        rc = xg_foreignmemory_copy_to(xch, ctx->domid, nr_pages, mfns, source);
++        if ( rc < 0 )
++            goto err;
++    }
++    else
++    {
++        DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, verify_buf,
++                                        &ctx->restore.verify_buf);
++
++        rc = xg_foreignmemory_copy_from(xch, ctx->domid, nr_pages, verify_buf, mfns);
++        if ( rc < 0 )
++            goto err;
++
++        guest_page = verify_buf;
++        page_data = source;
++        for ( i = 0; i < nr_pages; ++i )
+         {
+             /* Verify mode - compare incoming data to what we already have. */
+             if ( memcmp(guest_page, page_data, PAGE_SIZE) )
+                 ERROR("verify pfn %#"PRIpfn" failed (type %#"PRIx32")",
+                       pfns[i], types[i] >> XEN_DOMCTL_PFINFO_LTAB_SHIFT);
+-        }
+-        else
+-        {
+-            /* Regular mode - copy incoming data into place. */
+-            memcpy(guest_page, page_data, PAGE_SIZE);
+-        }
+ 
+-        ++j;
+-        guest_page += PAGE_SIZE;
+-        page_data += PAGE_SIZE;
++            guest_page += PAGE_SIZE;
++            page_data += PAGE_SIZE;
++        }
+     }
+ 
+  done:
+     rc = 0;
+ 
+  err:
+-    if ( mapping )
+-        xenforeignmemory_unmap(xch->fmem, mapping, nr_pages);
+-
+-    free(map_errs);
+     free(mfns);
+ 
+     return rc;
+@@ -751,6 +745,8 @@ static int setup(struct xc_sr_context *ctx)
+     int rc;
+     DECLARE_HYPERCALL_BUFFER_SHADOW(unsigned long, dirty_bitmap,
+                                     &ctx->restore.dirty_bitmap_hbuf);
++    DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, verify_buf,
++                                    &ctx->restore.verify_buf);
+ 
+     if ( ctx->stream_type == XC_STREAM_COLO )
+     {
+@@ -765,6 +761,16 @@ static int setup(struct xc_sr_context *ctx)
+         }
+     }
+ 
++    verify_buf = xc_hypercall_buffer_alloc_pages(
++        xch, verify_buf, MAX_BATCH_SIZE);
++
++    if ( !verify_buf )
++    {
++        ERROR("Unable to allocate memory for verify buffer");
++        rc = -1;
++        goto err;
++    }
++
+     rc = ctx->restore.ops.setup(ctx);
+     if ( rc )
+         goto err;
+@@ -799,6 +805,8 @@ static void cleanup(struct xc_sr_context *ctx)
+     unsigned int i;
+     DECLARE_HYPERCALL_BUFFER_SHADOW(unsigned long, dirty_bitmap,
+                                     &ctx->restore.dirty_bitmap_hbuf);
++    DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, verify_buf,
++                                    &ctx->restore.verify_buf);
+ 
+     for ( i = 0; i < ctx->restore.buffered_rec_num; i++ )
+         free(ctx->restore.buffered_records[i].data);
+@@ -806,6 +814,8 @@ static void cleanup(struct xc_sr_context *ctx)
+     if ( ctx->stream_type == XC_STREAM_COLO )
+         xc_hypercall_buffer_free_pages(
+             xch, dirty_bitmap, NRPAGES(bitmap_size(ctx->restore.p2m_size)));
++    
++    xc_hypercall_buffer_free_pages(xch, verify_buf, MAX_BATCH_SIZE);
+ 
+     free(ctx->restore.buffered_records);
+     free(ctx->restore.populated_pfns);
+diff --git a/tools/libs/guest/xg_sr_save.c b/tools/libs/guest/xg_sr_save.c
+index 3b2c5222e4..07f72f6590 100644
+--- a/tools/libs/guest/xg_sr_save.c
++++ b/tools/libs/guest/xg_sr_save.c
+@@ -88,13 +88,14 @@ static int write_batch(struct xc_sr_context *ctx)
+ {
+     xc_interface *xch = ctx->xch;
+     xen_pfn_t *mfns = NULL, *types = NULL;
+-    void *guest_mapping = NULL;
+     void **guest_data = NULL;
+     void **local_pages = NULL;
+-    int *errors = NULL, rc = -1;
+-    unsigned int i, p, nr_pages = 0, nr_pages_mapped = 0;
++    int rc = -1;
++    unsigned int i, p, nr_pages = 0;
++    /* Batch size in pages */
+     unsigned int nr_pfns = ctx->save.nr_batch_pfns;
+     void *page, *orig_page;
++    /* Page data records */
+     uint64_t *rec_pfns = NULL;
+     struct iovec *iov = NULL; int iovcnt = 0;
+     struct xc_sr_rec_page_data_header hdr = { 0 };
+@@ -108,8 +109,6 @@ static int write_batch(struct xc_sr_context *ctx)
+     mfns = malloc(nr_pfns * sizeof(*mfns));
+     /* Types of the batch pfns. */
+     types = malloc(nr_pfns * sizeof(*types));
+-    /* Errors from attempting to map the gfns. */
+-    errors = malloc(nr_pfns * sizeof(*errors));
+     /* Pointers to page data to send.  Mapped gfns or local allocations. */
+     guest_data = calloc(nr_pfns, sizeof(*guest_data));
+     /* Pointers to locally allocated pages.  Need freeing. */
+@@ -117,13 +116,14 @@ static int write_batch(struct xc_sr_context *ctx)
+     /* iovec[] for writev(). */
+     iov = malloc((nr_pfns + 4) * sizeof(*iov));
+ 
+-    if ( !mfns || !types || !errors || !guest_data || !local_pages || !iov )
++    if ( !mfns || !types || !guest_data || !local_pages || !iov )
+     {
+         ERROR("Unable to allocate arrays for a batch of %u pages",
+               nr_pfns);
+         goto err;
+     }
+ 
++    /* Get the type for each pfn in the batch. */
+     for ( i = 0; i < nr_pfns; ++i )
+     {
+         types[i] = mfns[i] = ctx->save.ops.pfn_to_gfn(ctx,
+@@ -145,6 +145,7 @@ static int write_batch(struct xc_sr_context *ctx)
+     }
+     rc = -1;
+ 
++    /* Construct array of pages to be copied with pages containing real data. */
+     for ( i = 0; i < nr_pfns; ++i )
+     {
+         if ( !is_known_page_type(types[i]) )
+@@ -161,28 +162,24 @@ static int write_batch(struct xc_sr_context *ctx)
+ 
+     if ( nr_pages > 0 )
+     {
+-        guest_mapping = xenforeignmemory_map(
+-            xch->fmem, ctx->domid, PROT_READ, nr_pages, mfns, errors);
+-        if ( !guest_mapping )
++        DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, priv_buf,
++                                        &ctx->save.priv_buf);
++
++        /* Copy the pages. */
++        rc = xg_foreignmemory_copy_from(xch, ctx->domid, nr_pages, priv_buf, mfns);
++        if ( rc < 0 )
+         {
+-            PERROR("Failed to map guest pages");
++            ERROR("Failed to copy batch");
+             goto err;
+         }
+-        nr_pages_mapped = nr_pages;
+ 
++        /* Attempt to normalise/localise the pages. */
+         for ( i = 0, p = 0; i < nr_pfns; ++i )
+         {
+             if ( !page_type_has_stream_data(types[i]) )
+                 continue;
+ 
+-            if ( errors[p] )
+-            {
+-                ERROR("Mapping of pfn %#"PRIpfn" (mfn %#"PRIpfn") failed %d",
+-                      ctx->save.batch_pfns[i], mfns[p], errors[p]);
+-                goto err;
+-            }
+-
+-            orig_page = page = guest_mapping + (p * PAGE_SIZE);
++            orig_page = page = priv_buf + (p * PAGE_SIZE);
+             rc = ctx->save.ops.normalise_page(ctx, types[i], &page);
+ 
+             if ( orig_page != page )
+@@ -192,22 +189,25 @@ static int write_batch(struct xc_sr_context *ctx)
+             {
+                 if ( rc == -1 && errno == EAGAIN )
+                 {
++                    /* Page can't be sent right now. */
+                     set_bit(ctx->save.batch_pfns[i], ctx->save.deferred_pages);
+                     ++ctx->save.nr_deferred_pages;
+                     types[i] = XEN_DOMCTL_PFINFO_XTAB;
++                    /* Stop expecting to have sent it. */
+                     --nr_pages;
+                 }
+                 else
+                     goto err;
+             }
+             else
++                /* Page can be sent right now. */
+                 guest_data[i] = page;
+ 
+-            rc = -1;
+             ++p;
+         }
+     }
+ 
++    /* Construct a PAGE_DATA record. */
+     rec_pfns = malloc(nr_pfns * sizeof(*rec_pfns));
+     if ( !rec_pfns )
+     {
+@@ -225,6 +225,7 @@ static int write_batch(struct xc_sr_context *ctx)
+     for ( i = 0; i < nr_pfns; ++i )
+         rec_pfns[i] = ((uint64_t)(types[i]) << 32) | ctx->save.batch_pfns[i];
+ 
++    /* Fill write buffer with record data. */
+     iov[0].iov_base = &rec.type;
+     iov[0].iov_len = sizeof(rec.type);
+ 
+@@ -248,14 +249,17 @@ static int write_batch(struct xc_sr_context *ctx)
+                 iov[iovcnt].iov_base = guest_data[i];
+                 iov[iovcnt].iov_len = PAGE_SIZE;
+                 iovcnt++;
++                /* The page will be sent. */
+                 --nr_pages;
+             }
+         }
+     }
+ 
++    /* Write the iov buffer's contents into the stream. */
+     if ( writev_exact(ctx->fd, iov, iovcnt) )
+     {
+         PERROR("Failed to write page data to stream");
++        rc = -1;
+         goto err;
+     }
+ 
+@@ -265,14 +269,11 @@ static int write_batch(struct xc_sr_context *ctx)
+ 
+  err:
+     free(rec_pfns);
+-    if ( guest_mapping )
+-        xenforeignmemory_unmap(xch->fmem, guest_mapping, nr_pages_mapped);
+     for ( i = 0; local_pages && i < nr_pfns; ++i )
+         free(local_pages[i]);
+     free(iov);
+     free(local_pages);
+     free(guest_data);
+-    free(errors);
+     free(types);
+     free(mfns);
+ 
+@@ -795,6 +796,8 @@ static int setup(struct xc_sr_context *ctx)
+     int rc;
+     DECLARE_HYPERCALL_BUFFER_SHADOW(unsigned long, dirty_bitmap,
+                                     &ctx->save.dirty_bitmap_hbuf);
++    DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, priv_buf,
++                                    &ctx->save.priv_buf);
+ 
+     rc = ctx->save.ops.setup(ctx);
+     if ( rc )
+@@ -802,13 +805,15 @@ static int setup(struct xc_sr_context *ctx)
+ 
+     dirty_bitmap = xc_hypercall_buffer_alloc_pages(
+         xch, dirty_bitmap, NRPAGES(bitmap_size(ctx->save.p2m_size)));
++    priv_buf = xc_hypercall_buffer_alloc_pages(
++        xch, priv_buf, MAX_BATCH_SIZE);
+     ctx->save.batch_pfns = malloc(MAX_BATCH_SIZE *
+                                   sizeof(*ctx->save.batch_pfns));
+     ctx->save.deferred_pages = bitmap_alloc(ctx->save.p2m_size);
+ 
+-    if ( !ctx->save.batch_pfns || !dirty_bitmap || !ctx->save.deferred_pages )
++    if ( !ctx->save.batch_pfns || !dirty_bitmap || !priv_buf || !ctx->save.deferred_pages )
+     {
+-        ERROR("Unable to allocate memory for dirty bitmaps, batch pfns and"
++        ERROR("Unable to allocate memory for dirty bitmaps, batch pfns, copy buffer and"
+               " deferred pages");
+         rc = -1;
+         errno = ENOMEM;
+@@ -826,7 +831,8 @@ static void cleanup(struct xc_sr_context *ctx)
+     xc_interface *xch = ctx->xch;
+     DECLARE_HYPERCALL_BUFFER_SHADOW(unsigned long, dirty_bitmap,
+                                     &ctx->save.dirty_bitmap_hbuf);
+-
++    DECLARE_HYPERCALL_BUFFER_SHADOW(uint8_t, priv_buf,
++                                    &ctx->save.priv_buf);
+ 
+     xc_shadow_control(xch, ctx->domid, XEN_DOMCTL_SHADOW_OP_OFF,
+                       NULL, 0);
+@@ -836,6 +842,7 @@ static void cleanup(struct xc_sr_context *ctx)
+ 
+     xc_hypercall_buffer_free_pages(xch, dirty_bitmap,
+                                    NRPAGES(bitmap_size(ctx->save.p2m_size)));
++    xc_hypercall_buffer_free_pages(xch, priv_buf, MAX_BATCH_SIZE);
+     free(ctx->save.deferred_pages);
+     free(ctx->save.batch_pfns);
+ }
+diff --git a/xen/common/memory.c b/xen/common/memory.c
+index 7d12cff8a1..980f285e2d 100644
+--- a/xen/common/memory.c
++++ b/xen/common/memory.c
+@@ -1501,6 +1501,140 @@ static int acquire_resource(
+     return rc;
+ }
+ 
++/*
++ * The "noinline" qualifier avoids the compiler to create a large function
++ * consuming quite a lot of stack.
++ */
++static int noinline mem_foreigncopy(
++    XEN_GUEST_HANDLE_PARAM(xen_foreigncopy_t) arg)
++{
++    struct domain *d, *const currd = current->domain;
++    xen_foreigncopy_t copy;
++    int rc, direction;
++
++    if ( copy_from_guest(&copy, arg, 1) )
++        return -EFAULT;
++
++    if ( copy.flags & ~XENMEM_foreigncopy_direction )
++        return -EINVAL;
++
++    direction = copy.flags & XENMEM_foreigncopy_direction;
++
++    d = rcu_lock_domain_by_any_id(copy.domid);
++    if ( !d )
++        return -ESRCH;
++
++    /*
++     * Check we are allowed to map and access these foreign pages.
++     */
++    if ( direction == XENMEM_foreigncopy_from )
++        rc = xsm_foreigncopy_from(XSM_TARGET, currd, d);
++    else
++        rc = xsm_foreigncopy_to(XSM_TARGET, currd, d);
++    if ( rc )
++        goto out;
++
++    while ( copy.nr_frames ) {
++        /*
++         * Arbitrary size.  Not too much stack space, and a reasonable stride
++         * for continuation checks.
++         */
++        xen_pfn_t gfn_list[32];
++        unsigned int todo = MIN(ARRAY_SIZE(gfn_list), copy.nr_frames);
++
++        rc = -EFAULT;
++        if ( copy_from_guest(gfn_list, copy.frame_list, todo) )
++            goto out;
++
++        for ( unsigned int i = 0; i < todo; i++ )
++        {
++            struct page_info *foreign_page;
++            mfn_t foreign_mfn;
++            void *foreign;
++            p2m_type_t p2mt;
++            p2m_query_t q = (direction == XENMEM_foreigncopy_to) ?
++                            P2M_ALLOC | P2M_UNSHARE : P2M_ALLOC;
++
++            foreign_page = get_page_from_gfn(d, gfn_list[i], &p2mt, q);
++
++            if ( unlikely(p2m_is_paged(p2mt)) )
++            {
++                if ( foreign_page )
++                    put_page(foreign_page);
++                p2m_mem_paging_populate(d, _gfn(gfn_list[i]));
++                p2mt = p2m_ram_paging_in;
++                foreign_page = NULL;
++            }
++
++            if ( unlikely(!foreign_page) )
++            {
++                rc = -ENOENT;
++                if ( p2mt != p2m_ram_paging_in )
++                {
++                    gdprintk(XENLOG_WARNING,
++                            "Error accessing foreign gfn %" PRI_gfn "\n",
++                            gfn_list[i]);
++                    rc = -EINVAL;
++                }
++                copy.nr_frames -= i;
++                guest_handle_add_offset(copy.frame_list, i);
++                goto out;
++            }
++
++            foreign_mfn = page_to_mfn(foreign_page);
++
++            /* A page is dirtied when it's being copied to. */
++            if ( direction == XENMEM_foreigncopy_to )
++                paging_mark_dirty(d, foreign_mfn);
++
++            foreign = map_domain_page(foreign_mfn);
++            if ( direction == XENMEM_foreigncopy_from )
++                rc = copy_to_guest(copy.buffer, foreign, PAGE_SIZE);
++            else
++                rc = copy_from_guest(foreign, copy.buffer, PAGE_SIZE);
++            unmap_domain_page(foreign);
++            put_page(foreign_page);
++
++            if ( unlikely(rc) )
++            {
++                gdprintk(XENLOG_WARNING,
++                         "Error %d copying gfn %" PRI_gfn "\n",
++                         rc, gfn_list[i]);
++                copy.nr_frames -= i;
++                guest_handle_add_offset(copy.frame_list, i);
++                goto out;
++            }
++
++            guest_handle_add_offset(copy.buffer, PAGE_SIZE);
++        }
++
++        copy.nr_frames -= todo;
++        guest_handle_add_offset(copy.frame_list, todo);
++
++        if ( copy.nr_frames && hypercall_preempt_check() )
++        {
++            rc = hypercall_create_continuation(
++                __HYPERVISOR_memory_op, "lh", XENMEM_foreigncopy, arg);
++            goto out;
++        }
++    }
++
++    rc = 0;
++
++ out:
++    rcu_unlock_domain(d);
++
++    /*
++     * Update in all cases, it allows the caller to know how many
++     * frames were successfully copied and the continuation to
++     * continue correctly.
++     */
++    if ( __copy_to_guest(arg, &copy, 1) && rc >= 0 )
++        rc = -EFAULT;
++
++    return rc;
++}
++
+ long do_memory_op(unsigned long cmd, XEN_GUEST_HANDLE_PARAM(void) arg)
+ {
+     struct domain *d, *curr_d = current->domain;
+@@ -1962,6 +2096,20 @@ long do_memory_op(unsigned long cmd, XEN_GUEST_HANDLE_PARAM(void) arg)
+             start_extent);
+         break;
+ 
++    case XENMEM_foreigncopy:
++        /*
++         * Instead of using "start_extent" for the continuation, we update
++         * the xen_foreigncopy structure back, so we are not constrained by
++         * MEMOP_EXTENT_SHIFT.
++         * We copy it back also to tell the caller where the copy stopped
++         * (either for error or because all frames were copied).
++         */
++        if ( unlikely(start_extent) )
++            return -EINVAL;
++
++        rc = mem_foreigncopy(guest_handle_cast(arg, xen_foreigncopy_t));
++        break;
++
+     default:
+         rc = arch_memory_op(cmd, arg);
+         break;
+diff --git a/xen/include/public/memory.h b/xen/include/public/memory.h
+index 29cf5c8239..c05df582ac 100644
+--- a/xen/include/public/memory.h
++++ b/xen/include/public/memory.h
+@@ -731,7 +731,50 @@ struct xen_vnuma_topology_info {
+ typedef struct xen_vnuma_topology_info xen_vnuma_topology_info_t;
+ DEFINE_XEN_GUEST_HANDLE(xen_vnuma_topology_info_t);
+ 
+-/* Next available subop number is 29 */
++/*
++ * Copy memory from/to a given domain.
++ * As this call requires target access and guest with target access won't be
++ * compat guests supported for compat guests this is not implemented.
++ */
++#define XENMEM_foreigncopy 29
++struct xen_foreigncopy {
++    /* IN - The domain whose memory is to be copied. */
++    domid_t domid;
++
++    /* IN - Flags. */
++#define XENMEM_foreigncopy_from 0
++#define XENMEM_foreigncopy_to 1
++#define XENMEM_foreigncopy_direction 1
++    uint16_t flags;
++
++    /*
++     * IN/OUT
++     *
++     * As an IN parameter number of frames of the domain to be copied.
++     * On output on error updated number of frames left (0 if success).
++     */
++    uint32_t nr_frames;
++
++    /*
++     * IN/OUT
++     *
++     * Frames to be copied.
++     * On output updated to point to the first frame unhandled, if any.
++     */
++    XEN_GUEST_HANDLE(xen_pfn_t) frame_list;
++
++    /*
++     * IN/OUT
++     *
++     * Guest buffer to read/write from.
++     * On output updated to point to the first page pointer unhandled.
++     */
++    XEN_GUEST_HANDLE(uint8) buffer;
++};
++typedef struct xen_foreigncopy xen_foreigncopy_t;
++DEFINE_XEN_GUEST_HANDLE(xen_foreigncopy_t);
++
++/* Next available subop number is 30 */
+ 
+ #endif /* __XEN_PUBLIC_MEMORY_H__ */
+ 
+diff --git a/xen/include/xsm/dummy.h b/xen/include/xsm/dummy.h
+index b1417abfa8..1ca7a5c2cb 100644
+--- a/xen/include/xsm/dummy.h
++++ b/xen/include/xsm/dummy.h
+@@ -572,6 +572,20 @@ static XSM_INLINE int cf_check xsm_map_gmfn_foreign(
+     return xsm_default_action(action, d, t);
+ }
+ 
++static XSM_INLINE int cf_check xsm_foreigncopy_from(
++    XSM_DEFAULT_ARG struct domain *d, struct domain *t)
++{
++    XSM_ASSERT_ACTION(XSM_TARGET);
++    return xsm_default_action(action, d, t);
++}
++
++static XSM_INLINE int cf_check xsm_foreigncopy_to(
++    XSM_DEFAULT_ARG struct domain *d, struct domain *t)
++{
++    XSM_ASSERT_ACTION(XSM_TARGET);
++    return xsm_default_action(action, d, t);
++}
++
+ static XSM_INLINE int cf_check xsm_hvm_param(
+     XSM_DEFAULT_ARG struct domain *d, unsigned long op)
+ {
+diff --git a/xen/include/xsm/xsm.h b/xen/include/xsm/xsm.h
+index b072285b06..babbcd2e48 100644
+--- a/xen/include/xsm/xsm.h
++++ b/xen/include/xsm/xsm.h
+@@ -95,6 +95,8 @@ struct xsm_ops {
+     int (*add_to_physmap)(struct domain *d1, struct domain *d2);
+     int (*remove_from_physmap)(struct domain *d1, struct domain *d2);
+     int (*map_gmfn_foreign)(struct domain *d, struct domain *t);
++    int (*foreigncopy_from)(struct domain *d, struct domain *t);
++    int (*foreigncopy_to)(struct domain *d, struct domain *t);
+     int (*claim_pages)(struct domain *d);
+ 
+     int (*console_io)(struct domain *d, int cmd);
+@@ -405,6 +407,18 @@ static inline int xsm_map_gmfn_foreign(
+     return alternative_call(xsm_ops.map_gmfn_foreign, d, t);
+ }
+ 
++static inline int xsm_foreigncopy_from(
++    xsm_default_t def, struct domain *d, struct domain *t)
++{
++    return alternative_call(xsm_ops.foreigncopy_from, d, t);
++}
++
++static inline int xsm_foreigncopy_to(
++    xsm_default_t def, struct domain *d, struct domain *t)
++{
++    return alternative_call(xsm_ops.foreigncopy_to, d, t);
++}
++
+ static inline int xsm_claim_pages(xsm_default_t def, struct domain *d)
+ {
+     return alternative_call(xsm_ops.claim_pages, d);
+diff --git a/xen/xsm/flask/hooks.c b/xen/xsm/flask/hooks.c
+index 33fedd46b8..447880a321 100644
+--- a/xen/xsm/flask/hooks.c
++++ b/xen/xsm/flask/hooks.c
+@@ -1344,6 +1344,16 @@ static int cf_check flask_map_gmfn_foreign(struct domain *d, struct domain *t)
+     return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ | MMU__MAP_WRITE);
+ }
+ 
++static int cf_check flask_foreigncopy_from(struct domain *d, struct domain *t)
++{
++    return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ);
++}
++
++static int cf_check flask_foreigncopy_to(struct domain *d, struct domain *t)
++{
++    return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ | MMU__MAP_WRITE);
++}
++
+ static int cf_check flask_hvm_param(struct domain *d, unsigned long op)
+ {
+     uint32_t perm;
+@@ -1988,6 +1998,8 @@ static const struct xsm_ops __initconst_cf_clobber flask_ops = {
+     .add_to_physmap = flask_add_to_physmap,
+     .remove_from_physmap = flask_remove_from_physmap,
+     .map_gmfn_foreign = flask_map_gmfn_foreign,
++    .foreigncopy_from = flask_foreigncopy_from,
++    .foreigncopy_to = flask_foreigncopy_to,
+ 
+ #if defined(CONFIG_HAS_PASSTHROUGH) && defined(CONFIG_HAS_PCI)
+     .get_device_group = flask_get_device_group,

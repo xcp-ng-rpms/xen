@@ -365,6 +365,11 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
+Patch1030: 0001-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
+Patch1031: 0002-x86-vhpet-Fix-sanitization-of-legacy-IRQ-route.patch
+Patch1032: 0003-x86-Dump-HPET-state-in-debug-key-q.patch
+Patch1033: 0004-x86-Dump-VIOAPIC-state-in-debug-key-q.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.2.foreigncopy.4%{?dist}
+Release: %{?xsrel}.2.foreigncopy.6%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -367,6 +367,7 @@ Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
 # New foreigncopy hypercall for migration
 Patch1030: foreigncopy-migration-v6.patch
+Patch1031: foreigncopy-v10-update.patch
 
 ExclusiveArch: x86_64
 
@@ -1214,6 +1215,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Aug 19 2026 Lucas Pottier <lucas.pottier@vates.tech> - 4.17.6-9.12.2.foreigncopy.6
+- Backport v10 changes of new foreigncopy hypercall + missing ops update
+
 * Tue Aug 18 2026 Lucas Pottier <lucas.pottier@vates.tech> - 4.17.6-9.12.2.foreigncopy.4
 - Backport v6 of new foreigncopy hypercall for review
 

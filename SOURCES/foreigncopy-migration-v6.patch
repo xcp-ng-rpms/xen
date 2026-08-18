@@ -27,7 +27,7 @@ index bc60e8fd55..0ecefe0ca6 100644
  	_IOC(_IOC_NONE, 'P', 0xFF, 0)
  
 diff --git a/tools/libs/guest/xg_sr_common.c b/tools/libs/guest/xg_sr_common.c
-index 17567ab133..6f10101032 100644
+index 17567ab133..cccc757f22 100644
 --- a/tools/libs/guest/xg_sr_common.c
 +++ b/tools/libs/guest/xg_sr_common.c
 @@ -156,6 +156,99 @@ static void __attribute__((unused)) build_assertions(void)
@@ -67,7 +67,7 @@ index 17567ab133..6f10101032 100644
 +        if ( xc_hypercall_bounce_pre(xch, foreign_pfns) )
 +            return -1;
 +
-+        copy.pfns = (xen_pfn_t *)HYPERCALL_BUFFER_AS_ARG(foreign_pfns);
++        copy.pfns = foreign_pfns;
 +
 +        DPRINTF("issuing foreigncopy hypercall");
 +
@@ -556,10 +556,10 @@ index 3b2c5222e4..07f72f6590 100644
      free(ctx->save.batch_pfns);
  }
 diff --git a/xen/common/memory.c b/xen/common/memory.c
-index 7d12cff8a1..980f285e2d 100644
+index 7d12cff8a1..e67aaaf7fd 100644
 --- a/xen/common/memory.c
 +++ b/xen/common/memory.c
-@@ -1501,6 +1501,140 @@ static int acquire_resource(
+@@ -1501,6 +1501,139 @@ static int acquire_resource(
      return rc;
  }
  
@@ -582,21 +582,24 @@ index 7d12cff8a1..980f285e2d 100644
 +
 +    direction = copy.flags & XENMEM_foreigncopy_direction;
 +
-+    d = rcu_lock_domain_by_any_id(copy.domid);
-+    if ( !d )
-+        return -ESRCH;
++    rc = rcu_lock_remote_domain_by_id(copy.domid, &d);
++    if ( rc )
++        return rc;
++
++    if ( copy.nr_frames == 0 )
++    {
++        rcu_unlock_domain(d);
++        return 0;
++    }
 +
 +    /*
 +     * Check we are allowed to map and access these foreign pages.
 +     */
-+    if ( direction == XENMEM_foreigncopy_from )
-+        rc = xsm_foreigncopy_from(XSM_TARGET, currd, d);
-+    else
-+        rc = xsm_foreigncopy_to(XSM_TARGET, currd, d);
++    rc = xsm_map_gmfn_foreign(XSM_TARGET, currd, d);
 +    if ( rc )
 +        goto out;
 +
-+    while ( copy.nr_frames ) {
++    do {
 +        /*
 +         * Arbitrary size.  Not too much stack space, and a reasonable stride
 +         * for continuation checks.
@@ -614,30 +617,26 @@ index 7d12cff8a1..980f285e2d 100644
 +            mfn_t foreign_mfn;
 +            void *foreign;
 +            p2m_type_t p2mt;
-+            p2m_query_t q = (direction == XENMEM_foreigncopy_to) ?
-+                            P2M_ALLOC | P2M_UNSHARE : P2M_ALLOC;
++            const unsigned long valid_mask =
++#ifdef CONFIG_X86
++                p2m_to_mask(p2m_ram_rw) | p2m_to_mask(p2m_ram_logdirty);
++#else
++                p2m_to_mask(p2m_ram_rw);
++#endif
 +
-+            foreign_page = get_page_from_gfn(d, gfn_list[i], &p2mt, q);
++            foreign_page = get_page_from_gfn(d, gfn_list[i], &p2mt, P2M_ALLOC);
 +
-+            if ( unlikely(p2m_is_paged(p2mt)) )
++            if ( unlikely(!(p2m_to_mask(p2mt) & valid_mask)) && foreign_page )
 +            {
-+                if ( foreign_page )
-+                    put_page(foreign_page);
-+                p2m_mem_paging_populate(d, _gfn(gfn_list[i]));
-+                p2mt = p2m_ram_paging_in;
++                put_page(foreign_page);
 +                foreign_page = NULL;
 +            }
-+
 +            if ( unlikely(!foreign_page) )
 +            {
-+                rc = -ENOENT;
-+                if ( p2mt != p2m_ram_paging_in )
-+                {
-+                    gdprintk(XENLOG_WARNING,
-+                            "Error accessing foreign gfn %" PRI_gfn "\n",
-+                            gfn_list[i]);
-+                    rc = -EINVAL;
-+                }
++                gdprintk(XENLOG_WARNING,
++                         "Error accessing foreign gfn %" PRI_gfn "\n",
++                         gfn_list[i]);
++                rc = -EINVAL;
 +                copy.nr_frames -= i;
 +                guest_handle_add_offset(copy.frame_list, i);
 +                goto out;
@@ -661,7 +660,7 @@ index 7d12cff8a1..980f285e2d 100644
 +            {
 +                gdprintk(XENLOG_WARNING,
 +                         "Error %d copying gfn %" PRI_gfn "\n",
-+                         rc, gfn_list[i]);
++                         -rc, gfn_list[i]);
 +                copy.nr_frames -= i;
 +                guest_handle_add_offset(copy.frame_list, i);
 +                goto out;
@@ -679,7 +678,7 @@ index 7d12cff8a1..980f285e2d 100644
 +                __HYPERVISOR_memory_op, "lh", XENMEM_foreigncopy, arg);
 +            goto out;
 +        }
-+    }
++    } while ( copy.nr_frames );
 +
 +    rc = 0;
 +
@@ -700,17 +699,15 @@ index 7d12cff8a1..980f285e2d 100644
  long do_memory_op(unsigned long cmd, XEN_GUEST_HANDLE_PARAM(void) arg)
  {
      struct domain *d, *curr_d = current->domain;
-@@ -1962,6 +2096,20 @@ long do_memory_op(unsigned long cmd, XEN_GUEST_HANDLE_PARAM(void) arg)
+@@ -1962,6 +2095,18 @@ long do_memory_op(unsigned long cmd, XEN_GUEST_HANDLE_PARAM(void) arg)
              start_extent);
          break;
  
 +    case XENMEM_foreigncopy:
 +        /*
-+         * Instead of using "start_extent" for the continuation, we update
-+         * the xen_foreigncopy structure back, so we are not constrained by
-+         * MEMOP_EXTENT_SHIFT.
-+         * We copy it back also to tell the caller where the copy stopped
-+         * (either for error or because all frames were copied).
++         * Instead of using "start_extent" we update the structure back,
++         * we update it back in anyway to tell caller were the copy
++         * stopped.
 +         */
 +        if ( unlikely(start_extent) )
 +            return -EINVAL;
@@ -722,10 +719,10 @@ index 7d12cff8a1..980f285e2d 100644
          rc = arch_memory_op(cmd, arg);
          break;
 diff --git a/xen/include/public/memory.h b/xen/include/public/memory.h
-index 29cf5c8239..c05df582ac 100644
+index 29cf5c8239..a76b657906 100644
 --- a/xen/include/public/memory.h
 +++ b/xen/include/public/memory.h
-@@ -731,7 +731,50 @@ struct xen_vnuma_topology_info {
+@@ -731,7 +731,49 @@ struct xen_vnuma_topology_info {
  typedef struct xen_vnuma_topology_info xen_vnuma_topology_info_t;
  DEFINE_XEN_GUEST_HANDLE(xen_vnuma_topology_info_t);
  
@@ -750,7 +747,7 @@ index 29cf5c8239..c05df582ac 100644
 +     * IN/OUT
 +     *
 +     * As an IN parameter number of frames of the domain to be copied.
-+     * On output on error updated number of frames left (0 if success).
++     * On output on error updated number of frames left.
 +     */
 +    uint32_t nr_frames;
 +
@@ -758,15 +755,14 @@ index 29cf5c8239..c05df582ac 100644
 +     * IN/OUT
 +     *
 +     * Frames to be copied.
-+     * On output updated to point to the first frame unhandled, if any.
++     * On output on error updated to point to first frame unhandled.
 +     */
 +    XEN_GUEST_HANDLE(xen_pfn_t) frame_list;
 +
 +    /*
 +     * IN/OUT
 +     *
-+     * Guest buffer to read/write from.
-+     * On output updated to point to the first page pointer unhandled.
++     * Userspace buffer to read/write from.
 +     */
 +    XEN_GUEST_HANDLE(uint8) buffer;
 +};
@@ -777,90 +773,3 @@ index 29cf5c8239..c05df582ac 100644
  
  #endif /* __XEN_PUBLIC_MEMORY_H__ */
  
-diff --git a/xen/include/xsm/dummy.h b/xen/include/xsm/dummy.h
-index b1417abfa8..1ca7a5c2cb 100644
---- a/xen/include/xsm/dummy.h
-+++ b/xen/include/xsm/dummy.h
-@@ -572,6 +572,20 @@ static XSM_INLINE int cf_check xsm_map_gmfn_foreign(
-     return xsm_default_action(action, d, t);
- }
- 
-+static XSM_INLINE int cf_check xsm_foreigncopy_from(
-+    XSM_DEFAULT_ARG struct domain *d, struct domain *t)
-+{
-+    XSM_ASSERT_ACTION(XSM_TARGET);
-+    return xsm_default_action(action, d, t);
-+}
-+
-+static XSM_INLINE int cf_check xsm_foreigncopy_to(
-+    XSM_DEFAULT_ARG struct domain *d, struct domain *t)
-+{
-+    XSM_ASSERT_ACTION(XSM_TARGET);
-+    return xsm_default_action(action, d, t);
-+}
-+
- static XSM_INLINE int cf_check xsm_hvm_param(
-     XSM_DEFAULT_ARG struct domain *d, unsigned long op)
- {
-diff --git a/xen/include/xsm/xsm.h b/xen/include/xsm/xsm.h
-index b072285b06..babbcd2e48 100644
---- a/xen/include/xsm/xsm.h
-+++ b/xen/include/xsm/xsm.h
-@@ -95,6 +95,8 @@ struct xsm_ops {
-     int (*add_to_physmap)(struct domain *d1, struct domain *d2);
-     int (*remove_from_physmap)(struct domain *d1, struct domain *d2);
-     int (*map_gmfn_foreign)(struct domain *d, struct domain *t);
-+    int (*foreigncopy_from)(struct domain *d, struct domain *t);
-+    int (*foreigncopy_to)(struct domain *d, struct domain *t);
-     int (*claim_pages)(struct domain *d);
- 
-     int (*console_io)(struct domain *d, int cmd);
-@@ -405,6 +407,18 @@ static inline int xsm_map_gmfn_foreign(
-     return alternative_call(xsm_ops.map_gmfn_foreign, d, t);
- }
- 
-+static inline int xsm_foreigncopy_from(
-+    xsm_default_t def, struct domain *d, struct domain *t)
-+{
-+    return alternative_call(xsm_ops.foreigncopy_from, d, t);
-+}
-+
-+static inline int xsm_foreigncopy_to(
-+    xsm_default_t def, struct domain *d, struct domain *t)
-+{
-+    return alternative_call(xsm_ops.foreigncopy_to, d, t);
-+}
-+
- static inline int xsm_claim_pages(xsm_default_t def, struct domain *d)
- {
-     return alternative_call(xsm_ops.claim_pages, d);
-diff --git a/xen/xsm/flask/hooks.c b/xen/xsm/flask/hooks.c
-index 33fedd46b8..447880a321 100644
---- a/xen/xsm/flask/hooks.c
-+++ b/xen/xsm/flask/hooks.c
-@@ -1344,6 +1344,16 @@ static int cf_check flask_map_gmfn_foreign(struct domain *d, struct domain *t)
-     return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ | MMU__MAP_WRITE);
- }
- 
-+static int cf_check flask_foreigncopy_from(struct domain *d, struct domain *t)
-+{
-+    return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ);
-+}
-+
-+static int cf_check flask_foreigncopy_to(struct domain *d, struct domain *t)
-+{
-+    return domain_has_perm(d, t, SECCLASS_MMU, MMU__MAP_READ | MMU__MAP_WRITE);
-+}
-+
- static int cf_check flask_hvm_param(struct domain *d, unsigned long op)
- {
-     uint32_t perm;
-@@ -1988,6 +1998,8 @@ static const struct xsm_ops __initconst_cf_clobber flask_ops = {
-     .add_to_physmap = flask_add_to_physmap,
-     .remove_from_physmap = flask_remove_from_physmap,
-     .map_gmfn_foreign = flask_map_gmfn_foreign,
-+    .foreigncopy_from = flask_foreigncopy_from,
-+    .foreigncopy_to = flask_foreigncopy_to,
- 
- #if defined(CONFIG_HAS_PASSTHROUGH) && defined(CONFIG_HAS_PCI)
-     .get_device_group = flask_get_device_group,

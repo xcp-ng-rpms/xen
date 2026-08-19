@@ -280,7 +280,11 @@ BuildRequires: bzip2-devel
 BuildRequires: libzstd-devel
 BuildRequires: lzo-devel
 BuildRequires: xz-devel
+%if 0%{?xcpng}
+BuildRequires: zlib-ng-devel
+%else
 BuildRequires: zlib-devel
+%endif
 
 # For libxl
 BuildRequires: json-c-devel
@@ -288,7 +292,11 @@ BuildRequires: libuuid-devel
 BuildRequires: perl-interpreter
 
 # For libacpi
+%if 0%{?xcpng}
+BuildRequires: acpica-tools
+%else
 BuildRequires: iasl
+%endif
 
 # For libxenfsimage
 BuildRequires: e2fsprogs-devel
@@ -1142,8 +1150,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Mon Jun 23 2026 Julian Vetter <julian.vetter@vates.tech> - 4.20.2-8.2 WIP
-- Added new mem_pnode argument to xenguest EMP path
+* Fri Aug 21 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.2
+- Added new mem_pnode argument to xenguest EMP path (Julian Vetter)
+- Use Alma10 package names in BuildRequires for xcpng
 
 * Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1
 - Sync with 4.20.2-8

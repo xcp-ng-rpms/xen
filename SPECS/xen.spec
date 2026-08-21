@@ -29,7 +29,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.20.2
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.20.2.tar.gz
@@ -1142,9 +1142,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Mon Jun 23 2026 Julian Vetter <julian.vetter@vates.tech> - 4.20.2-8.1 WIP
+* Mon Jun 23 2026 Julian Vetter <julian.vetter@vates.tech> - 4.20.2-8.2 WIP
 - Added new mem_pnode argument to xenguest EMP path
-* Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1 WIP
+
+* Mon Apr 20 2026 Yann Dirson <yann.dirson@vates.tech> - 4.20.2-8.1
 - Sync with 4.20.2-8
 - Dropped xsa467.patch, integrated in xen-4.20, and nested-virt patch, integrated by XS
 - Remove livepatch certificate support depending on unpublished XS packages

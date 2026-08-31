@@ -365,8 +365,11 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
-# XSA-509
+# XSA-509, 510, and 512
 Patch1030: xsa509.patch
+Patch1031: xsa510.patch
+Patch1032: xsa512-4.17-1.patch
+Patch1033: xsa512-4.17-2.patch
 
 ExclusiveArch: x86_64
 
@@ -1216,6 +1219,8 @@ fi
 %changelog
 * Mon Aug 31 2026 Yann Sionneau <yann.sionneau@vates.tech> - 4.17.6-12.3
 - Fix for XSA-509 CVE-2026-62437
+- Fix for XSA-510 CVE-2026-79602
+- Fix for XSA-512 CVE-2026-79604
 
 * Tue Aug 04 2026 Gael Duperrey <gduperrey@vates.tech> - 4.17.6-12.2
 - Rebuild against OpenSSL 3.0

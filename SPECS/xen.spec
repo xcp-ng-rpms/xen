@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -364,6 +364,9 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 # UEFI GOP bugfixes
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
+
+# XSA-509
+Patch1030: xsa509.patch
 
 ExclusiveArch: x86_64
 
@@ -1211,6 +1214,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Aug 31 2026 Yann Sionneau <yann.sionneau@vates.tech> - 4.17.6-12.3
+- Fix for XSA-509 CVE-2026-62437
+
 * Tue Aug 04 2026 Gael Duperrey <gduperrey@vates.tech> - 4.17.6-12.2
 - Rebuild against OpenSSL 3.0
 

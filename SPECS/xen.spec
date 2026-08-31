@@ -1211,10 +1211,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
-* Tue Aug 04 2026 Gael Duperrey <gduperrey@vates.tech> - 4.17.6-9.12.2
+* Tue Aug 04 2026 Gael Duperrey <gduperrey@vates.tech> - 4.17.6-12.2
 - Rebuild against OpenSSL 3.0
 
-* Thu Jul 30 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.6-9.12.1
+* Thu Jul 30 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.6-12.1
 - Sync with v8.3-fasttrack-2026-07-27 branch
 - *** Fasttrack branch changelog ***
   * Mon Jul 27 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.6-9.3.1

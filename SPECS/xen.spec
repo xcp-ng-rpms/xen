@@ -32,6 +32,8 @@ Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.6
 Release: %{?xsrel}.3%{?dist}
+# release with `~` (not allowed in package names) replaced by `-`
+%global cleanrel %(echo "%{release}" | tr '~' '-')
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.6.tar.gz
@@ -559,11 +561,11 @@ License: GPLv2
 %description dom0-tests
 This package contains test cases for the Xen Hypervisor.
 
-%package lp-devel_%{version}_%{release}
+%package lp-devel_%{version}_%{cleanrel}
 License: GPLv2
 Summary: Development package for building livepatches
 %{core_builddeps Requires}
-%description lp-devel_%{version}_%{release}
+%description lp-devel_%{version}_%{cleanrel}
 Contains the prepared source files, config, and xen-syms for building live
 patches against base version %{version}-%{release}.
 
@@ -1159,7 +1161,7 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/bin/test_x86_emulator
 %{_datadir}/xen-dom0-tests-metadata.json
 
-%files lp-devel_%{version}_%{release}
+%files lp-devel_%{version}_%{cleanrel}
 %{lp_devel_dir}
 
 %doc
@@ -1217,6 +1219,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+# Changes since the last build, to fold into the next changelog entry:
+# - Allow building with a ~ in the release
+
 * Mon Aug 31 2026 Yann Sionneau <yann.sionneau@vates.tech> - 4.17.6-12.3
 - Fix for XSA-509 CVE-2026-62437
 - Fix for XSA-510 CVE-2026-79602

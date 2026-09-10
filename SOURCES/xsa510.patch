@@ -18,12 +18,9 @@ This is XSA-510 / CVE-2026-79602.
 Reported-by: Jiqian Chen <Jiqian.Chen@amd.com>
 Signed-off-by: Roger Pau Monné <roger@xenproject.org>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
----
- xen/arch/x86/hvm/emulate.c | 1 +
- 1 file changed, 1 insertion(+)
 
 diff --git a/xen/arch/x86/hvm/emulate.c b/xen/arch/x86/hvm/emulate.c
-index 2efb1d4f0823..c09ea002ec62 100644
+index 3a7976729bb1..41f2d0c7e16e 100644
 --- a/xen/arch/x86/hvm/emulate.c
 +++ b/xen/arch/x86/hvm/emulate.c
 @@ -308,6 +308,7 @@ static int hvmemul_do_io(
@@ -34,6 +31,3 @@ index 2efb1d4f0823..c09ea002ec62 100644
          vio->req.state = STATE_IOREQ_NONE;
          break;
      case X86EMUL_UNHANDLEABLE:
--- 
-2.53.0
-

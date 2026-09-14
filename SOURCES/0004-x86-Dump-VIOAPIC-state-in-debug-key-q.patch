@@ -1,0 +1,116 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Date: Sun, 16 Aug 2026 19:20:19 +0000
+Subject: [PATCH] x86: Dump VIOAPIC state in debug key 'q'
+
+Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+
+diff --git a/xen/arch/x86/domain.c b/xen/arch/x86/domain.c
+index 0a53fa843698..8bf0bbeb2b00 100644
+--- a/xen/arch/x86/domain.c
++++ b/xen/arch/x86/domain.c
+@@ -53,6 +53,7 @@
+ #include <asm/hvm/nestedhvm.h>
+ #include <asm/hvm/support.h>
+ #ifdef CONFIG_HVM
++#include <asm/hvm/vioapic.h>
+ #include <asm/hvm/vpt.h>
+ #endif
+ #include <asm/hvm/svm/svm.h>
+@@ -2487,7 +2488,10 @@ void arch_dump_domain_info(struct domain *d)
+ 
+ #ifdef CONFIG_HVM
+     if ( is_hvm_domain(d) )
++    {
++        vioapic_dump(d);
+         hpet_dump(d);
++    }
+ #endif
+ }
+ 
+diff --git a/xen/arch/x86/hvm/vioapic.c b/xen/arch/x86/hvm/vioapic.c
+index 41e3c4d5e42d..2dd2eadae8aa 100644
+--- a/xen/arch/x86/hvm/vioapic.c
++++ b/xen/arch/x86/hvm/vioapic.c
+@@ -748,3 +748,69 @@ void vioapic_deinit(struct domain *d)
+ 
+     vioapic_free(d, d->arch.hvm.nr_vioapics);
+ }
++
++void vioapic_dump(struct domain *d)
++{
++    struct hvm_irq *hvm_irq;
++    unsigned int i;
++
++    if ( !has_vioapic(d) || !d->arch.hvm.vioapic )
++        return;
++
++    hvm_irq = hvm_domain_irq(d);
++    if ( !hvm_irq )
++        return;
++
++    printk("VIOAPIC domain %u: nr %u\n",
++           d->domain_id,
++           d->arch.hvm.nr_vioapics);
++
++    for ( i = 0; i < d->arch.hvm.nr_vioapics; i++ )
++    {
++        const struct hvm_vioapic *vioapic = domain_vioapic(d, i);
++        unsigned int pin;
++
++        if ( !vioapic )
++            continue;
++
++        printk("    apic %u: id %u base %#" PRIx64 " ioregsel %#x"
++               " base_gsi %u pins %u\n",
++               i,
++               vioapic->id,
++               vioapic->base_address,
++               vioapic->ioregsel,
++               vioapic->base_gsi,
++               vioapic->nr_pins);
++
++        for ( pin = 0; pin < vioapic->nr_pins; pin++ )
++        {
++            union vioapic_redir_entry entry;
++            unsigned int gsi = vioapic->base_gsi + pin;
++            uint8_t assert_count = 0;
++
++            spin_lock(&d->arch.hvm.irq_lock);
++            entry = vioapic->redirtbl[pin];
++            if ( gsi < hvm_irq->nr_gsis )
++                assert_count = hvm_irq->gsi_assert_count[gsi];
++            spin_unlock(&d->arch.hvm.irq_lock);
++
++            printk("        pin %u: gsi %u rte %016" PRIx64
++                   " vector %#x delivery_mode %u dest_mode %u dest_id %#x\n",
++                   pin,
++                   gsi,
++                   entry.bits,
++                   entry.fields.vector,
++                   entry.fields.delivery_mode,
++                   entry.fields.dest_mode,
++                   entry.fields.dest_id);
++            printk("            delivery_status %u polarity %u remote_irr %u"
++                   " trig_mode %u mask %u gsi_assert_count %u\n",
++                   entry.fields.delivery_status,
++                   entry.fields.polarity,
++                   entry.fields.remote_irr,
++                   entry.fields.trig_mode,
++                   entry.fields.mask,
++                   assert_count);
++        }
++    }
++}
+diff --git a/xen/arch/x86/include/asm/hvm/vioapic.h b/xen/arch/x86/include/asm/hvm/vioapic.h
+index 2944ec20dd53..b4e516fb9168 100644
+--- a/xen/arch/x86/include/asm/hvm/vioapic.h
++++ b/xen/arch/x86/include/asm/hvm/vioapic.h
+@@ -62,6 +62,7 @@ struct hvm_vioapic {
+ int vioapic_init(struct domain *d);
+ void vioapic_deinit(struct domain *d);
+ void vioapic_reset(struct domain *d);
++void vioapic_dump(struct domain *d);
+ void vioapic_irq_positive_edge(struct domain *d, unsigned int irq);
+ void vioapic_update_EOI(struct domain *d, u8 vector);
+ 

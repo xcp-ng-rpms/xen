@@ -1,22 +1,24 @@
-diff -ru xen-4.20.2/buildconfigs.orig/config-debug xen-4.20.2/buildconfigs/config-debug
---- xen-4.20.2/buildconfigs.orig/config-debug	2026-04-21 10:11:38.732113583 +0200
-+++ xen-4.20.2/buildconfigs/config-debug	2026-04-21 10:13:20.021778436 +0200
-@@ -138,7 +138,7 @@
- CONFIG_CMDLINE=""
- CONFIG_DOM0_MEM=""
- CONFIG_TRACEBUFFER=y
+diff --git a/buildconfigs/config-debug b/buildconfigs/config-debug
+index 36b8b77ae4..ac6ab86d4a 100644
+--- a/buildconfigs/config-debug
++++ b/buildconfigs/config-debug
+@@ -160,7 +160,7 @@ CONFIG_SYSCTL=y
+ 
+ CONFIG_PM_OP=y
+ CONFIG_PM_STATS=y
 -CONFIG_LOCKDOWN_DEFAULT=y
 +# CONFIG_LOCKDOWN_DEFAULT is not set
  # end of Common Features
  
  #
-diff -ru xen-4.20.2/buildconfigs.orig/config-release xen-4.20.2/buildconfigs/config-release
---- xen-4.20.2/buildconfigs.orig/config-release	2026-04-21 10:11:38.732203472 +0200
-+++ xen-4.20.2/buildconfigs/config-release	2026-04-21 10:13:20.022257014 +0200
-@@ -138,7 +138,7 @@
- CONFIG_CMDLINE=""
- CONFIG_DOM0_MEM=""
- CONFIG_TRACEBUFFER=y
+diff --git a/buildconfigs/config-release b/buildconfigs/config-release
+index 644bd4e493..efdbf8bb11 100644
+--- a/buildconfigs/config-release
++++ b/buildconfigs/config-release
+@@ -160,7 +160,7 @@ CONFIG_SYSCTL=y
+ 
+ CONFIG_PM_OP=y
+ CONFIG_PM_STATS=y
 -CONFIG_LOCKDOWN_DEFAULT=y
 +# CONFIG_LOCKDOWN_DEFAULT is not set
  # end of Common Features

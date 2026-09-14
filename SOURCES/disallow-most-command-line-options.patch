@@ -7,10 +7,10 @@ lockdown mode is enabled are annotated as such.
 Signed-off-by: Kevin Lampis <klampis@cloud.com>
 Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
 diff --git a/xen/arch/arm/domain_build.c b/xen/arch/arm/domain_build.c
-index 7b47abade196..3e043d8d0c5c 100644
+index fb8fbb1650b2..c34c0feb79c1 100644
 --- a/xen/arch/arm/domain_build.c
 +++ b/xen/arch/arm/domain_build.c
-@@ -40,7 +40,7 @@
+@@ -43,7 +43,7 @@
  #include <xen/serial.h>
  
  static unsigned int __initdata opt_dom0_max_vcpus;
@@ -19,7 +19,7 @@ index 7b47abade196..3e043d8d0c5c 100644
  
  /*
   * If true, the extended regions support is enabled for dom0 and
-@@ -60,7 +60,7 @@ static int __init parse_dom0_mem(const char *s)
+@@ -63,7 +63,7 @@ static int __init parse_dom0_mem(const char *s)
  
      return *s ? -EINVAL : 0;
  }
@@ -29,10 +29,10 @@ index 7b47abade196..3e043d8d0c5c 100644
  int __init parse_arch_dom0_param(const char *s, const char *e)
  {
 diff --git a/xen/arch/x86/acpi/cpu_idle.c b/xen/arch/x86/acpi/cpu_idle.c
-index 914661312df5..e9bc15748458 100644
+index d60a07bfd56b..13af97e1288d 100644
 --- a/xen/arch/x86/acpi/cpu_idle.c
 +++ b/xen/arch/x86/acpi/cpu_idle.c
-@@ -140,7 +140,7 @@ static int __init cf_check parse_cstate(const char *s)
+@@ -141,7 +141,7 @@ static int __init cf_check parse_cstate(const char *s)
          max_csubstate = simple_strtoul(s + 1, NULL, 0);
      return 0;
  }
@@ -42,7 +42,7 @@ index 914661312df5..e9bc15748458 100644
  static bool __read_mostly local_apic_timer_c2_ok;
  boolean_param("lapic_timer_c2_ok", local_apic_timer_c2_ok);
 diff --git a/xen/arch/x86/cpu/amd.c b/xen/arch/x86/cpu/amd.c
-index 3108d27caaa1..9bcb5bbd2922 100644
+index 801a35de30f2..5efe2ecbcbd7 100644
 --- a/xen/arch/x86/cpu/amd.c
 +++ b/xen/arch/x86/cpu/amd.c
 @@ -47,7 +47,7 @@ integer_param("cpuid_mask_thermal_ecx", opt_cpuid_mask_thermal_ecx);
@@ -55,7 +55,7 @@ index 3108d27caaa1..9bcb5bbd2922 100644
  /* Signal whether the ACPI C1E quirk is required. */
  bool __read_mostly amd_acpi_c1e_quirk;
 diff --git a/xen/arch/x86/cpu/mcheck/mce.c b/xen/arch/x86/cpu/mcheck/mce.c
-index 9028ccde5477..6c4ce0b3d015 100644
+index 9a91807cfb33..e37e9b110808 100644
 --- a/xen/arch/x86/cpu/mcheck/mce.c
 +++ b/xen/arch/x86/cpu/mcheck/mce.c
 @@ -31,7 +31,7 @@
@@ -68,7 +68,7 @@ index 9028ccde5477..6c4ce0b3d015 100644
  bool is_mc_panic;
  DEFINE_PER_CPU_READ_MOSTLY(unsigned int, nr_mce_banks);
 diff --git a/xen/arch/x86/cpu/microcode/core.c b/xen/arch/x86/cpu/microcode/core.c
-index 9d5cbf25ce8e..80390bb8e683 100644
+index 17540fc2e660..769a3226e1c0 100644
 --- a/xen/arch/x86/cpu/microcode/core.c
 +++ b/xen/arch/x86/cpu/microcode/core.c
 @@ -28,6 +28,7 @@
@@ -102,11 +102,33 @@ index 9d5cbf25ce8e..80390bb8e683 100644
  
  static struct microcode_ops __ro_after_init ucode_ops;
  
+diff --git a/xen/arch/x86/cpu/mwait-idle.c b/xen/arch/x86/cpu/mwait-idle.c
+index f47fdfb569d4..8c6998828c44 100644
+--- a/xen/arch/x86/cpu/mwait-idle.c
++++ b/xen/arch/x86/cpu/mwait-idle.c
+@@ -69,7 +69,7 @@
+ #endif
+ 
+ static __initdata bool opt_mwait_idle = true;
+-boolean_param("mwait-idle", opt_mwait_idle);
++boolean_secure_param("mwait-idle", opt_mwait_idle);
+ 
+ static unsigned int mwait_substates;
+ 
+@@ -84,7 +84,7 @@ static unsigned int mwait_substates;
+  */
+ static unsigned int __ro_after_init preferred_states_mask;
+ static char __initdata preferred_states[64];
+-string_param("preferred-cstates", preferred_states);
++string_secure_param("preferred-cstates", preferred_states);
+ 
+ #define LAPIC_TIMER_ALWAYS_RELIABLE 0xFFFFFFFF
+ /* Reliable LAPIC Timer States, bit 1 for C1 etc. Default to only C1. */
 diff --git a/xen/arch/x86/dom0_build.c b/xen/arch/x86/dom0_build.c
-index 8191d90a2299..ec42d23b2a26 100644
+index a32ad2739fb7..6e30acce9e2c 100644
 --- a/xen/arch/x86/dom0_build.c
 +++ b/xen/arch/x86/dom0_build.c
-@@ -141,7 +141,7 @@ static int __init cf_check parse_dom0_mem(const char *s)
+@@ -142,7 +142,7 @@ static int __init cf_check parse_dom0_mem(const char *s)
  
      return s[-1] ? -EINVAL : ret;
  }
@@ -115,7 +137,7 @@ index 8191d90a2299..ec42d23b2a26 100644
  
  static unsigned int __initdata opt_dom0_max_vcpus_min = 1;
  static unsigned int __initdata opt_dom0_max_vcpus_max = UINT_MAX;
-@@ -163,7 +163,7 @@ static int __init cf_check parse_dom0_max_vcpus(const char *s)
+@@ -164,7 +164,7 @@ static int __init cf_check parse_dom0_max_vcpus(const char *s)
  
      return *s ? -EINVAL : 0;
  }
@@ -124,7 +146,7 @@ index 8191d90a2299..ec42d23b2a26 100644
  
  static __initdata unsigned int dom0_nr_pxms;
  static __initdata unsigned int dom0_pxms[MAX_NUMNODES] =
-@@ -204,7 +204,7 @@ static int __init cf_check parse_dom0_nodes(const char *s)
+@@ -205,7 +205,7 @@ static int __init cf_check parse_dom0_nodes(const char *s)
  
      return rc;
  }
@@ -134,10 +156,10 @@ index 8191d90a2299..ec42d23b2a26 100644
  cpumask_t __initdata dom0_cpus;
  static nodemask_t __initdata dom0_nodes;
 diff --git a/xen/arch/x86/hvm/hvm.c b/xen/arch/x86/hvm/hvm.c
-index 96beb8d09f80..177e015b4c74 100644
+index 3bf4a794a843..04bcd997cc20 100644
 --- a/xen/arch/x86/hvm/hvm.c
 +++ b/xen/arch/x86/hvm/hvm.c
-@@ -87,12 +87,12 @@ unsigned long __section(".bss.page_aligned") __aligned(PAGE_SIZE)
+@@ -90,12 +90,12 @@ unsigned long __section(".bss.page_aligned") __aligned(PAGE_SIZE)
  
  /* Xen command-line option to enable HAP */
  static bool __initdata opt_hap_enabled = true;
@@ -153,7 +175,7 @@ index 96beb8d09f80..177e015b4c74 100644
  static const char __initconst warning_hvm_fep[] =
      "WARNING: HVM FORCED EMULATION PREFIX IS AVAILABLE\n"
 diff --git a/xen/arch/x86/irq.c b/xen/arch/x86/irq.c
-index 9e044ef1a4a0..df93b4e9d61c 100644
+index cdb0ce8830d2..5bd0e386f5c6 100644
 --- a/xen/arch/x86/irq.c
 +++ b/xen/arch/x86/irq.c
 @@ -34,7 +34,7 @@
@@ -163,10 +185,10 @@ index 9e044ef1a4a0..df93b4e9d61c 100644
 -boolean_param("noirqbalance", opt_noirqbalance);
 +boolean_secure_param("noirqbalance", opt_noirqbalance);
  
- unsigned int __read_mostly nr_irqs_gsi = 16;
+ unsigned int __read_mostly nr_irqs_gsi = NR_ISA_IRQS;
  unsigned int __read_mostly nr_irqs;
 diff --git a/xen/arch/x86/mm/p2m.c b/xen/arch/x86/mm/p2m.c
-index d463d3f1a497..6148e22afc0b 100644
+index bd9f70d48747..a2c667de543c 100644
 --- a/xen/arch/x86/mm/p2m.c
 +++ b/xen/arch/x86/mm/p2m.c
 @@ -41,8 +41,8 @@ DEFINE_PERCPU_RWLOCK_GLOBAL(p2m_percpu_rwlock);
@@ -181,7 +203,7 @@ index d463d3f1a497..6148e22afc0b 100644
  int p2m_init_logdirty(struct p2m_domain *p2m)
  {
 diff --git a/xen/arch/x86/nmi.c b/xen/arch/x86/nmi.c
-index 60f71359f5f8..907c771d54f5 100644
+index 1d5e99959017..daded9626ac6 100644
 --- a/xen/arch/x86/nmi.c
 +++ b/xen/arch/x86/nmi.c
 @@ -73,7 +73,7 @@ static int __init cf_check parse_watchdog(const char *s)
@@ -194,10 +216,10 @@ index 60f71359f5f8..907c771d54f5 100644
  /* opt_watchdog_timeout: Number of seconds to wait before panic. */
  static unsigned int opt_watchdog_timeout = 5;
 diff --git a/xen/arch/x86/setup.c b/xen/arch/x86/setup.c
-index 23f27df8caba..a1eb77785e41 100644
+index 5ee2f4f415ec..898512ee707f 100644
 --- a/xen/arch/x86/setup.c
 +++ b/xen/arch/x86/setup.c
-@@ -66,7 +66,7 @@
+@@ -67,7 +67,7 @@
  
  /* opt_nosmp: If true, secondary processors are ignored. */
  static bool __initdata opt_nosmp;
@@ -206,11 +228,20 @@ index 23f27df8caba..a1eb77785e41 100644
  
  /* maxcpus: maximum number of CPUs to activate. */
  static unsigned int __initdata max_cpus;
+@@ -98,7 +98,7 @@ boolean_param("noapic", skip_ioapic_setup);
+ /* **** Linux config option: propagated to domain0. */
+ /* xen_cpuidle: xen control cstate. */
+ int8_t __read_mostly xen_cpuidle = -1;
+-boolean_param("cpuidle", xen_cpuidle);
++boolean_secure_param("cpuidle", xen_cpuidle);
+ 
+ #ifndef NDEBUG
+ unsigned long __initdata highmem_start;
 diff --git a/xen/arch/x86/traps.c b/xen/arch/x86/traps.c
-index 5841e7ed5f5a..d6c0f65f2e76 100644
+index f2ef1054f6fe..f090919c0249 100644
 --- a/xen/arch/x86/traps.c
 +++ b/xen/arch/x86/traps.c
-@@ -82,7 +82,7 @@
+@@ -62,7 +62,7 @@
   *  ignore: The NMI error is cleared and ignored.
   */
  static char __read_mostly opt_nmi[10] = "fatal";
@@ -220,10 +251,10 @@ index 5841e7ed5f5a..d6c0f65f2e76 100644
  DEFINE_PER_CPU(uint64_t, efer);
  static DEFINE_PER_CPU(unsigned long, last_extable_addr);
 diff --git a/xen/arch/x86/x86_64/mmconfig-shared.c b/xen/arch/x86/x86_64/mmconfig-shared.c
-index d2ec3d808fca..5094cd31bff7 100644
+index f23d76e91125..c45e94b2d843 100644
 --- a/xen/arch/x86/x86_64/mmconfig-shared.c
 +++ b/xen/arch/x86/x86_64/mmconfig-shared.c
-@@ -60,7 +60,7 @@ static int __init cf_check parse_mmcfg(const char *s)
+@@ -61,7 +61,7 @@ static int __init cf_check parse_mmcfg(const char *s)
  
      return rc;
  }
@@ -233,10 +264,10 @@ index d2ec3d808fca..5094cd31bff7 100644
  static const char *__init cf_check pci_mmcfg_e7520(void)
  {
 diff --git a/xen/common/domain.c b/xen/common/domain.c
-index b4d9e38d09b3..eb3c11c680ee 100644
+index e5d2efc41a3c..381ac1974488 100644
 --- a/xen/common/domain.c
 +++ b/xen/common/domain.c
-@@ -54,7 +54,7 @@ unsigned int xen_processor_pmbits = XEN_PROCESSOR_PM_PX;
+@@ -55,7 +55,7 @@ unsigned int xen_processor_pmbits = XEN_PROCESSOR_PM_PX;
  
  /* opt_dom0_vcpus_pin: If true, dom0 VCPUs are pinned. */
  bool opt_dom0_vcpus_pin;
@@ -246,10 +277,10 @@ index b4d9e38d09b3..eb3c11c680ee 100644
  /* Protect updates/reads (resp.) of domain_list and domain_hash. */
  DEFINE_SPINLOCK(domlist_update_lock);
 diff --git a/xen/common/kernel.c b/xen/common/kernel.c
-index 27806a1ed69a..dc59ea36160c 100644
+index 321aa2a1eb0a..e36cd0fd3d3b 100644
 --- a/xen/common/kernel.c
 +++ b/xen/common/kernel.c
-@@ -137,8 +137,15 @@ static int parse_params(const char *cmdline, const struct kernel_param *start,
+@@ -138,8 +138,15 @@ static int __init parse_params(
                  continue;
              }
  
@@ -267,10 +298,10 @@ index 27806a1ed69a..dc59ea36160c 100644
              {
              case OPT_STR:
 diff --git a/xen/common/kexec.c b/xen/common/kexec.c
-index 84fe8c35976e..790839657d79 100644
+index a1b25fd67ef2..845f6f9ad445 100644
 --- a/xen/common/kexec.c
 +++ b/xen/common/kexec.c
-@@ -189,7 +189,7 @@ static int __init cf_check parse_crashkernel(const char *str)
+@@ -195,7 +195,7 @@ static int __init cf_check parse_crashkernel(const char *str)
  
      return rc;
  }
@@ -280,10 +311,10 @@ index 84fe8c35976e..790839657d79 100644
  /* Parse command lines in the format:
   *
 diff --git a/xen/common/numa.c b/xen/common/numa.c
-index ad75955a1622..c4981f2ff115 100644
+index d2bc85c87a44..c5ea804e9931 100644
 --- a/xen/common/numa.c
 +++ b/xen/common/numa.c
-@@ -687,7 +687,7 @@ static int __init cf_check numa_setup(const char *opt)
+@@ -694,7 +694,7 @@ static int __init cf_check numa_setup(const char *opt)
  
      return 0;
  }
@@ -293,10 +324,10 @@ index ad75955a1622..c4981f2ff115 100644
  static void cf_check dump_numa(unsigned char key)
  {
 diff --git a/xen/common/page_alloc.c b/xen/common/page_alloc.c
-index a30bcc987874..9855357c1e7c 100644
+index 769f9053d8ac..0ff2b75c14fe 100644
 --- a/xen/common/page_alloc.c
 +++ b/xen/common/page_alloc.c
-@@ -235,7 +235,7 @@ static int __init cf_check parse_bootscrub_param(const char *s)
+@@ -236,7 +236,7 @@ static int __init cf_check parse_bootscrub_param(const char *s)
  
      return 0;
  }
@@ -319,10 +350,10 @@ index c47341b97764..231de1454a95 100644
  static void noreturn reboot_or_halt(void)
  {
 diff --git a/xen/drivers/char/console.c b/xen/drivers/char/console.c
-index 572ea7ffa791..904624db8863 100644
+index c797b1710e4c..22808382d683 100644
 --- a/xen/drivers/char/console.c
 +++ b/xen/drivers/char/console.c
-@@ -44,7 +44,7 @@
+@@ -68,7 +68,7 @@ static void console_send(const char *str, size_t len, unsigned int flags);
  
  /* console: comma-separated list of console outputs. */
  static char __initdata opt_console[30] = OPT_CONSOLE_STR;
@@ -332,7 +363,7 @@ index 572ea7ffa791..904624db8863 100644
  /* conswitch: a character pair controlling console switching. */
  /* Char 1: CTRL+<char1> is used to switch console input between Xen and DOM0 */
 diff --git a/xen/drivers/char/ns16550.c b/xen/drivers/char/ns16550.c
-index eaeb0e09d01e..d4aae4a928b6 100644
+index a42861f66581..721ce37a9f8b 100644
 --- a/xen/drivers/char/ns16550.c
 +++ b/xen/drivers/char/ns16550.c
 @@ -20,6 +20,7 @@
@@ -343,7 +374,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  #include <xen/param.h>
  #include <xen/sched.h>
  #include <xen/sections.h>
-@@ -1390,8 +1391,8 @@ static void enable_exar_enhanced_bits(const struct ns16550 *uart)
+@@ -1449,8 +1450,8 @@ static void enable_exar_enhanced_bits(const struct ns16550 *uart)
   */
  static char __initdata opt_com1[128] = "";
  static char __initdata opt_com2[128] = "";
@@ -354,7 +385,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  
  enum serial_param_type {
      baud_rate,
-@@ -1477,7 +1478,7 @@ static enum __init serial_param_type get_token(char *token, char **value)
+@@ -1536,7 +1537,7 @@ static enum __init serial_param_type get_token(char *token, char **value)
      } while ( 0 )
  
  
@@ -363,7 +394,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  {
      int baud;
      const char *conf;
-@@ -1546,7 +1547,17 @@ static bool __init parse_positional(struct ns16550 *uart, char **str)
+@@ -1608,7 +1609,17 @@ static bool __init parse_positional(struct ns16550 *uart, char **str)
          else
  #endif
          {
@@ -382,7 +413,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
          }
      }
  
-@@ -1586,7 +1597,7 @@ static bool __init parse_positional(struct ns16550 *uart, char **str)
+@@ -1648,7 +1659,7 @@ static bool __init parse_positional(struct ns16550 *uart, char **str)
      return true;
  }
  
@@ -391,7 +422,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  {
      char *token, *start = str;
      char *param_value = NULL;
-@@ -1611,14 +1622,32 @@ static bool __init parse_namevalue_pairs(char *str, struct ns16550 *uart)
+@@ -1673,14 +1684,32 @@ static bool __init parse_namevalue_pairs(char *str, struct ns16550 *uart)
              break;
  
          case io_base:
@@ -429,7 +460,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  
          case irq:
              uart->irq = simple_strtoul(param_value, NULL, 0);
-@@ -1682,7 +1711,7 @@ static bool __init parse_namevalue_pairs(char *str, struct ns16550 *uart)
+@@ -1744,7 +1773,7 @@ static bool __init parse_namevalue_pairs(char *str, struct ns16550 *uart)
  }
  
  static void __init ns16550_parse_port_config(
@@ -438,7 +469,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  {
      char com_console_options[128];
      char *str;
-@@ -1700,10 +1729,10 @@ static void __init ns16550_parse_port_config(
+@@ -1762,10 +1791,10 @@ static void __init ns16550_parse_port_config(
      str = com_console_options;
  
      /* parse positional parameters and get pointer for name-value pairs */
@@ -451,7 +482,7 @@ index eaeb0e09d01e..d4aae4a928b6 100644
          return;
  
   config_parsed:
-@@ -1749,7 +1778,7 @@ void __init ns16550_init(int index, struct ns16550_defaults *defaults)
+@@ -1811,7 +1840,7 @@ void __init ns16550_init(int index, struct ns16550_defaults *defaults)
      uart->reg_width = 1;
      uart->reg_shift = 0;
  
@@ -461,10 +492,10 @@ index eaeb0e09d01e..d4aae4a928b6 100644
  
  #endif /* CONFIG_X86 */
 diff --git a/xen/drivers/cpufreq/cpufreq.c b/xen/drivers/cpufreq/cpufreq.c
-index 5cb833953687..7c036ac80824 100644
+index 4b74f5590b34..17fddb6160f9 100644
 --- a/xen/drivers/cpufreq/cpufreq.c
 +++ b/xen/drivers/cpufreq/cpufreq.c
-@@ -138,7 +138,7 @@ static int __init cf_check setup_cpufreq_option(const char *str)
+@@ -181,7 +181,7 @@ static int __init cf_check setup_cpufreq_option(const char *str)
  
      return (choice < 0) ? ret : 0;
  }

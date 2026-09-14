@@ -16,6 +16,8 @@ Fixes: 7a26b541a202 ("vtd: Dynamically allocate IRQ-tracking structures, only fo
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 
+diff --git a/xen/drivers/passthrough/x86/hvm.c b/xen/drivers/passthrough/x86/hvm.c
+index a2ca7e0e570c..c4dec8b05c33 100644
 --- a/xen/drivers/passthrough/x86/hvm.c
 +++ b/xen/drivers/passthrough/x86/hvm.c
 @@ -231,6 +231,12 @@ int pt_irq_create_bind(

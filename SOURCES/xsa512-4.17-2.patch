@@ -50,10 +50,10 @@ index 54f7f765167b..a91caabec674 100644
  	(* perm is the same *)
  	()
 diff --git a/tools/ocaml/xenstored/process.ml b/tools/ocaml/xenstored/process.ml
-index 33161da5eb8b..b2ee4d0adf1b 100644
+index a51c8a7d998d..73d7d23ce107 100644
 --- a/tools/ocaml/xenstored/process.ml
 +++ b/tools/ocaml/xenstored/process.ml
-@@ -328,15 +328,18 @@ let do_isintroduced con _t domains _cons data =
+@@ -345,15 +345,18 @@ let do_isintroduced con _t domains _cons data =
  		in
  	if domid = Define.domid_self || Domains.exist domains domid then "T\000" else "F\000"
  

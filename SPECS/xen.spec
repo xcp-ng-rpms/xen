@@ -31,7 +31,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -338,6 +338,9 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 # UEFI GOP bugfixes
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
+
+# Viridian for >64 vCPUs
+Patch1030: 0001-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 ExclusiveArch: x86_64
 
@@ -1185,6 +1188,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Sep 15 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.7-2.2
+- Enable Viridian enlightenments to support VMs with >64 vCPUs
+
 * Thu Sep 10 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-2.1
 - Sync with XenServer 4.17.7-2
 - Remove XSA-492 patches now part of XS release

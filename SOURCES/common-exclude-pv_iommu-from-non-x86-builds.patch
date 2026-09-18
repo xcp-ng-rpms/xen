@@ -1,0 +1,30 @@
+From f578a20b4a3a41bce02fc84d4358d4bffee423f7 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Mon, 8 Jun 2026 13:31:37 +0200
+Subject: [PATCH] common: exclude pv_iommu from non-x86 builds
+
+The PV IOMMU code uses x86-specific APIs (p2m, paging_mode_translate,
+boot_cpu_data) and has no relevance on ARM, which has no PV guest
+support. So, make the pv_iommu.o dependant on CONFIG_X86.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/common/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xen/common/Makefile b/xen/common/Makefile
+index e24369ee9a..9c3aee1e6d 100644
+--- a/xen/common/Makefile
++++ b/xen/common/Makefile
+@@ -39,7 +39,7 @@ obj-y += percpu.o
+ obj-$(CONFIG_PERF_COUNTERS) += perfc.o
+ obj-bin-$(CONFIG_HAS_PMAP) += pmap.init.o
+ obj-y += preempt.o
+-obj-y += pv_iommu.o
++obj-$(CONFIG_X86) += pv_iommu.o
+ obj-y += random.o
+ obj-y += rangeset.o
+ obj-y += radix-tree.o
+-- 
+2.53.0
+

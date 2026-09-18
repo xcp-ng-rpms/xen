@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Date: Fri, 18 Sep 2026 15:09:22 +0200
+Subject: [PATCH] xenguest: Apply hcall_ipi setting from xenstore
+
+The variable to store the setting is present and applied, but the code
+to actually set the variable from xenstore data isn't. So add that in
+order to make the hcall_ipi setting work.
+
+Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+
+diff --git a/tools/xenguest/xenguest_stubs.c b/tools/xenguest/xenguest_stubs.c
+index 63f9f47c773f..779957016ae1 100644
+--- a/tools/xenguest/xenguest_stubs.c
++++ b/tools/xenguest/xenguest_stubs.c
+@@ -400,6 +400,7 @@ static void get_flags(struct flags *f)
+     f->viridian_apic_assist = xenstore_get("platform/viridian_apic_assist");
+     f->viridian_crash_ctl = xenstore_get("platform/viridian_crash_ctl");
+     f->viridian_stimer = xenstore_get_value(&stimer_set, "platform/viridian_stimer");
++    f->viridian_hcall_ipi = xenstore_get("platform/viridian_hcall_ipi");
+ 
+     /*
+      * For vGPU-enabled VMs, it is unsafe to migrate VMs with time_ref_count

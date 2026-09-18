@@ -349,6 +349,13 @@ Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 # XSA 515
 Patch1030: xsa515.patch
 
+Patch1032: 0001-x86-vhpet-Fix-sanitization-of-legacy-IRQ-route.patch
+Patch1033: 0002-x86-Dump-HPET-state-in-debug-key-q.patch
+Patch1034: 0003-x86-Dump-vIOAPIC-state-in-debug-key-q.patch
+Patch1035: 0004-x86-Dump-vPIC-state-in-debug-key-q.patch
+Patch1036: 0005-x86-Dump-vLAPIC-state-in-debug-key-q.patch
+Patch1037: 0006-x86-Dump-Viridian-state-in-debug-key-q.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

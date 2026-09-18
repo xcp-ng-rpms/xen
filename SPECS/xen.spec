@@ -29,7 +29,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.21.2
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.21.2.tar.gz
@@ -192,6 +192,10 @@ Patch1000: xcpng-no-default-lockdown.patch
 # Fix xenguest EMP path (xg_emu.c) to accept mem_pnode from emu-manager
 Patch1001: xenguest-xg_emu-mem_pnode.patch
 %endif
+
+# Viridian for >64 vCPUs
+Patch1002: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
+Patch1003: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 ExclusiveArch: %{x86_64}
 
@@ -1116,6 +1120,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Sep 18 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.21.2-3.2
+- Enable Viridian enlightenments to support VMs with >64 vCPUs
+
 * Wed Sep 09 2026 Thierry Escande <thierry.escande@vates.tech> - 4.21.2-3.1
 - Sync with 4.21.2-3
 - *** Upstream changelog ***

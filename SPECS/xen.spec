@@ -17,12 +17,14 @@
 # Normally derived from the tag and provided by the environment.  May be a
 # `git describe` when not building an from a tagged changeset.
 
-%define lp_devel_dir %{_usrsrc}/xen-%{version}-%{release}
-
-# Prevent RPM adding Provides/Requires to lp-devel package, or mangling shebangs
-%global __provides_exclude_from ^%{lp_devel_dir}/.*$
-%global __requires_exclude_from ^%{lp_devel_dir}/.*$
-%global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir}/.*$
+# XCP-ng BEGIN: remove support for livepatching support
+# %%define lp_devel_dir %%{_usrsrc}/xen-%%{version}-%%{release}
+#
+# # Prevent RPM adding Provides/Requires to lp-devel package, or mangling shebangs
+# %%global __provides_exclude_from ^%%{lp_devel_dir}/.*$
+# %%global __requires_exclude_from ^%%{lp_devel_dir}/.*$
+# %%global __brp_mangle_shebangs_exclude_from ^%%{lp_devel_dir}/.*$
+# XCP-ng END
 
 %if 0%{?xenserver} < 9
 %global __patch /usr/bin/patch --fuzz=0
@@ -31,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -531,13 +533,15 @@ License: GPLv2
 %description dom0-tests
 This package contains test cases for the Xen Hypervisor.
 
-%package lp-devel_%{version}_%{release}
-License: GPLv2
-Summary: Development package for building livepatches
-%{core_builddeps Requires}
-%description lp-devel_%{version}_%{release}
-Contains the prepared source files, config, and xen-syms for building live
-patches against base version %{version}-%{release}.
+# XCP-ng BEGIN: remove support for livepatching support
+# %%package lp-devel_%%{version}_%%{release}
+# License: GPLv2
+# Summary: Development package for building livepatches
+# %%{core_builddeps Requires}
+# %%description lp-devel_%%{version}_%%{release}
+# Contains the prepared source files, config, and xen-syms for building live
+# patches against base version %%{version}-%%{release}.
+# XCP-ng END
 
 %prep
 %autosetup -p1
@@ -567,10 +571,12 @@ export PYTHON="%{__python}"
            --with-system-ipxe=/usr/share/ipxe/ipxe.bin \
            --with-system-ovmf=/usr/share/edk2/OVMF-release.fd
 
-# Take a snapshot of the configured source tree for livepatches
-mkdir ../livepatch-src
-cp -a . ../livepatch-src/
-echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
+# XCP-ng BEGIN: remove support for livepatching support
+# # Take a snapshot of the configured source tree for livepatches
+# mkdir ../livepatch-src
+# cp -a . ../livepatch-src/
+# echo %%{?_devtoolset_enable} > ../livepatch-src/prepare-build
+# XCP-ng END
 
 # Build tools and man pages
 %{?_cov_wrap} %{make_build} build-tools
@@ -625,10 +631,12 @@ mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs
 %{make_build} DESTDIR=%{buildroot} install-tools
 %{make_build} DESTDIR=%{buildroot} -C docs install-man-pages
 
-# Install artefacts for livepatches
-%{__install} -p -D -m 644 xen/build-xen-release/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms
-%{__install} -p -D -m 644 xen/build-xen-debug/xen-syms %{buildroot}%{lp_devel_dir}/xen-syms-d
-cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
+# XCP-ng BEGIN: remove support for livepatching support
+# # Install artefacts for livepatches
+# %%{__install} -p -D -m 644 xen/build-xen-release/xen-syms %%{buildroot}%%{lp_devel_dir}/xen-syms
+# %%{__install} -p -D -m 644 xen/build-xen-debug/xen-syms %%{buildroot}%%{lp_devel_dir}/xen-syms-d
+# cp -a ../livepatch-src/. %%{buildroot}%%{lp_devel_dir}
+# XCP-ng end
 
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
@@ -1131,8 +1139,10 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/bin/test_x86_emulator
 %{_datadir}/xen-dom0-tests-metadata.json
 
-%files lp-devel_%{version}_%{release}
-%{lp_devel_dir}
+# XCP-ng BEGIN: remove support for livepatching support
+# %%files lp-devel_%%{version}_%%{release}
+# %%{lp_devel_dir}
+# XCP-ng END
 
 %doc
 
@@ -1189,6 +1199,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Sep 23 2026 Yann Dirson <yann.dirson@vates.tech> - 4.17.7-2.3
+- Drop lp-devel package
+
 * Fri Sep 18 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.17.7-2.2
 - Enable Viridian enlightenments to support VMs with >64 vCPUs
 

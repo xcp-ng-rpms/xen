@@ -1418,7 +1418,7 @@ fi
   - Fix for XSA-471 CVE-2024-36350 CVE-2024-36357
   - Perform provenance checks on AMD microcode blobs
 
-* Tue Jul 02 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-14.1
+* Wed Jul 02 2025 Thierry Escande <thierry.escande@vates.tech> - 4.17.5-14.1
 - Sync with 4.17.5-14
 - Remove xsa470-4.17.patch included in XS release
 - *** Upstream changelog ***
@@ -1483,7 +1483,7 @@ fi
 * Fri Feb 28 2025 David Morel <david.morel@vates.tech> - 4.17.5-4.2
 - Fix for XSA-467 / CVE-2025-1713
 
-* Mon Feb  6 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-4.1
+* Thu Feb 06 2025 Yann Dirson <yann.dirson@vates.tech> - 4.17.5-4.1
 - xenguest: activate nested virt when requested
 
 * Tue Nov  5 2024 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.5-4

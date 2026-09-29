@@ -1,0 +1,126 @@
+From a14db514a859abd478509b5827ca383a951a075e Mon Sep 17 00:00:00 2001
+From: Andrii Sultanov <andriy.sultanov@vates.tech>
+Date: Wed, 5 Nov 2025 09:35:16 +0000
+Subject: [PATCH 08/13] fixup xenctrl stubs
+
+Arm has no shadow paging, so XEN_DOMCTL_SHADOW_OP_{GET,SET}_ALLOCATION
+is x86-only. The closest equivalent is the P2M page-table pool, which
+libxl sizes for Arm guests via XEN_DOMCTL_{get,set}_paging_mempool_size.
+Implement shadow_allocation_{get,set} with it on Arm, so the pool size
+xenopsd computes (and accounts for) actually reaches Xen, and the value
+read back is the real pool size instead of 0.
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ tools/ocaml/libs/xc/xenctrl_stubs.c | 47 +++++++++++++++++++++++++----
+ 1 file changed, 41 insertions(+), 6 deletions(-)
+
+diff --git a/tools/ocaml/libs/xc/xenctrl_stubs.c b/tools/ocaml/libs/xc/xenctrl_stubs.c
+index 30c5726c55..482952d229 100644
+--- a/tools/ocaml/libs/xc/xenctrl_stubs.c
++++ b/tools/ocaml/libs/xc/xenctrl_stubs.c
+@@ -194,6 +194,7 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ 	CAMLlocal2(l, arch_domconfig);
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 
++
+ 	/* Mnemonics for the named fields inside domctl_create_config */
+ #define VAL_SSIDREF             Field(config, 0)
+ #define VAL_HANDLE              Field(config, 1)
+@@ -269,9 +270,11 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ /*#define VAL_TEE_TYPE             Field(arch_domconfig, 4)*/
+ /*#define VAL_SCI_TYPE             Field(arch_domconfig, 5)*/
+ 
+-                cfg.arch.gic_version = VAL_GIC_VERSION;
++                /*cfg.arch.gic_version = Int32_val(VAL_GIC_VERSION);*/
++                cfg.arch.gic_version = 2;
+                 /*cfg.arch.sve_vl = VAL_SVE_VL;*/
+-                cfg.arch.nr_spis = VAL_NR_SPIS;
++                /*cfg.arch.nr_spis = Int32_val(VAL_NR_SPIS);*/
++                cfg.arch.nr_spis = (~(uint32_t)0);
+                 /*cfg.arch.tee_type = VAL_TEE_TYPE; NONE is 0 */
+                 /*cfg.arch.arm_sci_type = VAL_SCI_TYPE; NONE is 0*/
+ 
+@@ -326,16 +329,19 @@ CAMLprim value stub_xc_domain_create(value xch_val, value wanted_domid, value co
+ #undef VAL_FLAGS
+ #undef VAL_HANDLE
+ #undef VAL_SSIDREF
++#undef VAL_GIC_VERSION
++#undef VAL_NR_SPIS
++#undef VAL_CLOCK_FREQ
+ 
+ 	caml_enter_blocking_section();
+ 	result = xc_domain_create(xch, &domid, &cfg);
+ 	caml_leave_blocking_section();
+ 
+-#if defined(__arm__) || defined(__aarch64__)
++/*#if defined(__arm__) || defined(__aarch64__)*/
+         /* Return the OUT (and IN/OUT) parameters */
+-        VAL_GIC_VERSION = cfg.arch.gic_version;
+-        VAL_CLOCK_FREQ = cfg.arch.clock_frequency;
+-#endif
++	/*Store_field(arch_domconfig, 0, Val_int(cfg.arch.gic_version));*/
++	/*Store_field(arch_domconfig, 2, Val_int(cfg.arch.clock_frequency));*/
++/*#endif*/
+ 
+ 	if (result < 0)
+ 		failwith_xc(xch);
+@@ -1442,6 +1448,7 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ {
+ 	CAMLparam2(xch_val, domid);
+ 	CAMLlocal1(mb);
++#if defined(__i386__) || defined(__x86_64__)
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1455,6 +1462,21 @@ CAMLprim value stub_shadow_allocation_get(value xch_val, value domid)
+ 		failwith_xc(xch);
+ 
+ 	mb = Val_int(c_mb);
++#elif defined(__arm__) || defined(__aarch64__)
++	/* No shadow paging on Arm: report the P2M pool instead. */
++	xc_interface *xch = xch_of_val(xch_val);
++	uint32_t c_domid = Int_val(domid);
++	uint64_t size;
++	int ret;
++
++	caml_enter_blocking_section();
++	ret = xc_get_paging_mempool_size(xch, c_domid, &size);
++	caml_leave_blocking_section();
++	if (ret != 0)
++		failwith_xc(xch);
++
++	mb = Val_int(size >> 20);
++#endif
+ 	CAMLreturn(mb);
+ }
+ 
+@@ -1462,6 +1484,7 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 					  value mb)
+ {
+ 	CAMLparam3(xch_val, domid, mb);
++#if defined(__i386__) || defined(__x86_64__)
+ 	xc_interface *xch = xch_of_val(xch_val);
+ 	unsigned int c_mb;
+ 	int ret;
+@@ -1474,7 +1497,19 @@ CAMLprim value stub_shadow_allocation_set(value xch_val, value domid,
+ 	caml_leave_blocking_section();
+ 	if (ret != 0)
+ 		failwith_xc(xch);
++#elif defined(__arm__) || defined(__aarch64__)
++	/* No shadow paging on Arm: size the P2M pool instead. */
++	xc_interface *xch = xch_of_val(xch_val);
++	uint32_t c_domid = Int_val(domid);
++	uint64_t size = (uint64_t)Int_val(mb) << 20;
++	int ret;
+ 
++	caml_enter_blocking_section();
++	ret = xc_set_paging_mempool_size(xch, c_domid, size);
++	caml_leave_blocking_section();
++	if (ret != 0)
++		failwith_xc(xch);
++#endif
+ 	CAMLreturn(Val_unit);
+ }
+ 

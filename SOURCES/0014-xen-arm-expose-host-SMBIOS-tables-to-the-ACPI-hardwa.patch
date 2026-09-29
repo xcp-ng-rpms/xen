@@ -1,0 +1,303 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Thu, 8 Oct 2026 11:05:16 +0200
+Subject: [PATCH] xen/arm: expose host SMBIOS tables to the ACPI hardware
+ domain
+
+When booting with ACPI, the hardware domain gets a stub EFI system table
+built by Xen whose configuration table only contains the ACPI 2.0 RSDP.
+The firmware's SMBIOS/SMBIOS3 entry points are dropped, so dom0 has no
+/sys/firmware/dmi and tools like dmidecode (and xapi's bios_strings) see
+no DMI information at all.
+
+Xen already records the firmware's SMBIOS entry points in efi.smbios and
+efi.smbios3 while booting. Add them to dom0's EFI configuration table
+and map the entry points plus the structure tables they reference 1:1
+into the hardware domain, like the ACPI tables are.
+
+Move SMBIOS3_TABLE_GUID into efiapi.h next to SMBIOS_TABLE_GUID so it
+can be used outside common/efi/boot.c.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+
+diff --git a/xen/arch/arm/efi/efi-dom0.c b/xen/arch/arm/efi/efi-dom0.c
+index baee8ab716cb..fe7f344cb4c6 100644
+--- a/xen/arch/arm/efi/efi-dom0.c
++++ b/xen/arch/arm/efi/efi-dom0.c
+@@ -27,6 +27,8 @@
+ #include <xen/libfdt/libfdt.h>
+ #include <asm/setup.h>
+ #include <asm/acpi.h>
++#include <asm/p2m.h>
++#include <xen/vmap.h>
+ #include "../../../common/decompress.h"
+ #define XZ_EXTERN static
+ #include "../../../common/xz/crc32.c"
+@@ -34,6 +36,50 @@
+ /* Constant to indicate "Xen" in unicode u16 format */
+ static const CHAR16 xen_efi_fw_vendor[] = {0x0058, 0x0065, 0x006E, 0x0000};
+ 
++/* ACPI 2.0, SMBIOS and SMBIOS3 */
++#define DOM0_EFI_MAX_CONF_TABLES 3
++
++/* Entry point and structure table for each of SMBIOS and SMBIOS3 */
++#define DOM0_EFI_MAX_SMBIOS_REGIONS 4
++
++/*
++ * Host SMBIOS regions mapped into the hardware domain. They are also added
++ * to its EFI memory map, as Linux ignores config tables which don't live in
++ * a reserved region when running on Xen.
++ */
++static struct {
++    paddr_t start, size;
++} smbios_regions[DOM0_EFI_MAX_SMBIOS_REGIONS] __initdata;
++static unsigned int __initdata nr_smbios_regions;
++
++struct __packed smbios_eps {
++    char anchor[4];             /* "_SM_" */
++    u8 checksum;
++    u8 length;
++    u8 major, minor;
++    u16 max_size;
++    u8 revision;
++    u8 _rsrvd_[5];
++    char dmi_anchor[5];         /* "_DMI_" */
++    u8 dmi_checksum;
++    u16 dmi_size;
++    u32 dmi_address;
++    u16 dmi_num_structures;
++    u8 dmi_revision;
++};
++
++struct __packed smbios3_eps {
++    char anchor[5];             /* "_SM3_" */
++    u8 checksum;
++    u8 length;
++    u8 major, minor;
++    u8 docrev;
++    u8 revision;
++    u8 _rsrvd_;
++    u32 max_size;
++    u64 address;
++};
++
+ size_t __init estimate_efi_size(unsigned int mem_nr_banks)
+ {
+     size_t size;
+@@ -46,44 +92,154 @@ size_t __init estimate_efi_size(unsigned int mem_nr_banks)
+     if ( !acpi_disabled )
+         acpi_mem_nr_banks = bootinfo_get_acpi()->nr_banks;
+ 
+-    size = ROUNDUP(est_size + ect_size + fw_vendor_size, 8);
++    size = ROUNDUP(est_size + ect_size * DOM0_EFI_MAX_CONF_TABLES
++                   + fw_vendor_size, 8);
+     /* plus 1 for new created tables */
+-    size += ROUNDUP(emd_size * (mem_nr_banks + acpi_mem_nr_banks + 1), 8);
++    size += ROUNDUP(emd_size * (mem_nr_banks + acpi_mem_nr_banks + 1
++                                + DOM0_EFI_MAX_SMBIOS_REGIONS), 8);
+ 
+     return size;
+ }
+ 
++static int __init map_smbios_range(struct domain *d, paddr_t addr,
++                                   paddr_t len)
++{
++    unsigned long s = paddr_to_pfn(addr);
++    unsigned long e = PFN_UP(addr + len);
++    paddr_t start = pfn_to_paddr(s), size = pfn_to_paddr(e - s);
++    unsigned int i;
++    int rc;
++
++    rc = map_regions_p2mt(d, _gfn(s), e - s, _mfn(s), p2m_mmio_direct_c);
++    if ( rc )
++    {
++        printk(XENLOG_WARNING
++               "Unable to map SMBIOS region 0x%"PRIpaddr" - 0x%"PRIpaddr
++               " in domain %d\n", addr, addr + len - 1, d->domain_id);
++        return rc;
++    }
++
++    /* Don't describe the same pages twice in the EFI memory map. */
++    for ( i = 0; i < nr_smbios_regions; i++ )
++        if ( start >= smbios_regions[i].start &&
++             start + size <= smbios_regions[i].start + smbios_regions[i].size )
++            return 0;
++
++    ASSERT(nr_smbios_regions < DOM0_EFI_MAX_SMBIOS_REGIONS);
++    smbios_regions[nr_smbios_regions].start = start;
++    smbios_regions[nr_smbios_regions++].size = size;
++
++    return 0;
++}
++
++/*
++ * Map the host's SMBIOS entry point and the structure table it points to
++ * 1:1 into the hardware domain, so its kernel can find them through the
++ * EFI configuration table. Returns true if the entry point is usable.
++ */
++static bool __init map_smbios(struct domain *d, paddr_t ep_addr, bool v3)
++{
++    paddr_t ep_len, tbl_addr, tbl_len;
++    bool ok = false;
++
++    if ( v3 )
++    {
++        const struct smbios3_eps *eps = ioremap_cache(ep_addr, sizeof(*eps));
++
++        if ( !eps )
++            return false;
++        if ( !memcmp(eps->anchor, "_SM3_", 5) &&
++             eps->length >= sizeof(*eps) )
++        {
++            ep_len = eps->length;
++            tbl_addr = eps->address;
++            tbl_len = eps->max_size;
++            ok = true;
++        }
++        iounmap((void __iomem *)eps);
++    }
++    else
++    {
++        const struct smbios_eps *eps = ioremap_cache(ep_addr, sizeof(*eps));
++
++        if ( !eps )
++            return false;
++        if ( !memcmp(eps->anchor, "_SM_", 4) &&
++             !memcmp(eps->dmi_anchor, "_DMI_", 5) &&
++             eps->length >= sizeof(*eps) )
++        {
++            ep_len = eps->length;
++            tbl_addr = eps->dmi_address;
++            tbl_len = eps->dmi_size;
++            ok = true;
++        }
++        iounmap((void __iomem *)eps);
++    }
++
++    if ( !ok || !tbl_len )
++    {
++        printk(XENLOG_WARNING "Invalid SMBIOS%s entry point at 0x%"PRIpaddr"\n",
++               v3 ? "3" : "", ep_addr);
++        return false;
++    }
++
++    if ( map_smbios_range(d, ep_addr, ep_len) ||
++         map_smbios_range(d, tbl_addr, tbl_len) )
++        return false;
++
++    return true;
++}
++
+ void __init acpi_create_efi_system_table(struct domain *d,
+                                          struct membank tbl_add[])
+ {
+     u64 table_addr, table_size, offset = 0;
++    unsigned int nr_tables = 0;
+     u8 *base_ptr;
+     EFI_CONFIGURATION_TABLE *efi_conf_tbl;
+     EFI_SYSTEM_TABLE *efi_sys_tbl;
+ 
+     table_addr = d->arch.efi_acpi_gpa
+                  + acpi_get_table_offset(tbl_add, TBL_EFIT);
+-    table_size = sizeof(EFI_SYSTEM_TABLE) + sizeof(EFI_CONFIGURATION_TABLE)
+-                 + sizeof(xen_efi_fw_vendor);
+     base_ptr = d->arch.efi_acpi_table
+                + acpi_get_table_offset(tbl_add, TBL_EFIT);
+     efi_sys_tbl = (EFI_SYSTEM_TABLE *)base_ptr;
+ 
+-    efi_sys_tbl->Hdr.Signature = EFI_SYSTEM_TABLE_SIGNATURE;
+-    /* Specify the revision as 2.5 */
+-    efi_sys_tbl->Hdr.Revision = (2 << 16 | 50);
+-    efi_sys_tbl->Hdr.HeaderSize = table_size;
+-
+-    efi_sys_tbl->FirmwareRevision = 1;
+-    efi_sys_tbl->NumberOfTableEntries = 1;
+     offset += sizeof(EFI_SYSTEM_TABLE);
+     memcpy(base_ptr + offset, xen_efi_fw_vendor, sizeof(xen_efi_fw_vendor));
+     efi_sys_tbl->FirmwareVendor = (CHAR16 *)(table_addr + offset);
+ 
+     offset += sizeof(xen_efi_fw_vendor);
+     efi_conf_tbl = (EFI_CONFIGURATION_TABLE *)(base_ptr + offset);
+-    efi_conf_tbl->VendorGuid = (EFI_GUID)ACPI_20_TABLE_GUID;
+-    efi_conf_tbl->VendorTable = (VOID *)tbl_add[TBL_RSDP].start;
++    efi_conf_tbl[nr_tables].VendorGuid = (EFI_GUID)ACPI_20_TABLE_GUID;
++    efi_conf_tbl[nr_tables++].VendorTable = (VOID *)tbl_add[TBL_RSDP].start;
++
++    /* Pass the host's SMBIOS entry points through to the hardware domain. */
++    if ( efi.smbios3 != EFI_INVALID_TABLE_ADDR &&
++         map_smbios(d, efi.smbios3, true) )
++    {
++        efi_conf_tbl[nr_tables].VendorGuid = (EFI_GUID)SMBIOS3_TABLE_GUID;
++        efi_conf_tbl[nr_tables++].VendorTable = (VOID *)efi.smbios3;
++    }
++    if ( efi.smbios != EFI_INVALID_TABLE_ADDR &&
++         map_smbios(d, efi.smbios, false) )
++    {
++        efi_conf_tbl[nr_tables].VendorGuid = (EFI_GUID)SMBIOS_TABLE_GUID;
++        efi_conf_tbl[nr_tables++].VendorTable = (VOID *)efi.smbios;
++    }
++    ASSERT(nr_tables <= DOM0_EFI_MAX_CONF_TABLES);
++
++    table_size = sizeof(EFI_SYSTEM_TABLE)
++                 + nr_tables * sizeof(EFI_CONFIGURATION_TABLE)
++                 + sizeof(xen_efi_fw_vendor);
++
++    efi_sys_tbl->Hdr.Signature = EFI_SYSTEM_TABLE_SIGNATURE;
++    /* Specify the revision as 2.5 */
++    efi_sys_tbl->Hdr.Revision = (2 << 16 | 50);
++    efi_sys_tbl->Hdr.HeaderSize = table_size;
++
++    efi_sys_tbl->FirmwareRevision = 1;
++    efi_sys_tbl->NumberOfTableEntries = nr_tables;
+     efi_sys_tbl->ConfigurationTable = (EFI_CONFIGURATION_TABLE *)(table_addr
+                                                                   + offset);
+     xz_crc32_init();
+@@ -128,13 +284,19 @@ void __init acpi_create_efi_mmap_table(struct domain *d,
+                                    acpi->bank[i].start,
+                                    acpi->bank[i].size);
+ 
+-    fill_efi_memory_descriptor(desc, EfiACPIReclaimMemory,
++    fill_efi_memory_descriptor(desc++, EfiACPIReclaimMemory,
+                                d->arch.efi_acpi_gpa, d->arch.efi_acpi_len);
+ 
++    for ( i = 0; i < nr_smbios_regions; i++, desc++ )
++        fill_efi_memory_descriptor(desc, EfiReservedMemoryType,
++                                   smbios_regions[i].start,
++                                   smbios_regions[i].size);
++
+     tbl_add[TBL_MMAP].start = d->arch.efi_acpi_gpa
+                               + acpi_get_table_offset(tbl_add, TBL_MMAP);
+     tbl_add[TBL_MMAP].size = sizeof(EFI_MEMORY_DESCRIPTOR)
+-                             * (mem->nr_banks + acpi->nr_banks + 1);
++                             * (mem->nr_banks + acpi->nr_banks + 1
++                                + nr_smbios_regions);
+ }
+ 
+ /* Create /hypervisor/uefi node for efi properties. */
+diff --git a/xen/common/efi/boot.c b/xen/common/efi/boot.c
+index 8c8445b893a0..2c59dc6dd52d 100644
+--- a/xen/common/efi/boot.c
++++ b/xen/common/efi/boot.c
+@@ -34,8 +34,6 @@
+ 
+ #define EFI_REVISION(major, minor) (((major) << 16) | (minor))
+ 
+-#define SMBIOS3_TABLE_GUID \
+-  { 0xf2fd1544U, 0x9794, 0x4a2c, {0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94} }
+ #define SHIM_LOCK_PROTOCOL_GUID \
+   { 0x605dab50U, 0xe046, 0x4300, {0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23} }
+ #define SHIM_IMAGE_LOADER_GUID \
+diff --git a/xen/include/efi/efiapi.h b/xen/include/efi/efiapi.h
+index a616d1238aa4..73a5bb386ab7 100644
+--- a/xen/include/efi/efiapi.h
++++ b/xen/include/efi/efiapi.h
+@@ -879,6 +879,9 @@ typedef struct _EFI_BOOT_SERVICES {
+ #define SMBIOS_TABLE_GUID    \
+     { 0xeb9d2d31, 0x2d88, 0x11d3, {0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d} }
+ 
++#define SMBIOS3_TABLE_GUID    \
++    { 0xf2fd1544, 0x9794, 0x4a2c, {0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94} }
++
+ #define SAL_SYSTEM_TABLE_GUID    \
+     { 0xeb9d2d32, 0x2d88, 0x11d3, {0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d} }
+ 

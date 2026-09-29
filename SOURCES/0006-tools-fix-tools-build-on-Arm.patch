@@ -1,0 +1,52 @@
+From f8f944f14ee5172725a1998ffe4b1f2e2f19a46a Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Tue, 29 Sep 2026 10:55:29 +0200
+Subject: [PATCH 06/13] tools: fix tools build on Arm
+
+- vmdebug: HVM_PARAM_VIRIDIAN only exists on x86.
+- libacpi: mk_dsdt built for Arm doesn't know the x86-only --dm-version
+  option.
+
+Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ tools/libacpi/Makefile   | 4 ++--
+ tools/vmdebug/hvmparam.c | 2 ++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tools/libacpi/Makefile b/tools/libacpi/Makefile
+index 193ec78672..ea9caec0f7 100644
+--- a/tools/libacpi/Makefile
++++ b/tools/libacpi/Makefile
+@@ -43,7 +43,7 @@ $(ACPI_BUILD_DIR)/dsdt_anycpu_qemu_xen.asl: dsdt.asl dsdt_acpi_info.asl $(MK_DSD
+ 	# Remove last bracket
+ 	awk 'NR > 1 {print s} {s=$$0}' $< > $@.$(TMP_SUFFIX)
+ 	cat dsdt_acpi_info.asl >> $@.$(TMP_SUFFIX)
+-	$(MK_DSDT) --debug=$(debug) --dm-version qemu-xen >> $@.$(TMP_SUFFIX)
++	$(MK_DSDT) --debug=$(debug) >> $@.$(TMP_SUFFIX)
+ 	mv -f $@.$(TMP_SUFFIX) $@
+ 
+ # NB. awk invocation is a portable alternative to 'head -n -1'
+@@ -57,7 +57,7 @@ $(ACPI_BUILD_DIR)/dsdt_%cpu.asl: dsdt.asl dsdt_acpi_info.asl  $(MK_DSDT)
+ $(ACPI_BUILD_DIR)/dsdt_pvh.asl: dsdt_acpi_info.asl $(MK_DSDT)
+ 	printf "DefinitionBlock (\"DSDT.aml\", \"DSDT\", 5, \"Xen\", \"HVM\", 0)\n{" > $@
+ 	cat dsdt_acpi_info.asl >> $@
+-	$(MK_DSDT) --debug=$(debug) --maxcpu any --dm-version none >> $@
++	$(MK_DSDT) --debug=$(debug) --maxcpu any >> $@
+ 
+ $(ACPI_BUILD_DIR)/dsdt_anycpu_arm.asl: $(MK_DSDT)
+ 	printf "DefinitionBlock (\"DSDT.aml\", \"DSDT\", 3, \"Xen\", \"ARM\", 1)\n{" > $@.$(TMP_SUFFIX)
+diff --git a/tools/vmdebug/hvmparam.c b/tools/vmdebug/hvmparam.c
+index 8220852ba1..8ce35aa181 100644
+--- a/tools/vmdebug/hvmparam.c
++++ b/tools/vmdebug/hvmparam.c
+@@ -27,7 +27,9 @@ static hvmparam_desc_t params[HVM_NR_PARAMS] =
+     PARAM(IOREQ_PFN, "Device Model IO Request frame"),
+     PARAM(BUFIOREQ_PFN, "Device Model Buffered IO Request frame"),
+     PARAM(BUFIOREQ_EVTCHN, "Device Model Buffered IO Request event channel"),
++#ifdef CONFIG_X86
+     PARAM(VIRIDIAN, "Windows Viridian enlightenments"),
++#endif
+     PARAM(TIMER_MODE, "Timer tick delivery settings"),
+     PARAM(HPET_ENABLED, "HPET available?"),
+     PARAM(IDENT_PT, "Identity-map pagetable (Intel restricted real mode)"),

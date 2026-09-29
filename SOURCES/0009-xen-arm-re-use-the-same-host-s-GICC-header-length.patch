@@ -1,0 +1,107 @@
+From 015b32b402bad922cbf2e3d05cf62f9ab543efa3 Mon Sep 17 00:00:00 2001
+From: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+Date: Fri, 24 Jul 2026 09:46:37 +0200
+Subject: [PATCH 09/13] xen/arm: re-use the same host's GICC header length
+
+We are trying to rewrite the MADT. So we would want to re-use the same
+host's GICC header length.
+
+Signed-off-by: Oleksii Kurochko <oleksii.kurochko@gmail.com>
+---
+ xen/arch/arm/gic-v2.c           |  5 ++++-
+ xen/arch/arm/gic-v3.c           |  5 ++++-
+ xen/arch/arm/gic.c              | 14 +++++++++++++-
+ xen/arch/arm/include/asm/acpi.h | 21 +++++++++++++++------
+ 4 files changed, 36 insertions(+), 9 deletions(-)
+
+diff --git a/xen/arch/arm/gic-v2.c b/xen/arch/arm/gic-v2.c
+index 43a379fdda..73a49c47f5 100644
+--- a/xen/arch/arm/gic-v2.c
++++ b/xen/arch/arm/gic-v2.c
+@@ -1131,7 +1131,10 @@ static int gicv2_make_hwdom_madt(const struct domain *d, u32 offset)
+     host_gicc = container_of(header, struct acpi_madt_generic_interrupt,
+                              header);
+ 
+-    size = ACPI_MADT_GICC_LENGTH;
++    size = host_gicc->header.length;
++
++    printk("ACPI_MADT_GICC_LENGTH->%u\n", size);
++
+     /* Add Generic Interrupt */
+     for ( i = 0; i < d->max_vcpus; i++ )
+     {
+diff --git a/xen/arch/arm/gic-v3.c b/xen/arch/arm/gic-v3.c
+index 17ff85ef5d..b8b5e82738 100644
+--- a/xen/arch/arm/gic-v3.c
++++ b/xen/arch/arm/gic-v3.c
+@@ -1681,7 +1681,10 @@ static int gicv3_make_hwdom_madt(const struct domain *d, u32 offset)
+ 
+     host_gicc = container_of(header, struct acpi_madt_generic_interrupt,
+                              header);
+-    size = ACPI_MADT_GICC_LENGTH;
++    size = host_gicc->header.length;
++
++    printk("ACPI_MADT_GICC_LENGTH->%u\n", size);
++
+     for ( i = 0; i < d->max_vcpus; i++ )
+     {
+         gicc = (struct acpi_madt_generic_interrupt *)(base_ptr + table_len);
+diff --git a/xen/arch/arm/gic.c b/xen/arch/arm/gic.c
+index 260ee64cca..7d6cdb74dc 100644
+--- a/xen/arch/arm/gic.c
++++ b/xen/arch/arm/gic.c
+@@ -411,8 +411,20 @@ unsigned long gic_get_hwdom_madt_size(const struct domain *d)
+ {
+     unsigned long madt_size;
+ 
++    struct acpi_subtable_header *header;
++    struct acpi_madt_generic_interrupt *host_gicc;
++
++    header = acpi_table_get_entry_madt(ACPI_MADT_TYPE_GENERIC_INTERRUPT, 0);
++    if ( !header )
++        panic("Can't get GICC entry");
++
++    host_gicc = container_of(header, struct acpi_madt_generic_interrupt,
++                             header);
++
++    printk("ACPI_MADT_GICC_LENGTH->%d\n", host_gicc->header.length);
++
+     madt_size = sizeof(struct acpi_table_madt)
+-                + ACPI_MADT_GICC_LENGTH * d->max_vcpus
++                + host_gicc->header.length * d->max_vcpus
+                 + sizeof(struct acpi_madt_generic_distributor)
+                 + gic_hw_ops->get_hwdom_extra_madt_size(d);
+ 
+diff --git a/xen/arch/arm/include/asm/acpi.h b/xen/arch/arm/include/asm/acpi.h
+index 13756dd341..30bc446d1f 100644
+--- a/xen/arch/arm/include/asm/acpi.h
++++ b/xen/arch/arm/include/asm/acpi.h
+@@ -53,13 +53,22 @@ void acpi_smp_init_cpus(void);
+  */
+ paddr_t acpi_get_table_offset(struct membank tbl_add[], EFI_MEM_RES index);
+ 
+-/* Macros for consistency checks of the GICC subtable of MADT */
+-#define ACPI_MADT_GICC_LENGTH	\
+-    (acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
++/*
++ * MADT GICC minimum length refers to the MADT GICC structure table length as
++ * defined in the earliest ACPI version supported on arm64, ie ACPI 5.1.
++ *
++ * The efficiency_class member was added to the
++ * struct acpi_madt_generic_interrupt to represent the MADT GICC structure
++ * "Processor Power Efficiency Class" field, added in ACPI 6.0 whose offset
++ * is therefore used to delimit the MADT GICC structure minimum length
++ * appropriately.
++ */
++#define ACPI_MADT_GICC_MIN_LENGTH   ACPI_OFFSET( \
++    struct acpi_madt_generic_interrupt, efficiency_class)
+ 
+-#define BAD_MADT_GICC_ENTRY(entry, end)						\
+-    (!(entry) || (unsigned long)(entry) + sizeof(*(entry)) > (end) ||	\
+-     (entry)->header.length != ACPI_MADT_GICC_LENGTH)
++#define BAD_MADT_GICC_ENTRY(entry, end) \
++    (!(entry) || (entry)->header.length < ACPI_MADT_GICC_MIN_LENGTH || \
++    (unsigned long)(entry) + (entry)->header.length > (end))
+ 
+ #ifdef CONFIG_ACPI
+ extern bool acpi_disabled;

@@ -1,0 +1,101 @@
+From 3826de71e0f02fd811507ac87d06b0905d4a50a8 Mon Sep 17 00:00:00 2001
+From: Julian Vetter <julian.vetter@vates.tech>
+Date: Tue, 29 Sep 2026 10:55:29 +0200
+Subject: [PATCH 02/13] xen: fix hypervisor build on Arm
+
+Several additions in the patch queue assume x86 and break the Arm
+build:
+
+- pv_iommu uses x86-only interfaces (p2m, paging_mode_translate,
+  boot_cpu_data) and is irrelevant without PV guests: only build it on
+  x86.
+- check_iomem_vs_pci_bars() is defined in drivers/passthrough/pci.c,
+  which is only built with CONFIG_HAS_PCI, but called unconditionally
+  from common/domctl.c: add a stub for non-PCI builds.
+- print_domain_crash() uses x86 inline asm in livepatch release
+  builds: restrict that variant to x86.
+- asm/event.h uses struct vcpu/domain without including xen/sched.h.
+- the generic PFN compression ranges[] may be unused depending on the
+  PDX configuration: mark it unused.
+
+Signed-off-by: Julian Vetter <julian.vetter@vates.tech>
+---
+ xen/arch/arm/include/asm/event.h | 1 +
+ xen/common/Makefile              | 2 +-
+ xen/common/pdx.c                 | 2 +-
+ xen/include/xen/pci.h            | 8 ++++++++
+ xen/include/xen/sched.h          | 2 +-
+ 5 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/xen/arch/arm/include/asm/event.h b/xen/arch/arm/include/asm/event.h
+index 509157b2b3..227bdf0471 100644
+--- a/xen/arch/arm/include/asm/event.h
++++ b/xen/arch/arm/include/asm/event.h
+@@ -2,6 +2,7 @@
+ #define __ASM_EVENT_H__
+ 
+ #include <asm/domain.h>
++#include <xen/sched.h>
+ 
+ void vcpu_kick(struct vcpu *v);
+ void vcpu_mark_events_pending(struct vcpu *v);
+diff --git a/xen/common/Makefile b/xen/common/Makefile
+index 040a08b1d4..fd561a9774 100644
+--- a/xen/common/Makefile
++++ b/xen/common/Makefile
+@@ -40,7 +40,7 @@ obj-y += percpu.o
+ obj-$(CONFIG_PERF_COUNTERS) += perfc.o
+ obj-bin-$(CONFIG_HAS_PMAP) += pmap.init.o
+ obj-y += preempt.o
+-obj-y += pv_iommu.o
++obj-$(CONFIG_X86) += pv_iommu.o
+ obj-y += random.o
+ obj-y += rangeset.o
+ obj-y += radix-tree.o
+diff --git a/xen/common/pdx.c b/xen/common/pdx.c
+index e7e16e193e..9d61f90262 100644
+--- a/xen/common/pdx.c
++++ b/xen/common/pdx.c
+@@ -90,7 +90,7 @@ void set_pdx_range(unsigned long smfn, unsigned long emfn)
+ #endif
+ 
+ /* Generic PFN compression helpers. */
+-static struct pfn_range {
++static __attribute__((unused)) struct pfn_range {
+     unsigned long base_pfn, pages;
+ } ranges[MAX_PFN_RANGES] __initdata;
+ static unsigned int __initdata nr_ranges;
+diff --git a/xen/include/xen/pci.h b/xen/include/xen/pci.h
+index 9f098f5a0b..863fea098e 100644
+--- a/xen/include/xen/pci.h
++++ b/xen/include/xen/pci.h
+@@ -288,8 +288,16 @@ const char *parse_pci_seg(const char *s, unsigned int *seg_p,
+ 
+ int check_ioports_vs_pci_bars(
+     struct domain *d, unsigned int port_start, unsigned int port_end);
++#ifdef CONFIG_HAS_PCI
+ int check_iomem_vs_pci_bars(
+     struct domain *d, xen_pfn_t mfn_start, xen_pfn_t mfn_end);
++#else
++static inline int check_iomem_vs_pci_bars(
++    struct domain *d, xen_pfn_t mfn_start, xen_pfn_t mfn_end)
++{
++    return 0;
++}
++#endif
+ 
+ #define PCI_BAR_VF      (1u << 0)
+ #define PCI_BAR_LAST    (1u << 1)
+diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
+index bc84604fe5..0f8cdfc275 100644
+--- a/xen/include/xen/sched.h
++++ b/xen/include/xen/sched.h
+@@ -881,7 +881,7 @@ void vcpu_end_shutdown_deferral(struct vcpu *v);
+  */
+ void __domain_crash(struct domain *d);
+ 
+-#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH)
++#if defined(NDEBUG) && defined(CONFIG_LIVEPATCH) && defined(CONFIG_X86)
+ #define print_domain_crash(func) \
+     printk(#func " called from %pS\n", \
+            ({ void *ip; asm ("lea (%%rip), %0" : "=r" (ip)); ip; }))

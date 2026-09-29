@@ -197,6 +197,21 @@ Patch1001: xenguest-xg_emu-mem_pnode.patch
 Patch1002: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
 Patch1003: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
+# ARM patches
+Patch2001: 0001-xen-numa-fix-the-per-node-NUMA-additions-for-non-NUM.patch
+Patch2002: 0002-xen-fix-hypervisor-build-on-Arm.patch
+Patch2003: 0003-arm-mm-skip-redundant-TLB-flush-on-grant-unmap.patch
+Patch2004: 0004-arm-acpi-don-t-expose-the-ACPI-IORT-SMMUv3-entry-to-.patch
+Patch2005: 0005-xen-configs-introduce-mtcollins-configs.patch
+Patch2006: 0006-tools-fix-tools-build-on-Arm.patch
+Patch2007: 0007-tools-ocaml-Provide-ARM-implementations-of-xenctrl-s.patch
+Patch2008: 0008-fixup-xenctrl-stubs.patch
+Patch2009: 0009-xen-arm-re-use-the-same-host-s-GICC-header-length.patch
+Patch2010: 0010-patch-xenguest-for-arm.patch
+Patch2011: 0011-Initialize-rambase-on-ARM.patch
+Patch2012: 0012-xen-arm-report-proper-GIC-version-via-XEN_DOMCTL_get.patch
+Patch2013: 0013-tools-xenguest-create-a-guest-device-tree-for-ARM-do.patch
+
 ExclusiveArch: %{x86_64} %{arm64}
 
 BuildRequires: python3-devel

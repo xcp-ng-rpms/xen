@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.4%{?dist}
+Release: %{?xsrel}.5%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -340,6 +340,12 @@ Patch1027: 0001-efi-Enable-EFI_SET_VIRTUAL_ADDRESS_MAP-by-default.patch
 # UEFI GOP bugfixes
 Patch1028: 0001-multiboot2-parse-vga-option-when-setting-GOP-mode.patch
 Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
+
+# XSAs 515, 517, 518, and 520
+Patch1030: xsa515.patch
+Patch1031: xsa517.patch
+Patch1032: xsa518-4.20.patch
+Patch1033: xsa520.patch
 
 ExclusiveArch: x86_64
 
@@ -1195,6 +1201,13 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Oct 06 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-2.5
+- Fixes for:
+  - XSA-515 CVE-2026-79608
+  - XSA-517 CVE-2026-79610
+  - XSA-518 CVE-2026-79611
+  - XSA-520 CVE-2026-102700
+
 * Mon Oct 05 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-2.4
 - Revert "xenguest: Support Viridian flags for >64 vCPUs"
 

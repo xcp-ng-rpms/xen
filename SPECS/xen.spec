@@ -14,6 +14,8 @@
 # Full hash from the HEAD commit of this repo during processing, usually
 # provided by the environment.  Default to ??? if not set.
 
+%if ! 0%{?xcpng}
+# XCP-ng: remove support for livepatching support
 # Normally derived from the tag and provided by the environment.  May be a
 # `git describe` when not building an from a tagged changeset.
 
@@ -25,11 +27,12 @@
 %global __provides_exclude_from ^%{lp_devel_dir_re}/.*$
 %global __requires_exclude_from ^%{lp_devel_dir_re}/.*$
 %global __brp_mangle_shebangs_exclude_from ^%{lp_devel_dir_re}/.*$
+%endif
 
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.21.2
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.21.2.tar.gz
@@ -411,6 +414,8 @@ License: GPLv2
 %description dom0-tests
 This package contains test cases for the Xen Hypervisor.
 
+%if ! 0%{?xcpng}
+# XCP-ng: remove support for livepatching support
 %package lp-devel_%{version}_%{release}
 License: GPLv2
 Summary: Development package for building livepatches
@@ -418,6 +423,7 @@ Summary: Development package for building livepatches
 %description lp-devel_%{version}_%{release}
 Contains the prepared source files, config, and xen-syms for building live
 patches against base version %{version}-%{release}.
+%endif
 
 %prep
 %autosetup -p1
@@ -458,10 +464,13 @@ openssl x509 -pubkey -outform pem -in livepatch.cer -out xen/crypto/signing_key.
 sed -i -e 's/@@VERSION@@/%{version}/g' \
        -e 's/@@RELEASE@@/%{release}/g' xen/arch/x86/sbat.csv
 
+%if ! 0%{?xcpng}
+# XCP-ng: remove support for livepatching support
 # Take a snapshot of the configured source tree for livepatches
 mkdir ../livepatch-src
 cp -a . ../livepatch-src/
 echo %{?_devtoolset_enable} > ../livepatch-src/prepare-build
+%endif
 
 # Check if there are any changes in the public headers.
 # Any changes here must be checked. If necessary, update the hypercall
@@ -518,10 +527,13 @@ mkdir -p %{buildroot}%{_libdir}/ocaml/stublibs
 %{make_build} DESTDIR=%{buildroot} install-tools
 %{make_build} DESTDIR=%{buildroot} -C docs install-man-pages
 
+%if ! 0%{?xcpng}
+# XCP-ng: remove support for livepatching support
 # Install artifacts for livepatches
 %{__install} -p -D -m 644 xen/build-xen-release/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms
 %{__install} -p -D -m 644 xen/build-xen-debug/xen.efi.elf %{buildroot}%{lp_devel_dir}/xen-syms-d
 cp -a ../livepatch-src/. %{buildroot}%{lp_devel_dir}
+%endif
 
 # Install release & debug Xen
 install_xen () { # $1=vendorversion $2=outdir
@@ -1041,8 +1053,11 @@ install_xen -%{hv_rel}-d build-xen-debug
 %{_libexecdir}/%{name}/tests/test_x86_emulator
 %{_datadir}/xen-dom0-tests-metadata.json
 
+%if ! 0%{?xcpng}
+# XCP-ng: remove support for livepatching support
 %files lp-devel_%{version}_%{release}
 %{lp_devel_dir}
+%endif
 
 %doc
 
@@ -1120,6 +1135,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Sep 30 2026 Yann Dirson <yann.dirson@vates.tech> - 4.21.2.3.3
+- Drop lp-devel package
+
 * Fri Sep 18 2026 Tu Dinh <ngoc-tu.dinh@vates.tech> - 4.21.2-3.2
 - Enable Viridian enlightenments to support VMs with >64 vCPUs
 

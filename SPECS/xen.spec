@@ -1,6 +1,6 @@
 %global package_speccommit bcbe416b2a19fdbe32031ad74572b02032a5daa4
 %global usver 4.21.2
-%global xsver 3
+%global xsver 4
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -199,6 +199,9 @@ Patch1001: xenguest-xg_emu-mem_pnode.patch
 # Viridian for >64 vCPUs
 Patch1002: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
 Patch1003: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
+
+# ARM patches
+Patch2000: common-exclude-pv_iommu-from-non-x86-builds.patch
 
 ExclusiveArch: %{x86_64}
 
@@ -1135,6 +1138,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Thu Oct 08 2026 Julian Vetter <julian.vetter@vates.tech> - 4.21.2-3.4
+- Exclude pv_iommu from non-x86 builds
+
 * Wed Sep 30 2026 Yann Dirson <yann.dirson@vates.tech> - 4.21.2.3.3
 - Drop lp-devel package
 

@@ -1,6 +1,6 @@
 %global package_speccommit bcbe416b2a19fdbe32031ad74572b02032a5daa4
 %global usver 4.21.2
-%global xsver 4
+%global xsver 3
 %global xsrel %{xsver}%{?xscount}%{?xshash}
 # -*- rpm-spec -*-
 
@@ -32,7 +32,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.21.2
-Release: %{?xsrel}.3%{?dist}
+Release: %{?xsrel}.4%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.21.2.tar.gz

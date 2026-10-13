@@ -13,12 +13,12 @@ Assisted-by: Claude
 Reported-by: Teddy Astie <teddy.astie@vates.tech>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Teddy Astie <teddy.astie@vates.tech>
----
-v2: Add parentheses around the || expression.
 
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index b65979791c5d..9533b923f421 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -1350,13 +1350,19 @@ map_grant_ref(
+@@ -1325,13 +1325,19 @@ map_grant_ref(
  
      grant_read_lock(rgt);
  

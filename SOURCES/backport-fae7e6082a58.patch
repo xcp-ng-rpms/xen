@@ -1,4 +1,4 @@
-From 66b310570996c69bf7954aabacdd6678630ef8ac Mon Sep 17 00:00:00 2001
+From fae7e6082a58812fb03c02283edbb000ab93e7c6 Mon Sep 17 00:00:00 2001
 From: Andrii Sultanov <andriy.sultanov@vates.tech>
 Date: Thu, 20 Aug 2026 15:00:02 +0000
 Subject: oxenstored: Reset the watches trie on domain reconnect
@@ -29,6 +29,7 @@ Fixes: 674ad2be409d ("xenstore: extend the xenstore ring with a 'closing' signal
 Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+(cherry picked from commit a2ca4f8b9890899ca89d6116002e7a9c5957d8c6)
 
 diff --git a/tools/ocaml/xenstored/connection.ml b/tools/ocaml/xenstored/connection.ml
 index 54f7f765167b..a91caabec674 100644
@@ -50,10 +51,10 @@ index 54f7f765167b..a91caabec674 100644
  	(* perm is the same *)
  	()
 diff --git a/tools/ocaml/xenstored/process.ml b/tools/ocaml/xenstored/process.ml
-index a51c8a7d998d..73d7d23ce107 100644
+index 33161da5eb8b..b2ee4d0adf1b 100644
 --- a/tools/ocaml/xenstored/process.ml
 +++ b/tools/ocaml/xenstored/process.ml
-@@ -345,15 +345,18 @@ let do_isintroduced con _t domains _cons data =
+@@ -328,15 +328,18 @@ let do_isintroduced con _t domains _cons data =
  		in
  	if domid = Define.domid_self || Domains.exist domains domid then "T\000" else "F\000"
  

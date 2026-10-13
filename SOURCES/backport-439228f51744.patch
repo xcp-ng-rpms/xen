@@ -1,5 +1,10 @@
+From 439228f517441fe0187a4ff62be7ae766891dc1c Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Wed, 26 Aug 2026 17:51:04 +0100
 Subject: x86/pass-through: disallow pt_irq_create_bind() on dying domains
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 DMs may invoke XEN_DOMCTL_bind_pt_irq for domains already under
 destruction. When XEN_DOMCTL_bind_pt_irq is invoked after
@@ -15,9 +20,10 @@ This is XSA-509 / CVE-2026-62437.
 Fixes: 7a26b541a202 ("vtd: Dynamically allocate IRQ-tracking structures, only for those")
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
+(cherry picked from commit 328a1461430f82d5f0318511e71b7143cdbca872)
 
 diff --git a/xen/drivers/passthrough/x86/hvm.c b/xen/drivers/passthrough/x86/hvm.c
-index a2ca7e0e570c..c4dec8b05c33 100644
+index a16e0e534411..4c8a3f8a3983 100644
 --- a/xen/drivers/passthrough/x86/hvm.c
 +++ b/xen/drivers/passthrough/x86/hvm.c
 @@ -231,6 +231,12 @@ int pt_irq_create_bind(

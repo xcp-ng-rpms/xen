@@ -1,8 +1,7 @@
-From 8c021a1df9e01f0a673bc828035b39e26590ff6f Mon Sep 17 00:00:00 2001
+From d3b6291e689ca48e038fb309ed6de9e30f056e8e Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger@xenproject.org>
 Date: Tue, 4 Aug 2026 12:23:19 +0200
-Subject: [PATCH] xen/page_alloc: ensure TLB flush is done ahead of page
- scrubbing
+Subject: xen/page_alloc: ensure TLB flush is done ahead of page scrubbing
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -26,6 +25,7 @@ This is XSA-511 / CVE-2026-79603.
 Fixes: 24f1a58d1954 ("mm: option to _always_ scrub freed domheap pages")
 Signed-off-by: Roger Pau Monné <roger@xenproject.org>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit ed7e656e6c18c1f5e6c7d0332fdaa8eeeee1b24e)
 
 diff --git a/xen/common/memory.c b/xen/common/memory.c
 index d063f649a120..e5983997f0ea 100644
@@ -142,10 +142,10 @@ index 62afb07bc65f..dc0926019aff 100644
          /*
           * Preserve flag PGC_static and change page state
 diff --git a/xen/include/xen/mm.h b/xen/include/xen/mm.h
-index 3bc379cc7dbc..122033c6ad56 100644
+index 211685a5d29c..baf116007a22 100644
 --- a/xen/include/xen/mm.h
 +++ b/xen/include/xen/mm.h
-@@ -193,8 +193,6 @@ struct npfec {
+@@ -182,8 +182,6 @@ struct npfec {
  #define  MEMF_exact_node  (1U<<_MEMF_exact_node)
  #define _MEMF_no_owner    5
  #define  MEMF_no_owner    (1U<<_MEMF_no_owner)

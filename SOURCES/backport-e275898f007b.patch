@@ -1,7 +1,7 @@
-From 796537311797d600c0c716d0c015531fc41abb92 Mon Sep 17 00:00:00 2001
+From e275898f007bcc7377bf698303b3f42575f6ebfb Mon Sep 17 00:00:00 2001
 From: Roger Pau Monne <roger@xenproject.org>
 Date: Fri, 7 Aug 2026 11:03:48 +0200
-Subject: [PATCH] x86/emul: cope with internal handlers returning X86EMUL_RETRY
+Subject: x86/emul: cope with internal handlers returning X86EMUL_RETRY
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -18,12 +18,13 @@ This is XSA-510 / CVE-2026-79602.
 Reported-by: Jiqian Chen <Jiqian.Chen@amd.com>
 Signed-off-by: Roger Pau Monné <roger@xenproject.org>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 62aff073266bd83fa2d675913d913134abd3c82b)
 
 diff --git a/xen/arch/x86/hvm/emulate.c b/xen/arch/x86/hvm/emulate.c
-index 3a7976729bb1..41f2d0c7e16e 100644
+index 464c43d035f5..610696d971a8 100644
 --- a/xen/arch/x86/hvm/emulate.c
 +++ b/xen/arch/x86/hvm/emulate.c
-@@ -308,6 +308,7 @@ static int hvmemul_do_io(
+@@ -249,6 +249,7 @@ static int hvmemul_do_io(
      switch ( rc )
      {
      case X86EMUL_OKAY:

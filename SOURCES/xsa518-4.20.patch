@@ -15,9 +15,11 @@ Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Teddy Astie <teddy.astie@vates.tech>
 
+diff --git a/xen/arch/x86/hvm/vmx/vmx.c b/xen/arch/x86/hvm/vmx/vmx.c
+index e5259ed034a3..516b4cf0c076 100644
 --- a/xen/arch/x86/hvm/vmx/vmx.c
 +++ b/xen/arch/x86/hvm/vmx/vmx.c
-@@ -4281,26 +4281,30 @@ void asmlinkage vmx_vmexit_handler(struc
+@@ -4248,26 +4248,30 @@ void vmx_vmexit_handler(struct cpu_user_regs *regs)
               * We intercept #DB unconditionally to work around CVE-2015-8104 /
               * XSA-156 (guest-kernel induced host DoS).
               *

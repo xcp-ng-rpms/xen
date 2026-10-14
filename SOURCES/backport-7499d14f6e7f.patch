@@ -1,4 +1,4 @@
-From ca21f228fe8302f3fc724b2fff46b24906d9dcd7 Mon Sep 17 00:00:00 2001
+From 7499d14f6e7fda900d8ad00f6224b2efe226ac20 Mon Sep 17 00:00:00 2001
 From: Andrii Sultanov <andriy.sultanov@vates.tech>
 Date: Thu, 20 Aug 2026 16:00:02 +0100
 Subject: oxenstored: Factor out Process.do_reconnect()
@@ -14,6 +14,7 @@ This is part of XSA-512 / CVE-2026-79604.
 Signed-off-by: Andrii Sultanov <andriy.sultanov@vates.tech>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Andrii Sultanov <andriy.sultanov@vates.tech>
+(cherry picked from commit 9c5a46b12066da7311a8d43202abd78956ab0bfb)
 
 diff --git a/tools/ocaml/xenstored/history.ml b/tools/ocaml/xenstored/history.ml
 index ba5c9cb571ff..029802bd1544 100644
@@ -31,10 +32,10 @@ index ba5c9cb571ff..029802bd1544 100644
  	let dom = x.con.Connection.dom in
  	match dom with
 diff --git a/tools/ocaml/xenstored/process.ml b/tools/ocaml/xenstored/process.ml
-index 62d937e49409..a51c8a7d998d 100644
+index 02bd0f7d8098..33161da5eb8b 100644
 --- a/tools/ocaml/xenstored/process.ml
 +++ b/tools/ocaml/xenstored/process.ml
-@@ -350,6 +350,13 @@ let do_reset_watches con _t _domains cons _data =
+@@ -333,6 +333,13 @@ let do_reset_watches con _t _domains cons _data =
    Connections.del_watches cons con;
    Connection.del_transactions con
  
@@ -48,7 +49,7 @@ index 62d937e49409..a51c8a7d998d 100644
  (* only in >= xen3.3                                                                                    *)
  let do_set_target con _t _domains cons data =
  	if not (Connection.is_dom0 con)
-@@ -735,9 +742,7 @@ let do_input store cons doms con =
+@@ -718,9 +725,7 @@ let do_input store cons doms con =
  			if Connection.can_input con then Connection.do_input con
  			else None
  		with Xenbus.Xb.Reconnect ->
@@ -59,7 +60,7 @@ index 62d937e49409..a51c8a7d998d 100644
  			None
  		| Invalid_argument exp | Failure exp ->
  			error "caught exception %s" exp;
-@@ -760,7 +765,7 @@ let do_input store cons doms con =
+@@ -743,7 +748,7 @@ let do_input store cons doms con =
  		write_access_log ~ty ~tid ~con:(Connection.get_domstr con) ~data;
  		Connection.incr_ops con
  
@@ -68,7 +69,7 @@ index 62d937e49409..a51c8a7d998d 100644
  	Connection.source_flush_watchevents con;
  	if Connection.has_output con then (
  		if Connection.has_new_output con then (
-@@ -775,8 +780,6 @@ let do_output _store _cons _doms con =
+@@ -758,8 +763,6 @@ let do_output _store _cons _doms con =
  		try
  			ignore (Connection.do_output con)
  		with Xenbus.Xb.Reconnect ->

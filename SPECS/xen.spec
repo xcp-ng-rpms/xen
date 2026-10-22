@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -348,6 +348,10 @@ Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 
 # XSA 515
 Patch1030: xsa515.patch
+
+# XSA 523
+Patch1031: xsa523-4.18-1.patch
+Patch1032: xsa523-4.18-2.patch
 
 ExclusiveArch: x86_64
 
@@ -1203,6 +1207,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Mon Oct 26 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-4.2
+- Fix for XSA-523 (CVE-2026-102703 & CVE-2026-102704)
+
 * Wed Oct 14 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-4.1
 - Sync with XenServer 4.17.7-4
 - Remove XSA-517, XSA-518, and XSA-520 patches now part of XS release

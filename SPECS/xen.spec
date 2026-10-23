@@ -353,6 +353,14 @@ Patch1030: xsa515.patch
 Patch1031: xsa523-4.18-1.patch
 Patch1032: xsa523-4.18-2.patch
 
+Patch1041: 0001-x86-vhpet-Fix-sanitization-of-legacy-IRQ-route.patch
+Patch1042: 0002-x86-vpt-Validate-the-timer-on-remote-completion.patch
+Patch1043: 0003-x86-Dump-HPET-state-in-debug-key-q.patch
+Patch1044: 0004-x86-Dump-vIOAPIC-state-in-debug-key-q.patch
+Patch1045: 0005-x86-Dump-vPIC-state-in-debug-key-q.patch
+Patch1046: 0006-x86-Dump-vLAPIC-state-in-debug-key-q.patch
+Patch1047: 0007-x86-Dump-Viridian-state-in-debug-key-q.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel

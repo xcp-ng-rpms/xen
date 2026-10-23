@@ -1,0 +1,94 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Date: Fri, 18 Sep 2026 19:56:14 +0200
+Subject: [PATCH] x86: Dump vPIC state in debug key 'q'
+
+Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+
+diff --git a/xen/arch/x86/domain.c b/xen/arch/x86/domain.c
+index 8bf0bbeb2b00..b51985763d1a 100644
+--- a/xen/arch/x86/domain.c
++++ b/xen/arch/x86/domain.c
+@@ -53,6 +53,7 @@
+ #include <asm/hvm/nestedhvm.h>
+ #include <asm/hvm/support.h>
+ #ifdef CONFIG_HVM
++#include <asm/hvm/vpic.h>
+ #include <asm/hvm/vioapic.h>
+ #include <asm/hvm/vpt.h>
+ #endif
+@@ -2489,6 +2490,7 @@ void arch_dump_domain_info(struct domain *d)
+ #ifdef CONFIG_HVM
+     if ( is_hvm_domain(d) )
+     {
++        vpic_dump_domain_info(d);
+         vioapic_dump(d);
+         hpet_dump(d);
+     }
+diff --git a/xen/arch/x86/hvm/vpic.c b/xen/arch/x86/hvm/vpic.c
+index b3cafaab8fad..29d2cd08580d 100644
+--- a/xen/arch/x86/hvm/vpic.c
++++ b/xen/arch/x86/hvm/vpic.c
+@@ -530,6 +530,51 @@ int vpic_ack_pending_irq(struct vcpu *v)
+     return vpic[irq >> 3].irq_base + (irq & 7);
+ }
+ 
++void vpic_dump_domain_info(struct domain *d)
++{
++    struct hvm_hw_vpic state[ARRAY_SIZE(d->arch.hvm.vpic)];
++    unsigned long flags;
++    unsigned int pic, i;
++
++    if ( !has_vpic(d) )
++        return;
++
++    /* Keep the interrupt lock hold time independent of console output. */
++    spin_lock_irqsave(&d->arch.hvm.irq_lock, flags);
++    for ( pic = 0; pic < ARRAY_SIZE(state); pic++ )
++        state[pic] = d->arch.hvm.vpic[pic];
++    spin_unlock_irqrestore(&d->arch.hvm.irq_lock, flags);
++
++    for ( pic = 0; pic < ARRAY_SIZE(state); pic++ )
++    {
++        const struct hvm_hw_vpic *vpic = &state[pic];
++
++        printk("PIC%u: IRQ base %#x, init_state %u, priority_add %u, "
++               "flags %c%c%c%c%c%c%c, int_output %#x\n",
++               pic,
++               vpic->irq_base,
++               vpic->init_state,
++               vpic->priority_add,
++               vpic->readsel_isr ? 'S' : 'R',
++               vpic->poll ? 'P' : '_',
++               vpic->auto_eoi ? 'A' : '_',
++               vpic->rotate_on_auto_eoi ? 'O' : '_',
++               vpic->special_fully_nested_mode ? 'N' : '_',
++               vpic->special_mask_mode ? 'K' : '_',
++               vpic->is_master ? 'M' : 's',
++               vpic->int_output);
++
++        for ( i = 0; i < 8; i++ )
++            printk("    IRQ %u (%u): %c%c%c%c\n",
++                   pic * 8 + i,
++                   pic * 8 + i + vpic->irq_base,
++                   vpic->irr & (1u << i) ? 'R' : '_',
++                   vpic->imr & (1u << i) ? 'M' : '_',
++                   vpic->isr & (1u << i) ? 'S' : '_',
++                   vpic->elcr & (1u << i) ? 'E' : 'L');
++    }
++}
++
+ /*
+  * Local variables:
+  * mode: C
+diff --git a/xen/arch/x86/include/asm/hvm/vpic.h b/xen/arch/x86/include/asm/hvm/vpic.h
+index d71b270193d6..57c85c93aa81 100644
+--- a/xen/arch/x86/include/asm/hvm/vpic.h
++++ b/xen/arch/x86/include/asm/hvm/vpic.h
+@@ -36,5 +36,6 @@ void vpic_init(struct domain *d);
+ void vpic_reset(struct domain *d);
+ int vpic_ack_pending_irq(struct vcpu *v);
+ int is_periodic_irq(struct vcpu *v, int irq, int type);
++void vpic_dump_domain_info(struct domain *d);
+ 
+ #endif  /* __ASM_X86_HVM_VPIC_H__ */  

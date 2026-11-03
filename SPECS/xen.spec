@@ -351,6 +351,9 @@ Patch1029: 0002-multiboot2-do-not-set-StdOut-mode-unconditionally.patch
 # XSA 515
 Patch1030: xsa515.patch
 
+# HPET fix
+Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel
@@ -1208,6 +1211,7 @@ fi
 * Tue Nov 03 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-5.1
 - Sync with XenServer 4.17.7-5
 - Remove XSA-523 patches now part of XS release
+- Add patch for lost timer interrupts fix
 - *** Upstream changelog ***
   * Wed Oct 21 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.7-5
   - Fixes for XSA-523 CVE-2026-102703 CVE-2026-102704

@@ -1,4 +1,6 @@
+From 11cfbc19bb46f3e530a2a7b0ad732743e7e39e0c Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
+Date: Tue, 29 Sep 2026 17:09:30 +0100
 Subject: x86/vmx: Rework #DB intercept logic to fix VMEntry failure with BTF
 
 The consistency checks in effect when Blocked-by-STI/MovSS are active includes
@@ -14,6 +16,7 @@ Reported-by: Teddy Astie <teddy.astie@vates.tech>
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Teddy Astie <teddy.astie@vates.tech>
+(cherry picked from commit 1017562ac0f2e6885cc9ec904bb75a5c29abe6b7)
 
 diff --git a/xen/arch/x86/hvm/vmx/vmx.c b/xen/arch/x86/hvm/vmx/vmx.c
 index e5259ed034a3..516b4cf0c076 100644

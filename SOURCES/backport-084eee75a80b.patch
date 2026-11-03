@@ -1,4 +1,6 @@
+From 084eee75a80bb682e4ea8d4d82be01fbf9b32f57 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 29 Sep 2026 17:06:38 +0100
 Subject: gnttab: address fallout from XSA-501
 
 A v1 -> v2 change isn't the only scenario where "status" may go stale in
@@ -13,6 +15,7 @@ Assisted-by: Claude
 Reported-by: Teddy Astie <teddy.astie@vates.tech>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Teddy Astie <teddy.astie@vates.tech>
+(cherry picked from commit e0a0823ee0a97f7e3c43dd7307b008eeb6120cbf)
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
 index b65979791c5d..9533b923f421 100644

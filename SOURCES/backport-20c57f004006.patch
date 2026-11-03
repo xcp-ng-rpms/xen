@@ -1,4 +1,6 @@
+From 20c57f0040064d62cf496b64c301b4249339454a Mon Sep 17 00:00:00 2001
 From: George Dunlap <gwd@xenproject.org>
+Date: Tue, 29 Sep 2026 17:00:15 +0100
 Subject: x86/pv: map each vCPU's root page table in its per-domain area
 
 For XPTI enabled VMs, restore_all_guest() copies most of the active L4
@@ -47,6 +49,7 @@ Fixes: 5784de3e2067 ("x86: Meltdown band-aid against malicious 64-bit PV guests"
 Assisted-by: Claude Code:claude-fable-5-1
 Signed-off-by: George Dunlap <gwd@xenproject.org>
 Reviewed-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 288fb615858ef9a55b327ba61973a99329809183)
 
 diff --git a/xen/arch/x86/include/asm/config.h b/xen/arch/x86/include/asm/config.h
 index fbc4bb3416bd..0be864885644 100644

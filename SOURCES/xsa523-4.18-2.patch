@@ -16,10 +16,10 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index 842d43684849..03543fc335a9 100644
+index 34514f6531a9..210283247ecc 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -2934,13 +2934,8 @@ struct gnttab_copy_buf {
+@@ -2880,13 +2880,8 @@ struct gnttab_copy_buf {
      bool_t have_type;
  };
  
@@ -34,7 +34,7 @@ index 842d43684849..03543fc335a9 100644
      buf->domain = rcu_lock_domain_by_any_id(domid);
  
      if ( !buf->domain )
-@@ -2972,12 +2967,10 @@ static int gnttab_copy_lock_domains(const struct gnttab_copy *op,
+@@ -2918,12 +2913,10 @@ static int gnttab_copy_lock_domains(const struct gnttab_copy *op,
  {
      int rc;
  
@@ -49,7 +49,7 @@ index 842d43684849..03543fc335a9 100644
      if ( rc < 0 )
          goto error;
  
-@@ -3040,6 +3033,9 @@ static int gnttab_copy_claim_buf(const struct gnttab_copy *op,
+@@ -2986,6 +2979,9 @@ static int gnttab_copy_claim_buf(const struct gnttab_copy *op,
          buf->ptr.u.ref = ptr->u.ref;
          buf->have_grant = 1;
      }

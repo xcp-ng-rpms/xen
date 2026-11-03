@@ -1,4 +1,6 @@
+From 1eaef8526490f01c09a040d1318b13e439e8c459 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 29 Sep 2026 17:45:11 +0100
 Subject: gnttab: properly drop page ref on a GNTTAB_cache_flush error path
 
 Ordinary domains always have a grant table. System domains don't, but they
@@ -9,12 +11,13 @@ This is XSA-520 / CVE-2026-102700.
 Reported-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reported-by: Yehyeong Lee <yhlee@isslab.korea.ac.kr>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
+(cherry picked from commit 6a355a772ca5205b8de29c58cfc3cef4f2ba8238)
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index 9533b923f421..df53ead2d011 100644
+index abd351de6977..5932722ce0fa 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -3562,6 +3562,8 @@ static int _cache_flush(const gnttab_cache_flush_t *cflush, grant_ref_t *cur_ref
+@@ -3569,6 +3569,8 @@ static int _cache_flush(gnttab_cache_flush_t *cflush, grant_ref_t *cur_ref)
      owner = page_get_owner_and_reference(page);
      if ( !owner || !owner->grant_table )
      {

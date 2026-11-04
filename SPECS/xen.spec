@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.2%{?dist}
+Release: %{?xsrel}.3%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -1207,6 +1207,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Wed Nov 04 2026 Philippe Coval <philippe.coval@vates.tech> - 4.17.7-4.3
+- Rebuild xen on xapi to fix ocaml dep
+
 * Mon Oct 26 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-4.2
 - Fix for XSA-523 (CVE-2026-102703 & CVE-2026-102704)
 

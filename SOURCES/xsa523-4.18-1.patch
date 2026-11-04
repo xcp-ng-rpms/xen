@@ -15,10 +15,10 @@ Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
-index 742c9797c535..842d43684849 100644
+index df53ead2d011..34514f6531a9 100644
 --- a/xen/common/grant_table.c
 +++ b/xen/common/grant_table.c
-@@ -3081,10 +3081,10 @@ static bool_t gnttab_copy_buf_valid(const struct gnttab_copy_ptr *p,
+@@ -3024,10 +3024,10 @@ static bool_t gnttab_copy_buf_valid(const struct gnttab_copy_ptr *p,
                                      const struct gnttab_copy_buf *b,
                                      bool_t has_gref)
  {

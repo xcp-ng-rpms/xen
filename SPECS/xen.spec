@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -357,6 +357,10 @@ Patch1030: xsa515.patch
 
 # HPET fix
 Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
+
+# Viridian for >64 vCPUs
+Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
+Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 ExclusiveArch: x86_64
 
@@ -1212,6 +1216,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Nov 13 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-6.2
+- xenguest: Restore support for Viridian flags for >64 vCPUs
+
 * Thu Nov 12 2026 Lucas Pottier <lucas.pottier@vates.tech> - 4.17.7-6.1
 - Sync with XenServer 4.17.7-6
 - *** Upstream changelog ***

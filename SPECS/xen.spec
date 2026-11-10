@@ -33,7 +33,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.17.7
-Release: %{?xsrel}.1%{?dist}
+Release: %{?xsrel}.2%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.17.7.tar.gz
@@ -353,6 +353,10 @@ Patch1030: xsa515.patch
 
 # HPET fix
 Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
+
+# I/O performance: optional halt polling and grant-copy prefetch (runtime knobs, off by default)
+Patch1032: 0001-xen-sched-add-optional-adaptive-halt-polling.patch
+Patch1033: 0001-xen-gnttab-optionally-prefetch-local-grant-copy-sources.patch
 
 ExclusiveArch: x86_64
 
@@ -1208,6 +1212,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Tue Nov 10 2026 Stefanos Gerangelos <stefanos.gerangelos@vates.tech> - 4.17.7-5.2
+- Add optional adaptive halt polling (halt_poll_* runtime parameters, off by default)
+- Add optional grant-copy source prefetch (gcopy_prefetch runtime parameter, off by default)
+
 * Tue Nov 03 2026 Thierry Escande <thierry.escande@vates.tech> - 4.17.7-5.1
 - Sync with XenServer 4.17.7-5
 - Remove XSA-523 patches now part of XS release

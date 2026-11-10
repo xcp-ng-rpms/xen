@@ -1,0 +1,88 @@
+From 63d55163692a20b3e95584eadcc067f72b833904 Mon Sep 17 00:00:00 2001
+From: Olivier Lambert <olivier.lambert@vates.tech>
+Date: Tue, 10 Nov 2026 16:49:02 +0200
+Subject: [PATCH 2/2] xen/gnttab: optionally prefetch local grant-copy sources
+
+For GNTTABOP_copy batches issued by a PV domain whose source is one of its
+own frames (e.g. netback RX copying NIC-DMA'd dom0 pages into a guest),
+the source data is usually cold in cache.  Optionally prefetch the source
+bytes of the current op and of the next op in the batch, so the copy of
+op i overlaps the cache misses of op i+1.
+
+Runtime parameter gcopy_prefetch=1 enables it; default 0 (off).  Only
+DOMID_SELF, non-gref sources of PV callers that fit in one page and are
+in the directmap are prefetched; validation of the op itself is
+unchanged and still done by gnttab_copy_one().
+
+Measured on XCP-ng 8.3 (net-lab): copy phase of a grant-copy op -57%,
+whole op -10%.
+
+Assisted-by: Claude
+Signed-off-by: Stefanos Gerangelos <stefanos.gerangelos@vates.tech>
+---
+ xen/common/grant_table.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index fd3a170..ee08464 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -38,6 +38,7 @@
+ #include <xen/iommu.h>
+ #include <xen/paging.h>
+ #include <xen/keyhandler.h>
++#include <xen/prefetch.h>
+ #include <xen/radix-tree.h>
+ #include <xen/vmap.h>
+ #include <xen/nospec.h>
+@@ -3131,6 +3132,33 @@ static int gnttab_copy_one(const struct gnttab_copy *op,
+     return rc;
+ }
+ 
++/*
++ * Optionally prefetch the source bytes of grant-copy ops whose source is a
++ * local frame of the calling PV domain (e.g. netback RX: dom0 pages the NIC
++ * DMA'd into, cold in cache).  Runtime: xl set-parameters gcopy_prefetch=1
++ * (0 = off, default).
++ */
++static unsigned int __read_mostly gcopy_prefetch;
++integer_runtime_param("gcopy_prefetch", gcopy_prefetch);
++
++static void gcopy_prefetch_src(const struct gnttab_copy *op)
++{
++    unsigned long mfn;
++    const char *va;
++    unsigned int o;
++
++    if ( (op->flags & GNTCOPY_source_gref) || op->source.domid != DOMID_SELF ||
++         !is_pv_domain(current->domain) || op->len == 0 ||
++         op->source.offset + op->len > PAGE_SIZE )
++        return;
++    mfn = op->source.u.gmfn;
++    if ( !mfn_valid(_mfn(mfn)) || !arch_mfns_in_directmap(mfn, 1) )
++        return;
++    va = (const char *)mfn_to_virt(mfn) + op->source.offset;
++    for ( o = 0; o < op->len; o += 64 )
++        prefetch(va + o);
++}
++
+ /*
+  * gnttab_copy(), other than the various other helpers of
+  * do_grant_table_op(), returns (besides possible error indicators)
+@@ -3162,6 +3190,16 @@ static long gnttab_copy(
+             break;
+         }
+ 
++        if ( gcopy_prefetch )
++        {
++            struct gnttab_copy nop;
++
++            if ( i == 0 )
++                gcopy_prefetch_src(&op);
++            if ( i + 1 < count && !__copy_from_guest_offset(&nop, uop, 1, 1) )
++                gcopy_prefetch_src(&nop);
++        }
++
+         rc = gnttab_copy_one(&op, &dest, &src);
+         if ( rc > 0 )
+         {

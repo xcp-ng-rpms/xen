@@ -1,0 +1,281 @@
+From ec4023b7eac6dc14c905da03be606f439f52ca08 Mon Sep 17 00:00:00 2001
+From: Olivier Lambert <olivier.lambert@vates.tech>
+Date: Tue, 10 Nov 2026 16:49:02 +0200
+Subject: [PATCH 1/2] xen/sched: add optional adaptive halt polling
+
+When a vCPU blocks, Xen deschedules it, idles the pCPU and later has to
+wake, reschedule and context-switch it back in.  For latency-sensitive
+I/O (e.g. network request/response) the wake-up event often arrives a few
+microseconds after the halt, so that round trip dominates.
+
+Add optional halt polling: before blocking, vcpu_block() spins for a
+bounded window waiting for an event for the vCPU.  If one arrives, the
+vCPU simply continues; otherwise it blocks as before.  The poll ends early
+on any pending softirq, so nothing else on the pCPU is delayed by more
+than one softirq check.
+
+All knobs are runtime parameters (xl set-parameters), polling is off by
+default:
+
+  halt_poll_us=N         maximum poll window in microseconds (0 = off)
+  halt_poll_adaptive=1   per-vCPU window adjusted as in KVM: starts at
+                         10us, doubles when a halt ended just after the
+                         window, resets to 0 when a halt exceeds the cap
+  halt_poll_yield=1      (default) do not poll while another unit waits
+                         on this pCPU's credit runqueue
+  halt_poll_smt=1        do not poll while an SMT sibling runs a non-idle
+                         unit
+  halt_poll_dom0_only=N  1 = poll for dom0 only, 2 = guests only
+
+Debug key 'Y' dumps the settings and hit/miss counters.
+
+Measured on XCP-ng 8.3 (net-lab), cross-host guest-to-guest:
+halt_poll_us=200 on all domains lowers RTT from ~145-150us to ~67-72us
+avg (p99 ~195us -> ~100-120us) at the cost of extra CPU time charged to
+the polling vCPUs.
+
+Assisted-by: Claude
+Signed-off-by: Stefanos Gerangelos <stefanos.gerangelos@vates.tech>
+---
+ xen/common/sched/core.c   | 158 ++++++++++++++++++++++++++++++++++++++
+ xen/common/sched/credit.c |  18 +++++
+ xen/include/xen/sched.h   |   4 +
+ 3 files changed, 180 insertions(+)
+
+diff --git a/xen/common/sched/core.c b/xen/common/sched/core.c
+index e903679..20555d6 100644
+--- a/xen/common/sched/core.c
++++ b/xen/common/sched/core.c
+@@ -18,6 +18,7 @@
+ #include <xen/lib.h>
+ #include <xen/param.h>
+ #include <xen/sched.h>
++#include <xen/keyhandler.h>
+ #include <xen/domain.h>
+ #include <xen/delay.h>
+ #include <xen/event.h>
+@@ -1103,12 +1104,20 @@ void vcpu_sleep_sync(struct vcpu *v)
+     sync_vcpu_execstate(v);
+ }
+ 
++static void halt_poll_adjust(struct vcpu *v, s_time_t halt_ns);
++
+ void vcpu_wake(struct vcpu *v)
+ {
+     unsigned long flags;
+     spinlock_t *lock;
+     struct sched_unit *unit = v->sched_unit;
+ 
++    if ( v->hp_pending )
++    {
++        v->hp_pending = false;
++        halt_poll_adjust(v, NOW() - v->hp_t0);
++    }
++
+     TRACE_2D(TRC_SCHED_WAKE, v->domain->domain_id, v->vcpu_id);
+ 
+     rcu_read_lock(&sched_res_rculock);
+@@ -1552,10 +1561,159 @@ static int vcpu_set_soft_affinity(struct vcpu *v, const cpumask_t *affinity)
+ }
+ 
+ /* Block the currently-executing domain until a pertinent event occurs. */
++/*
++ * Halt polling. Before blocking, spin for up to halt_poll_us
++ * microseconds waiting for an event for this vCPU, so that a wake-up that
++ * arrives shortly after the halt does not pay deschedule + idle + wake +
++ * reschedule. Any pending softirq (timer, schedule, ...) ends the poll so
++ * nothing else on this pCPU is delayed by more than one softirq check.
++ * Runtime tunable: xl set-parameters halt_poll_us=N (0 = off, default).
++ */
++static unsigned int __read_mostly halt_poll_us;
++integer_runtime_param("halt_poll_us", halt_poll_us);
++static unsigned long halt_poll_hits, halt_poll_misses, halt_poll_softirq;
++static unsigned int __read_mostly halt_poll_dom0_only;
++integer_runtime_param("halt_poll_dom0_only", halt_poll_dom0_only);
++
++/*
++ * halt_poll_adaptive=1 (KVM algorithm): each vCPU polls for hp_win_ns, which
++ * grows (start 10 us, x2, cap halt_poll_us) when a halt was shorter than the cap
++ * but longer than the window, and resets to 0 when a halt exceeds the cap.
++ * halt_poll_adaptive=0: fixed window halt_poll_us.
++ */
++static unsigned int __read_mostly halt_poll_adaptive;
++/* 1 (default): never poll, and stop polling, while another vCPU waits on this
++ * pCPU's credit runqueue (KVM's single_task_running() rule). */
++static unsigned int __read_mostly halt_poll_yield = 1;
++integer_runtime_param("halt_poll_yield", halt_poll_yield);
++static unsigned long halt_poll_yielded;
++bool csched_runq_waiters_hint(unsigned int cpu);
++
++/* 1: never poll while an SMT sibling of this pCPU runs a non-idle unit
++ * (spinning was measured to cost a CPU-bound sibling 15-22 %). */
++static unsigned int __read_mostly halt_poll_smt;
++integer_runtime_param("halt_poll_smt", halt_poll_smt);
++static unsigned long halt_poll_smtskip;
++
++static bool halt_poll_sibling_busy(void)
++{
++    unsigned int cpu = smp_processor_id(), s;
++
++    if ( !halt_poll_smt )
++        return false;
++    for_each_cpu ( s, per_cpu(cpu_sibling_mask, cpu) )
++    {
++        const struct sched_resource *sr = get_sched_res(s);
++
++        if ( s != cpu && sr && !is_idle_unit(ACCESS_ONCE(sr->curr)) )
++            return true;
++    }
++    return false;
++}
++
++static bool halt_poll_others_waiting(void)
++{
++    unsigned int cpu = smp_processor_id();
++
++    return halt_poll_yield &&
++           get_sched_res(cpu)->scheduler->sched_id == XEN_SCHEDULER_CREDIT &&
++           csched_runq_waiters_hint(cpu);
++}
++integer_runtime_param("halt_poll_adaptive", halt_poll_adaptive);
++static unsigned long halt_poll_grow, halt_poll_shrink;
++
++static void halt_poll_adjust(struct vcpu *v, s_time_t halt_ns)
++{
++    s_time_t max = MICROSECS(ACCESS_ONCE(halt_poll_us));
++
++    if ( !halt_poll_adaptive )
++        return;
++    if ( halt_ns <= v->hp_win_ns )
++        return;                                   /* poll caught it */
++    if ( halt_ns > max )
++    {
++        if ( v->hp_win_ns )
++        {
++            v->hp_win_ns = 0;                     /* long halt: stop polling */
++            halt_poll_shrink++;
++        }
++    }
++    else if ( v->hp_win_ns < max )
++    {
++        v->hp_win_ns = v->hp_win_ns ? min_t(s_time_t, 2 * (s_time_t)v->hp_win_ns, max)
++                                    : MICROSECS(10);
++        halt_poll_grow++;
++    }
++}
++
++static bool vcpu_halt_poll(struct vcpu *v)
++{
++    s_time_t t0, deadline;
++    unsigned int us = ACCESS_ONCE(halt_poll_us);
++    s_time_t win;
++
++    v->hp_pending = false;
++    if ( !us || (halt_poll_dom0_only == 1 && !is_hardware_domain(v->domain)) ||
++         (halt_poll_dom0_only == 2 && is_hardware_domain(v->domain)) )
++        return false;
++
++    t0 = NOW();
++    win = halt_poll_adaptive ? v->hp_win_ns : MICROSECS(us);
++    deadline = t0 + win;
++    while ( NOW() < deadline )
++    {
++        if ( halt_poll_others_waiting() )
++        {
++            halt_poll_yielded++;
++            break;
++        }
++        if ( halt_poll_sibling_busy() )
++        {
++            halt_poll_smtskip++;
++            break;
++        }
++        if ( local_events_need_delivery() )
++        {
++            halt_poll_hits++;
++            halt_poll_adjust(v, NOW() - t0);
++            return true;
++        }
++        if ( softirq_pending(smp_processor_id()) )
++        {
++            halt_poll_softirq++;
++            break;
++        }
++        cpu_relax();
++    }
++    if ( win )
++        halt_poll_misses++;
++    v->hp_t0 = t0;
++    v->hp_pending = true;                         /* measured at wake-up */
++    return false;
++}
++
++static void cf_check dump_halt_poll(unsigned char key)
++{
++    printk("halt_poll: us=%u adaptive=%u yield=%u smt=%u dom0_only=%u hits=%lu misses=%lu softirq=%lu yielded=%lu smtskip=%lu grow=%lu shrink=%lu\n",
++           halt_poll_us, halt_poll_adaptive, halt_poll_yield, halt_poll_smt, halt_poll_dom0_only,
++           halt_poll_hits, halt_poll_misses, halt_poll_softirq, halt_poll_yielded,
++           halt_poll_smtskip, halt_poll_grow, halt_poll_shrink);
++}
++
++static int __init cf_check halt_poll_keyhandler_init(void)
++{
++    register_keyhandler('Y', dump_halt_poll, "dump halt-poll counters", 0);
++    return 0;
++}
++__initcall(halt_poll_keyhandler_init);
++
+ void vcpu_block(void)
+ {
+     struct vcpu *v = current;
+ 
++    if ( vcpu_halt_poll(v) )
++        return;
++
+     set_bit(_VPF_blocked, &v->pause_flags);
+ 
+     smp_mb__after_atomic();
+diff --git a/xen/common/sched/credit.c b/xen/common/sched/credit.c
+index 8e04f54..61acdda 100644
+--- a/xen/common/sched/credit.c
++++ b/xen/common/sched/credit.c
+@@ -263,6 +263,24 @@ static inline bool is_runq_idle(unsigned int cpu)
+            is_idle_unit(__runq_elem(RUNQ(cpu)->next)->unit);
+ }
+ 
++/* Halt polling: lock-free hint, true if another unit is waiting on
++ * cpu's runq (the credit runq always holds the idle unit when it is not
++ * running, so "only the idle unit at the head" means no waiters). Racy by
++ * design: used only to decide whether spinning would delay someone.
++ */
++bool csched_runq_waiters_hint(unsigned int cpu)
++{
++    const struct csched_pcpu *spc = CSCHED_PCPU(cpu);
++    const struct list_head *next;
++
++    if ( !spc )
++        return false;
++    next = ACCESS_ONCE(spc->runq.next);
++    if ( next == &spc->runq )
++        return false;
++    return !is_idle_unit(__runq_elem((struct list_head *)next)->unit);
++}
++
+ static inline void
+ inc_nr_runnable(unsigned int cpu)
+ {
+diff --git a/xen/include/xen/sched.h b/xen/include/xen/sched.h
+index 87be7fb..fac36e5 100644
+--- a/xen/include/xen/sched.h
++++ b/xen/include/xen/sched.h
+@@ -225,6 +225,10 @@ struct vcpu
+     bool             is_urgent;
+     /* VCPU must context_switch without scheduling unit. */
+     bool             force_context_switch;
++    /* Adaptive halt polling (KVM-style), see sched/core.c */
++    unsigned int     hp_win_ns;
++    bool             hp_pending;
++    s_time_t         hp_t0;
+     /* Require shutdown to be deferred for some asynchronous operation? */
+     bool             defer_shutdown;
+     /* VCPU is paused following shutdown request (d->is_shutting_down)? */

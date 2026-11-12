@@ -1,4 +1,6 @@
+From 2445b30a442ff3554ec477d5ec6445f92634394a Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 3 Nov 2026 12:07:06 +0000
 Subject: gnttab: move "only local domain may copy by frame" check
 
 gnttab_copy_one() calls gnttab_copy_lock_domain{s,}() only conditionally.
@@ -14,6 +16,7 @@ Reported-by: Stephan Lipp <Stephan@Adalogics.com>
 Reported-by: CodeAnt AI Security Research <securityresearch@codeant.ai>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
+(cherry picked from commit cd4d68f86cb111e2ea0a17cfb4fb8cd9c6c69e83)
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
 index 34514f6531a9..210283247ecc 100644

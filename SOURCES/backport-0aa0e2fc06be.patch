@@ -1,4 +1,6 @@
+From 0aa0e2fc06bec65017e68de94c259427bf31e21c Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 3 Nov 2026 12:07:06 +0000
 Subject: gnttab: complete checking in gnttab_copy_buf_valid()
 
 The ->have_grant field needs checking not only ahead of comparing GREFs,
@@ -13,6 +15,7 @@ Reported-by: Stephan Lipp <Stephan@Adalogics.com>
 Reported-by: CodeAnt AI Security Research <securityresearch@codeant.ai>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
+(cherry picked from commit 266df0688c8a4fc243cd2bfd1f4cb09164f99bff)
 
 diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
 index df53ead2d011..34514f6531a9 100644

@@ -1,0 +1,60 @@
+From 314d3603905256835c4f8a29a75e3bd5eafb29cf Mon Sep 17 00:00:00 2001
+From: Lin Liu <lin.liu01@citrix.com>
+Date: Mon, 9 Nov 2026 11:32:40 +0100
+Subject: xen/credit: Uncount units dropped by csched_schedule()
+
+csched_schedule() takes snext off the runq without decrementing
+nr_runnable, as it is about to run.  A unit that stops being runnable
+is normally removed and uncounted by csched_unit_sleep(), but if the
+pick loop drops it first, the sleep finds nothing to do and the unit
+stays counted:
+
+     CPU A                            CPU B
+     domain_pause()                   csched_schedule(), lock held
+       atomic_inc(&d->pause_count)
+                                        __runq_remove(snext)
+       vcpu_sleep_sync()                !unit_runnable_state(): drop
+         waits for lock                 unlock
+         csched_unit_sleep()
+           not running, not queued:
+           nothing to do
+     domain_unpause()
+       vcpu_wake()
+         runq_insert()                nr_runnable +1 again
+
+Decrement nr_runnable when dropping the unit.
+
+Fixes: 7c7b407e7772 ("xen/sched: introduce unit_runnable_state()")
+Reported-by: Bengang Yuan <bengang.yuan@citrix.com>
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Lin Liu <lin.liu01@citrix.com>
+Reviewed-by: Juergen Gross <jgross@suse.com>
+
+diff --git a/xen/common/sched/credit.c b/xen/common/sched/credit.c
+index b447cd8845..b590d182de 100644
+--- a/xen/common/sched/credit.c
++++ b/xen/common/sched/credit.c
+@@ -1959,7 +1959,8 @@ static void cf_check csched_schedule(
+      */
+     clear_bit(CSCHED_FLAG_UNIT_YIELD, &scurr->flags);
+ 
+-    do {
++    for ( ; ; )
++    {
+         snext = __runq_elem(runq->next);
+ 
+         /* Tasklet work (which runs in idle UNIT context) overrides all else. */
+@@ -1987,7 +1988,12 @@ static void cf_check csched_schedule(
+         else
+             __runq_remove(snext);
+ 
+-    } while ( !unit_runnable_state(snext->unit) );
++        if ( unit_runnable_state(snext->unit) )
++            break;
++
++        /* Dropped snext is off the runq but still counted: uncount it. */
++        dec_nr_runnable(sched_cpu);
++    }
+ 
+     /*
+      * Update idlers mask if necessary. When we're idling, other CPUs

@@ -1,4 +1,6 @@
+From 0dd6d91faa7ce1b4ecf8b31a34c742e35a4ff24a Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Wed, 4 Nov 2026 17:41:37 +0000
 Subject: AMD/IOMMU: allocate (at least) one spare device table entry
 
 Certain IOMMUs have an off-by-one in the upper bounds check of device
@@ -18,6 +20,7 @@ This is CVE-2024-21963 / XSA-524.
 
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Acked-by: Andrew Cooper <andrew.cooper3@citrix.com>
+(cherry picked from commit d7378932b1fcee6ef3f3698efae03ffa003672b8)
 
 diff --git a/xen/drivers/passthrough/amd/iommu-defs.h b/xen/drivers/passthrough/amd/iommu-defs.h
 index 35de548e3a78..ce37f74f4162 100644

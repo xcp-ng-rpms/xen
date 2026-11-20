@@ -1,4 +1,4 @@
-From 6c3cf7c8a1a5a0e7717fcee463e2fd498e8b7467 Mon Sep 17 00:00:00 2001
+From 24a977e618c007e33254d77a3eaf18f987858457 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
 Date: Fri, 7 Nov 2025 15:00:32 +0000
 Subject: x86/spec-ctrl: Rename tsa_calculations()
@@ -15,6 +15,7 @@ This is part of XSA-525.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Acked-by: Roger Pau Monné <roger@xenproject.org>
+(cherry picked from commit 85b6ec84e7276c2ed01815cd11b96fe73d98e14b)
 
 diff --git a/xen/arch/x86/spec_ctrl.c b/xen/arch/x86/spec_ctrl.c
 index b71fe0a4ece1..ffab2e8bbf23 100644

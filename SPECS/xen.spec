@@ -360,6 +360,9 @@ Patch1030: xsa515.patch
 # HPET fix
 Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
 
+# Viridian for >64 vCPUs
+Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
+Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 ExclusiveArch: x86_64
 
@@ -1217,6 +1220,7 @@ fi
 %changelog
 * Mon Nov 23 2026 Corentin Oparowski <corentin.oparowski@vates.tech> - 4.17.7-7.1
 - Remove XSA-524 fix patch now part of XS release
+- xenguest: Restore support for Viridian flags for >64 vCPUs
 - Sync with XenServer 4.17.7-7
 - *** Upstream changelog ***
   * Tue Nov 17 2026 Andrew Cooper <andrew.cooper3@citrix.com> - 4.17.7-7

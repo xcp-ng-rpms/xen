@@ -1,4 +1,4 @@
-From 8c91436cb87928408110bfc77ba9e8018d0c0318 Mon Sep 17 00:00:00 2001
+From f5ddda326384c21c8b6fd1c26867db580729e164 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
 Date: Fri, 16 Oct 2026 18:18:56 +0100
 Subject: x86/spec-ctrl: Extend TSA-SQ/L1 mitigations to Zen5 CPUs
@@ -21,6 +21,7 @@ This is CVE-2024-36350 and CVE-2024-36357, part of XSA-525.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Acked-by: Roger Pau Monné <roger@xenproject.org>
+(cherry picked from commit c8cb3beaa78952913b3eef062650f752118e910f)
 
 diff --git a/xen/arch/x86/cpu-policy.c b/xen/arch/x86/cpu-policy.c
 index 9224c36d81b5..8b0ab6437b6c 100644

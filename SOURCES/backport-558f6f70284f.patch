@@ -1,5 +1,10 @@
+From 558f6f70284f09333eb1c361ef739fe3c469fe57 Mon Sep 17 00:00:00 2001
 From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 17 Nov 2026 17:32:54 +0100
 Subject: AMD/IOMMU: correct devtab size writing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 The fix for XSA-524 inadvertently converted a page-granular value to a
 byte-granular one, thus always setting maximum size (2Mb) without the
@@ -9,10 +14,14 @@ Fixes: d7378932b1fc ("AMD/IOMMU: allocate (at least) one spare device table entr
 Reported-by: Roger Pau Monné <roger.pau@amd.com>
 Signed-off-by: Jan Beulich <jbeulich@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@amd.com>
+master commit: ab77da87e9b38022341eb6a54593e681485d203a
+master date: 2026-11-17 17:02:47 +0100
 
+diff --git a/xen/drivers/passthrough/amd/iommu_init.c b/xen/drivers/passthrough/amd/iommu_init.c
+index 741dd4a6bbf4..885e58e84dcb 100644
 --- a/xen/drivers/passthrough/amd/iommu_init.c
 +++ b/xen/drivers/passthrough/amd/iommu_init.c
-@@ -80,9 +80,8 @@ static void register_iommu_dev_table_in_
+@@ -91,9 +91,8 @@ static void register_iommu_dev_table_in_mmio_space(struct amd_iommu *iommu)
  
      entry = 0;
      iommu_set_addr_lo_to_reg(&entry, addr_lo >> PAGE_SHIFT);

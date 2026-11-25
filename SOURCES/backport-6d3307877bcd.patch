@@ -1,4 +1,4 @@
-From 6ade91ad6ecc3310fc4eaf84d58b163f5fa0c78a Mon Sep 17 00:00:00 2001
+From 6d3307877bcdac7d9e1ae87d3b2b5751594910a2 Mon Sep 17 00:00:00 2001
 From: Andrew Cooper <andrew.cooper3@citrix.com>
 Date: Fri, 7 Nov 2025 15:00:32 +0000
 Subject: x86/spec-ctrl: Mitigate the new TSA-Fill variant
@@ -20,6 +20,7 @@ This is CVE-2026-0004, part of XSA-525.
 
 Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
 Reviewed-by: Roger Pau Monné <roger@xenproject.org>
+(cherry picked from commit d44b131ce954905205a478e19c8422aa2ec9e399)
 
 diff --git a/tools/misc/xen-cpuid.c b/tools/misc/xen-cpuid.c
 index 04035d565eb5..00997e40f53a 100644

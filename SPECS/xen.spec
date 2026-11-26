@@ -361,6 +361,11 @@ Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
 # XSA 524 fix
 Patch1032: xsa524-fix.patch
 
+# XSA-535
+Patch1034: xsa535-4.18-1.patch
+Patch1035: xsa535-4.18-2.patch
+Patch1036: xsa535-4.18-3.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel
@@ -1215,6 +1220,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Nov 27 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.7-6.3
+- Fixes for:
+  - XSA-535 CVE-2026-119781 CVE-2026-119782 CVE-2026-119783
+
 * Tue Nov 17 2026 Lucas Pottier <lucas.pottier@vates.tech> - 4.17.7-6.2
 - Add XSA-524 fix patch
 

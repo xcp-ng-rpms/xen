@@ -1,0 +1,83 @@
+From 9338a6da0c1b35c42f0f37932c06bcf294dca02a Mon Sep 17 00:00:00 2001
+From: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Date: Thu, 29 Oct 2026 13:27:56 +0100
+Subject: x86/vpt: Validate timer object with generation number
+
+The remote completion path of pt_update_irq removes timers from tm_list
+by checking that their addresses match the previous iteration. However,
+if the guest rearms a timer during the gap between two list iterations,
+the resulting timer object is no longer the same, even if their
+addresses match. Removing the timer from the list will then lose the
+armed timer object.
+
+Record a generation number in each timer object upon arming, and check
+that the generation number matches before removing it from the list.
+
+Fixes: 0bcbc971feaa ("x86/vpt: add support for level interrupts")
+Signed-off-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+master commit: ad987b59ba7b434c1ebcd927328ff3cef24a193a
+master date: 2026-10-29 09:12:03 +0100
+
+Backported-by: Teddy Astie <teddy.astie@vates.tech>
+[backport: check applied to the generic remote-injection path from
+ "x86/vpt: fix injection to remote vCPU"]
+---
+ xen/arch/x86/hvm/vpt.c             | 7 ++++++-
+ xen/arch/x86/include/asm/hvm/vpt.h | 1 +
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/x86/hvm/vpt.c b/xen/arch/x86/hvm/vpt.c
+index 9b84d6a3c7..f1272773f0 100644
+--- a/xen/arch/x86/hvm/vpt.c
++++ b/xen/arch/x86/hvm/vpt.c
+@@ -317,7 +317,7 @@ int pt_update_irq(struct vcpu *v)
+ {
+     struct list_head *head = &v->arch.hvm.tm_list;
+     struct periodic_time *pt, *temp, *earliest_pt;
+-    uint64_t max_lag;
++    uint64_t max_lag, generation;
+     int irq, pt_vector = -1;
+     bool level;
+ 
+@@ -356,6 +356,7 @@ int pt_update_irq(struct vcpu *v)
+     }
+ 
+     earliest_pt->irq_issued = 1;
++    generation = earliest_pt->generation;
+     irq = earliest_pt->irq;
+     level = earliest_pt->level;
+ 
+@@ -412,6 +413,9 @@ int pt_update_irq(struct vcpu *v)
+         list_for_each_entry ( pt, &v->arch.hvm.tm_list, list )
+             if ( pt == earliest_pt )
+             {
++                if ( pt->generation != generation )
++                    break;
++
+                 pt_irq_fired(v, pt);
+                 cb = pt->cb;
+                 cb_priv = pt->priv;
+@@ -550,6 +554,7 @@ void create_periodic_time(
+     set_timer(&pt->timer, pt->scheduled);
+ 
+     pt_vcpu_lock(v);
++    pt->generation++;
+     pt->on_list = 1;
+     list_add(&pt->list, &v->arch.hvm.tm_list);
+     pt_vcpu_unlock(v);
+diff --git a/xen/arch/x86/include/asm/hvm/vpt.h b/xen/arch/x86/include/asm/hvm/vpt.h
+index 0b92b28625..90ec5c6dc9 100644
+--- a/xen/arch/x86/include/asm/hvm/vpt.h
++++ b/xen/arch/x86/include/asm/hvm/vpt.h
+@@ -32,6 +32,7 @@ struct periodic_time {
+     u8 irq;
+     struct vcpu *vcpu;          /* vcpu timer interrupt delivers to */
+     u32 pending_intr_nr;        /* pending timer interrupts */
++    uint64_t generation;        /* distinguish two armings of the same timer */
+     u64 period;                 /* frequency in ns */
+     s_time_t scheduled;         /* scheduled timer interrupt */
+     u64 last_plt_gtime;         /* platform time when last IRQ is injected */
+-- 
+2.56.1
+

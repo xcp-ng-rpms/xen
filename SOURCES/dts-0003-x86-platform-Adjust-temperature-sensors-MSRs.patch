@@ -1,0 +1,71 @@
+From 53c9f6c7578fe51e4c47f5634569a99d3053adc3 Mon Sep 17 00:00:00 2001
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Tue, 24 Feb 2026 09:18:02 +0100
+Subject: x86/platform: Adjust temperature sensors MSRs
+
+Temperature sensors MSR were previously assumed to be available when "DTS"
+CPUID bit is set. This is not really the case :
+ * MSR_IA32_THERM_STATUS is gated behind ACPI CPUID bit, only DTS-related bits
+of this MSR are gated behind the DTS CPUID
+ * MSR_PACKAGE_THERM_STATUS is gated behind "PTM" CPUID
+
+Also adjust the MSR_TEMPERATURE_TARGET which is not architectural, but stable
+in practice, and required to be exposed for reliably querying CPU temperature.
+
+Fixes: 615c9f3f820 ("x86/platform: Expose DTS sensors MSR")
+Reported-by: Tu Dinh <ngoc-tu.dinh@vates.tech>
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Reviewed-by: Jan Beulich <jbeulich@suse.com>
+---
+ xen/arch/x86/platform_hypercall.c    | 19 ++++++++++++++++++-
+ xen/include/xen/lib/x86/cpu-policy.h |  2 +-
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/xen/arch/x86/platform_hypercall.c b/xen/arch/x86/platform_hypercall.c
+index aab865766b..258947817d 100644
+--- a/xen/arch/x86/platform_hypercall.c
++++ b/xen/arch/x86/platform_hypercall.c
+@@ -94,9 +94,26 @@ static bool msr_read_allowed(unsigned int msr)
+         return cpu_has_srbds_ctrl;
+ 
+     case MSR_IA32_THERM_STATUS:
++        return host_cpu_policy.basic.acpi;
++
++    /*
++     * This MSR is present on most Intel Core-family CPUs since Nehalem but is not an
++     * architectural MSR. No CPUID bit enumerates this MSR.
++     *
++     * This MSR exposes "temperature target" that is needed to compute the CPU
++     * temperature. The "temperature target" is a model specific value, and this MSR is
++     * the only known method of getting the one used for the CPU. On some CPU models with
++     * Intel SST-PP, the "temperature target" can vary over time.
++     *
++     * We assume all Intel CPUs with DTS may support this MSR; but reads can fail in case
++     * the platform doesn't actually support this MSR.
++     */
+     case MSR_TEMPERATURE_TARGET:
++        return boot_cpu_data.x86_vendor == X86_VENDOR_INTEL &&
++               host_cpu_policy.basic.digital_temp_sensor;
++
+     case MSR_PACKAGE_THERM_STATUS:
+-        return host_cpu_policy.basic.digital_temp_sensor;
++        return host_cpu_policy.basic.pkg_therm_mgmt;
+     }
+ 
+     if ( ppin_msr && msr == ppin_msr )
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index db8d035589..d29e380359 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -132,7 +132,7 @@ struct cpu_policy
+                         :1,
+                         :1,
+                         :1,
+-                        :1,
++                        pkg_therm_mgmt:1,
+                         hwp:1,
+                         hwp_interrupt:1,
+                         hwp_activity_window:1,
+-- 
+2.56.1
+

@@ -1,0 +1,64 @@
+From f2a1a03c6209fbd5f6fa5eeaa251e36b6db26e31 Mon Sep 17 00:00:00 2001
+From: Jan Beulich <jbeulich@suse.com>
+Date: Tue, 20 Jan 2026 08:59:16 +0100
+Subject: x86/cpu-policy: define bits of leaf 6
+
+... as far as we presently use them in the codebase.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Reviewed-by: Jason Andryuk <jason.andryuk@amd.com>
+---
+ xen/include/xen/lib/x86/cpu-policy.h | 37 +++++++++++++++++++++++++++-
+ 1 file changed, 36 insertions(+), 1 deletion(-)
+
+diff --git a/xen/include/xen/lib/x86/cpu-policy.h b/xen/include/xen/lib/x86/cpu-policy.h
+index f94f23e159..bdda6e52e1 100644
+--- a/xen/include/xen/lib/x86/cpu-policy.h
++++ b/xen/include/xen/lib/x86/cpu-policy.h
+@@ -121,7 +121,42 @@ struct cpu_policy
+             uint64_t :64, :64; /* Leaf 0x3 - PSN. */
+             uint64_t :64, :64; /* Leaf 0x4 - Structured Cache. */
+             uint64_t :64, :64; /* Leaf 0x5 - MONITOR. */
+-            uint64_t :64, :64; /* Leaf 0x6 - Therm/Perf. */
++
++            /* Leaf 0x6 - Therm/Perf. */
++            union {
++                uint32_t _6a;
++                struct {
++                    bool :1,
++                        turbo_boost:1,
++                        arat:1,
++                        :1,
++                        :1,
++                        :1,
++                        :1,
++                        hwp:1,
++                        hwp_interrupt:1,
++                        hwp_activity_window:1,
++                        hwp_epp:1,
++                        hwp_request_pkg:1,
++                        :1,
++                        hdc:1,
++                        :1,
++                        :1,
++                        hwp_peci_override:1,
++                        :1,
++                        :1,
++                        hw_feedback:1;
++                };
++            };
++            uint32_t /* b */:32;
++            union {
++                uint32_t _6c;
++                struct {
++                    bool hw_feedback_cap:1; /* aperf/mperf */
++                };
++            };
++            uint32_t /* d */:32;
++
+             uint64_t :64, :64; /* Leaf 0x7 - Structured Features. */
+             uint64_t :64, :64; /* Leaf 0x8 - rsvd */
+             uint64_t :64, :64; /* Leaf 0x9 - DCA */
+-- 
+2.56.1
+

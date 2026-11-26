@@ -32,7 +32,7 @@
 Summary: Xen is a virtual machine monitor
 Name:    xen
 Version: 4.21.2
-Release: %{?xsrel}.4%{?dist}
+Release: %{?xsrel}.5%{?dist}
 License: GPLv2 and LGPLv2 and MIT and Public Domain
 URL:     https://www.xenproject.org
 Source0: xen-4.21.2.tar.gz
@@ -199,6 +199,17 @@ Patch1001: xenguest-xg_emu-mem_pnode.patch
 # Viridian for >64 vCPUs
 Patch1002: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
 Patch1003: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
+
+# Intel Digital Thermal Sensors
+Patch1004: dts-0001-x86-cpu-policy-define-bits-of-leaf-6.patch
+Patch1005: dts-0002-x86-platform-Expose-DTS-sensors-MSR.patch
+Patch1006: dts-0003-x86-platform-Adjust-temperature-sensors-MSRs.patch
+Patch1007: dts-0004-libxc-Report-EINVAL-in-invalid-xc_resource_op-use.patch
+Patch1008: dts-0005-xenpm-Use-EXIT_-SUCCESS-FAILURE-instead-of-errno-as-.patch
+Patch1009: dts-0006-xenpm-Add-get-core-temp-subcommand.patch
+
+# HPET fix
+Patch1010: x86-vpt-Validate-timer-object-with-generation-number.patch
 
 # ARM patches
 Patch2000: common-exclude-pv_iommu-from-non-x86-builds.patch
@@ -1138,6 +1149,9 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Thu Nov 26 2026 Teddy Astie <teddy.astie@vates.teech> - 4.21.2.3-5
+- Backport Intel DTS support and HPET fix.
+
 * Thu Oct 08 2026 Julian Vetter <julian.vetter@vates.tech> - 4.21.2-3.4
 - Exclude pv_iommu from non-x86 builds
 

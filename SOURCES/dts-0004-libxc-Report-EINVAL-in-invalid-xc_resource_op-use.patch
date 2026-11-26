@@ -1,0 +1,29 @@
+From 7b5d398b23d745cd449a08b51722efd4ca601c44 Mon Sep 17 00:00:00 2001
+From: Teddy Astie <teddy.astie@vates.tech>
+Date: Thu, 2 Apr 2026 08:49:17 +0200
+Subject: libxc: Report EINVAL in invalid xc_resource_op use
+
+xc_report_op doesn't update errno when called with 0 operations
+(even though it returns -1).
+
+Signed-off-by: Teddy Astie <teddy.astie@vates.tech>
+Reviewed-by: Anthony PERARD <anthony.perard@vates.tech>
+---
+ tools/libs/ctrl/xc_resource.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/libs/ctrl/xc_resource.c b/tools/libs/ctrl/xc_resource.c
+index cb6a97202b..f65127f91c 100644
+--- a/tools/libs/ctrl/xc_resource.c
++++ b/tools/libs/ctrl/xc_resource.c
+@@ -137,6 +137,7 @@ int xc_resource_op(xc_interface *xch, uint32_t nr_ops, xc_resource_op_t *ops)
+     if ( nr_ops > 1 )
+         return xc_resource_op_multi(xch, nr_ops, ops);
+ 
++    errno = EINVAL;
+     return -1;
+ }
+ 
+-- 
+2.56.1
+

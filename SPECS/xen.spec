@@ -361,13 +361,19 @@ Patch1030: xsa515.patch
 Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
 
 # Viridian for >64 vCPUs
-#Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
-#Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
+Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
+Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 # XSA-535
 Patch1034: xsa535-4.18-1.patch
 Patch1035: xsa535-4.18-2.patch
 Patch1036: xsa535-4.18-3.patch
+
+# Fix WBINVD on C3 entry on AMD CPUs
+Patch1037: 0001-x86-ACPI-optimise-C3-entry-on-AMD-CPUs.patch
+
+# libxenstat fix backport
+Patch1038: 0001-tools-libxenstat-don-t-lose-all-VIFs-when-dom0-has-n.patch
 
 ExclusiveArch: x86_64
 
@@ -1223,6 +1229,11 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Nov 27 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.7-7.3
+- Reapply viridian patches
+- Stop doing WBINVD on C3 entry on AMD Zen to improve performance
+- Backport libxenstat fix around missing VIFs
+
 * Thu Nov 26 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.7-7.2
 - Temporarily revert viridian patches
 - Fixes for:

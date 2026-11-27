@@ -1,0 +1,44 @@
+From 09b7585dbef128cad0ccf96b30991c81bfe8f929 Mon Sep 17 00:00:00 2001
+From: Olivier Lambert <olivier.lambert@vates.tech>
+Date: Sat, 3 Oct 2026 07:17:43 +0000
+Subject: tools/libxenstat: don't lose all VIFs when dom0 has no Linux bridge
+
+xenstat_collect_networks() looks for a Linux bridge (a
+/sys/class/net/*/bridge directory) so that, with bonding, dom0 can be
+given the bridge's counters. When there is none, as on hosts using Open
+vSwitch (the XCP-ng default), routed networking or only libvirt's
+virbr0 (which is excluded on purpose), getBridge() leaves devBridge
+empty. strstr(iface, "") then matches every interface, and devNoBridge
+is just "p", so every VIF with a standard name (vifN.M, vifN.M-emu)
+takes the bridge branch instead of being attached to its domain. Every
+domain ends up with zero networks, and xentop shows NETS 0.
+
+Only take the bridge branch when a bridge was actually found.
+
+Fixes: 1fd93d4f8cb8 ("xenstat: Linux dom0 statistics for case we use network bonding")
+Assisted-by: Claude-Code:claude-opus-5-5
+Signed-off-by: Olivier Lambert <olivier.lambert@vates.tech>
+Tested-by: Jason Andryuk <jason.andryuk@amd.com>
+Reviewed-by: Jason Andryuk <jason.andryuk@amd.com>
+Acked-by: Anthony PERARD <anthony.perard@vates.tech>
+---
+ tools/libs/stat/xenstat_linux.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tools/libs/stat/xenstat_linux.c b/tools/libs/stat/xenstat_linux.c
+index 132b7e6360..aa6f4d2563 100644
+--- a/tools/libs/stat/xenstat_linux.c
++++ b/tools/libs/stat/xenstat_linux.c
+@@ -322,7 +322,8 @@ int xenstat_collect_networks(xenstat_node * node)
+ 
+ 		/* If the device parsed is network bridge and both tx & rx packets are zero, we are most */
+ 		/* likely using bonding so we alter the configuration for dom0 to have bridge stats */
+-		if ((strstr(iface, devBridge) != NULL) &&
++		if ((devBridge[0] != '\0') &&
++		    (strstr(iface, devBridge) != NULL) &&
+ 		    (strstr(iface, devNoBridge) == NULL) &&
+ 		    ((domain = xenstat_node_domain(node, 0)) != NULL)) {
+ 			for (i = 0; i < domain->num_networks; i++) {
+-- 
+2.56.1
+

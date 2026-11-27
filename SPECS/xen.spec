@@ -361,8 +361,8 @@ Patch1030: xsa515.patch
 Patch1031: 0001-x86-vpt-Validate-timer-object-with-generation-number.patch
 
 # Viridian for >64 vCPUs
-Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
-Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
+#Patch1032: 0001-xenguest-Apply-hcall_ipi-setting-from-xenstore.patch
+#Patch1033: 0002-xenguest-Support-Viridian-flags-for-64-vCPUs.patch
 
 # XSA-535
 Patch1034: xsa535-4.18-1.patch
@@ -1224,6 +1224,7 @@ fi
 
 %changelog
 * Thu Nov 26 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.7-7.2
+- Temporarily revert viridian patches
 - Fixes for:
   - XSA-535 CVE-2026-119781 CVE-2026-119782 CVE-2026-119783
 

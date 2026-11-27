@@ -1,0 +1,270 @@
+From c9617ab09cafaa1083312e284c637651968202e5 Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:30 +0100
+Subject: [PATCH] docs/specs, tools: define the PAGE_DATA flags field
+
+The 32-bit field after count in a PAGE_DATA record is reserved, and
+libxenguest and the Python stream validator reject a record which sets
+it.  The record's page_data is page_size bytes of uncompressed
+contents per present page, and nothing in the record can say that it
+is encoded otherwise, so pages cannot be sent compressed.
+
+Turn that field into a flags field.  Bits 7-0 identify the algorithm
+used to encode page_data, 0x00 meaning none, and a restoring side must
+fail on a value it does not implement.  Bits 31-8 stay reserved, and a
+restoring side must still reject a record which sets any of them,
+overriding the general rule for reserved fields.  Make libxenguest and
+the Python validator enforce both rules, and check the length of
+page_data according to the algorithm.  Add test_page_data_flags for the
+Python checks.
+
+The specification's Future Extensions section requires a new record
+type for any extension of an existing one.  Also allow an existing type
+to be extended in place when a receiver which predates the extension is
+guaranteed to reject the extended record rather than misread it.  For
+PAGE_DATA, this holds for an encoding which leaves count and the pfn
+array in plaintext and shortens page_data: an older libxenguest which
+ignores the field fails its exact length check.
+
+The stream version is not bumped.  A zero flags field means what the
+reserved field meant, and no other value is accepted.
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/docs/specs/libxc-migration-stream.pandoc b/docs/specs/libxc-migration-stream.pandoc
+index d1ed3a6ac9..96efaeddb8 100644
+--- a/docs/specs/libxc-migration-stream.pandoc
++++ b/docs/specs/libxc-migration-stream.pandoc
+@@ -3,7 +3,8 @@
+   Andrew Cooper <<andrew.cooper3@citrix.com>>
+   Wen Congyang <<wency@cn.fujitsu.com>>
+   Yang Hongyang <<hongyang.yang@easystack.cn>>
+-% Revision 4
++  Marcus Granado <<marcus.granado@citrix.com>>
++% Revision 5
+ 
+ Introduction
+ ============
+@@ -279,7 +280,7 @@ memory contents.
+ 
+      0     1     2     3     4     5     6     7 octet
+     +-----------------------+-------------------------+
+-    | count (C)             | (reserved)              |
++    | count (C)             | flags                   |
+     +-----------------------+-------------------------+
+     | pfn[0]                                          |
+     +-------------------------------------------------+
+@@ -299,8 +300,19 @@ Field       Description
+ ----------- --------------------------------------------------------
+ count       Number of pages described in this record.
+ 
+-(reserved)  Set to zero on save.  A restoring side must reject a
+-            record with this field non-zero.
++flags       Bit 7-0:  Algorithm used to encode page_data.
++
++                      0x00: None.  page_data is page_size octets of
++                            uncompressed contents per present page.
++
++                      0x01 - 0xFF: Unassigned.
++
++                      A restoring side must fail on an algorithm value it
++                      does not implement, rather than attempting to
++                      interpret the page_data.
++
++            Bit 31-8: Reserved.  Set to zero on save.  A restoring side
++                      must reject a record with any of these bits set.
+ 
+ pfn         An array of count PFNs and their types.
+ 
+@@ -312,8 +324,8 @@ pfn         An array of count PFNs and their types.
+ 
+             Bit 51-0: PFN.
+ 
+-page_data   page_size octets of uncompressed page contents for each
+-            page set as present in the pfn array.
++page_data   Contents of each page set as present in the pfn array,
++            encoded with the algorithm in flags bits 7-0.
+ --------------------------------------------------------------------
+ 
+ Note: Count is strictly > 0.  N is strictly <= C and it is possible for there
+@@ -802,7 +814,9 @@ The format may be extended by adding additional record types.
+ 
+ Extending an existing record type must be done by adding a new record
+ type.  This allows old images with the old record to still be
+-restored.
++restored.  An existing record type may instead be extended in place if
++a receiver which predates the extension is guaranteed to reject the
++extended record rather than misread it.
+ 
+ The image header may only be extended by _appending_ additional
+ fields.  In particular, the `marker`, `id` and `version` fields must
+diff --git a/tools/libs/guest/xg_sr_restore.c b/tools/libs/guest/xg_sr_restore.c
+index ae985f9dcd..8564175abe 100644
+--- a/tools/libs/guest/xg_sr_restore.c
++++ b/tools/libs/guest/xg_sr_restore.c
+@@ -401,10 +401,10 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+     }
+ 
+     /* Reject rather than ignore: a future use may change the layout. */
+-    if ( pages->_res1 != 0 )
++    if ( pages->flags & PAGE_DATA_FLAGS_RESZ_MASK )
+     {
+-        ERROR("Reserved field set in PAGE_DATA record: %#x",
+-              (unsigned int)pages->_res1);
++        ERROR("Reserved bits set in PAGE_DATA record: %#x",
++              (unsigned int)(pages->flags & PAGE_DATA_FLAGS_RESZ_MASK));
+         goto err;
+     }
+ 
+@@ -463,13 +463,24 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+         types[i] = type;
+     }
+ 
+-    if ( rec->length != (sizeof(*pages) +
+-                         (sizeof(uint64_t) * pages->count) +
+-                         (PAGE_SIZE * pages_of_data)) )
++    switch ( pages->flags & PAGE_DATA_ALGO_MASK )
+     {
+-        ERROR("PAGE_DATA record wrong size: length %u, expected "
+-              "%zu + %zu + %lu", rec->length, sizeof(*pages),
+-              (sizeof(uint64_t) * pages->count), (PAGE_SIZE * pages_of_data));
++    case PAGE_DATA_ALGO_NONE:
++        if ( rec->length != (sizeof(*pages) +
++                             (sizeof(uint64_t) * pages->count) +
++                             (PAGE_SIZE * pages_of_data)) )
++        {
++            ERROR("PAGE_DATA record wrong size: length %u, expected "
++                  "%zu + %zu + %lu", rec->length, sizeof(*pages),
++                  (sizeof(uint64_t) * pages->count),
++                  (PAGE_SIZE * pages_of_data));
++            goto err;
++        }
++        break;
++
++    default:
++        ERROR("Unsupported algorithm %u in PAGE_DATA record",
++              (unsigned int)(pages->flags & PAGE_DATA_ALGO_MASK));
+         goto err;
+     }
+ 
+diff --git a/tools/libs/guest/xg_sr_stream_format.h b/tools/libs/guest/xg_sr_stream_format.h
+index 69e6c1ccc4..a6103c9556 100644
+--- a/tools/libs/guest/xg_sr_stream_format.h
++++ b/tools/libs/guest/xg_sr_stream_format.h
+@@ -83,10 +83,16 @@ struct xc_sr_rhdr
+ struct xc_sr_rec_page_data_header
+ {
+     uint32_t count;
+-    uint32_t _res1;
++    uint32_t flags;
+     uint64_t pfn[0];
+ };
+ 
++/* PAGE_DATA flags: bits 7-0 are the algorithm, bits 31-8 are reserved. */
++#define PAGE_DATA_ALGO_MASK       0x000000ffU
++#define PAGE_DATA_FLAGS_RESZ_MASK 0xffffff00U
++
++#define PAGE_DATA_ALGO_NONE       0x00000000U
++
+ #define PAGE_DATA_PFN_MASK      0x000fffffffffffffULL
+ #define PAGE_DATA_PFN_RESZ_MASK 0x0ff0000000000000ULL
+ #define PAGE_DATA_TYPE_MASK     0xf000000000000000ULL
+diff --git a/tools/python/xen/migration/libxc.py b/tools/python/xen/migration/libxc.py
+index 9881f5ced4..cd694581f1 100644
+--- a/tools/python/xen/migration/libxc.py
++++ b/tools/python/xen/migration/libxc.py
+@@ -87,6 +87,11 @@ PAGE_DATA_FORMAT             = "II"
+ PAGE_DATA_PFN_MASK           = (1 << 52) - 1
+ PAGE_DATA_PFN_RESZ_MASK      = ((1 << 60) - 1) & ~((1 << 52) - 1)
+ 
++# page_data flags: bits 7-0 algorithm, bits 31-8 reserved (must reject)
++PAGE_DATA_ALGO_MASK          = 0x000000ff
++PAGE_DATA_FLAGS_RESZ_MASK    = 0xffffff00
++PAGE_DATA_ALGO_NONE          = 0x00
++
+ # flags from xen/public/domctl.h: XEN_DOMCTL_PFINFO_* shifted by 32 bits
+ PAGE_DATA_TYPE_SHIFT         = 60
+ PAGE_DATA_TYPE_LTABTYPE_MASK = (0x7 << PAGE_DATA_TYPE_SHIFT)
+@@ -260,11 +265,14 @@ class VerifyLibxc(VerifyBase):
+             raise RecordError(
+                 "PAGE_DATA record must be at least %d bytes long" % (minsz, ))
+ 
+-        count, res1 = unpack(PAGE_DATA_FORMAT, content[:minsz])
++        count, flags = unpack(PAGE_DATA_FORMAT, content[:minsz])
+ 
+-        if res1 != 0:
++        if flags & PAGE_DATA_FLAGS_RESZ_MASK:
+             raise StreamError(
+-                "Reserved bits set in PAGE_DATA record 0x%04x" % (res1, ))
++                "Reserved bits set in PAGE_DATA record 0x%08x"
++                % (flags & PAGE_DATA_FLAGS_RESZ_MASK, ))
++
++        algo = flags & PAGE_DATA_ALGO_MASK
+ 
+         pfnsz = count * 8
+         if (len(content) - minsz) < pfnsz:
+@@ -290,9 +298,17 @@ class VerifyLibxc(VerifyBase):
+                 nr_pages += 1
+ 
+         pagesz = nr_pages * 4096
+-        if len(content) != minsz + pfnsz + pagesz:
+-            raise RecordError("Expected %u + %u + %u, got %u" %
+-                              (minsz, pfnsz, pagesz, len(content)))
++        datasz = len(content) - minsz - pfnsz
++
++        if algo == PAGE_DATA_ALGO_NONE:
++
++            if datasz != pagesz:
++                raise RecordError("Expected %u + %u + %u, got %u" %
++                                  (minsz, pfnsz, pagesz, len(content)))
++
++        else:
++            raise StreamError(
++                "Unsupported algorithm %u in PAGE_DATA record" % (algo, ))
+ 
+ 
+     def verify_record_x86_pv_info(self, content):
+diff --git a/tools/python/xen/migration/tests.py b/tools/python/xen/migration/tests.py
+index ff2768946b..099f9d2f5c 100644
+--- a/tools/python/xen/migration/tests.py
++++ b/tools/python/xen/migration/tests.py
+@@ -7,7 +7,7 @@ Unit tests for migration v2 streams
+ 
+ import unittest
+ 
+-from struct import calcsize
++from struct import calcsize, pack
+ 
+ from xen.migration import libxc, libxl
+ 
+@@ -29,6 +29,29 @@ class TestLibxc(unittest.TestCase):
+                          ):
+             self.assertEqual(calcsize(fmt), sz)
+ 
++    def test_page_data_flags(self):
++        """ PAGE_DATA flags: algorithm dispatch and the reserved bits """
++
++        v = libxc.VerifyLibxc(lambda *_: None, lambda *_: b"")
++        PAGE = b"\x00" * 4096
++        NOTAB = libxc.PAGE_DATA_TYPE_NOTAB | 0x1   # one normal page, pfn 1
++
++        def rec(flags, data):
++            return pack(libxc.PAGE_DATA_FORMAT, 1, flags) + \
++                   pack("=Q", NOTAB) + data
++
++        # Uncompressed: exactly one page of data, and nothing else accepted.
++        v.verify_record_page_data(rec(libxc.PAGE_DATA_ALGO_NONE, PAGE))
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_NONE, PAGE[:-1]))
++
++        # An unimplemented algorithm, and any reserved bit, are refused.
++        self.assertRaises(libxc.StreamError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_NONE + 1, PAGE))
++        for bit in range(8, 32):
++            self.assertRaises(libxc.StreamError, v.verify_record_page_data,
++                              rec(1 << bit, PAGE))
++
+ 
+ class TestLibxl(unittest.TestCase):
+ 

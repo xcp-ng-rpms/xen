@@ -1,0 +1,233 @@
+From fa841373f03c507a468b67bb9535e25fb5a7ec90 Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:32 +0100
+Subject: [PATCH] tools/libs/guest: compress PAGE_DATA records with LZ4 on save
+
+write_batch() sends the pages of each batch uncompressed, writing
+iovecs which point into the foreign mapping straight to the stream.
+Restore decodes PAGE_DATA algorithm 0x01, LZ4, but nothing emits it, so
+memory which compresses well still crosses the link at full size.
+
+When ctx->save.compression selects LZ4, copy the batch's page data into
+a staging buffer, compress it into one LZ4 frame with block checksums,
+and send the frame, zero-padded to REC_ALIGN, in place of the pages.
+Send the batch uncompressed unless the frame is strictly shorter than
+the page data, as the stream specification requires of a saver.
+
+The copy is required: LZ4 may encode a page P by reference to an
+earlier page Q, checked against Q's current bytes but rebuilt from Q as
+encoded earlier in the frame.  A guest write to Q in between corrupts P
+undetected, as the block checksums cover the compressed data, and P is
+not re-sent unless the guest writes it again.
+
+Stage from the iov rather than the mapping, as only the iov describes
+the record: PV pagetables are normalised into separately allocated
+pages, and a page deferred on EAGAIN stays in the mapping but has no
+data in the record.
+
+The batch is staged whole and compressed as one block of up to 4MB;
+copying in smaller chunks interleaved with compression was slower in
+most configurations measured.
+
+The two buffers, about 8MB together, are allocated on first use.  If
+allocation or compression fails, compression is switched off for the
+rest of the save rather than failing it.  The encoder is guarded by
+XG_SR_LZ4, as the decoder is.
+
+Nothing sets ctx->save.compression yet, so behaviour is unchanged.
+
+Suggested-by: Frediano Ziglio <freddy77@gmail.com>
+Suggested-by: Teddy Astie <teddy.astie@vates.tech>
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/tools/libs/guest/xg_sr_common.h b/tools/libs/guest/xg_sr_common.h
+index 53c7d77bb2..b2ee2cc5d4 100644
+--- a/tools/libs/guest/xg_sr_common.h
++++ b/tools/libs/guest/xg_sr_common.h
+@@ -223,6 +223,12 @@ static inline int update_blob(struct xc_sr_blob *blob,
+     return 0;
+ }
+ 
++enum xc_sr_compression
++{
++    XC_SR_COMPRESS_NONE,
++    XC_SR_COMPRESS_LZ4,
++};
++
+ struct xc_sr_context
+ {
+     xc_interface *xch;
+@@ -258,6 +264,14 @@ struct xc_sr_context
+             unsigned long *deferred_pages;
+             unsigned long nr_deferred_pages;
+             xc_hypercall_buffer_t dirty_bitmap_hbuf;
++
++            /* Which algorithm to compress page data with. */
++            enum xc_sr_compression compression;
++
++            /* LZ4 staging and output buffers, allocated on first use. */
++            void *lz4_staging_buf;
++            void *lz4_compress_buf;
++            size_t lz4_compress_buf_size;
+         } save;
+ 
+         struct /* Restore data. */
+diff --git a/tools/libs/guest/xg_sr_save.c b/tools/libs/guest/xg_sr_save.c
+index f3345c40c8..374fa96a9c 100644
+--- a/tools/libs/guest/xg_sr_save.c
++++ b/tools/libs/guest/xg_sr_save.c
+@@ -74,6 +74,118 @@ static int write_checkpoint_record(struct xc_sr_context *ctx)
+     return write_record(ctx, &checkpoint);
+ }
+ 
++static void cleanup_compression(struct xc_sr_context *ctx)
++{
++    free(ctx->save.lz4_staging_buf);
++    free(ctx->save.lz4_compress_buf);
++    ctx->save.lz4_staging_buf = NULL;
++    ctx->save.lz4_compress_buf = NULL;
++    ctx->save.lz4_compress_buf_size = 0;
++}
++
++#if defined(XG_SR_LZ4)
++/*
++ * One block per 4MB batch: smaller blocks can be 2x slower to decode.
++ * liblz4 allows 64KB, 256KB, 1MB and 4MB.
++ */
++#define XC_SR_COMPRESS_BLOCK_SIZE LZ4F_max4MB
++
++/*
++ * Compress the page data in iov[2..iovcnt) into an LZ4 frame, and replace
++ * those entries with one describing it, padded to the record alignment.
++ * Returns the new iovcnt, the original one with iov untouched if the batch
++ * should be sent uncompressed, or -1 if the batch itself is malformed.
++ */
++static int lz4_compress_batch(struct xc_sr_context *ctx, struct iovec *iov,
++                              int iovcnt, unsigned int nr_pages,
++                              uint32_t *flags, uint32_t *length)
++{
++    static const LZ4F_preferences_t prefs = {
++        .frameInfo = {
++            .blockSizeID = XC_SR_COMPRESS_BLOCK_SIZE,
++            .blockChecksumFlag = LZ4F_blockChecksumEnabled,
++        },
++    };
++    xc_interface *xch = ctx->xch;
++    size_t raw = (size_t)nr_pages * PAGE_SIZE, clen, staged;
++    uint8_t *dst;
++    int i;
++
++    if ( nr_pages == 0 )
++        return iovcnt;
++
++    if ( !ctx->save.lz4_staging_buf )
++    {
++        size_t bound = LZ4F_compressFrameBound(MAX_BATCH_SIZE * PAGE_SIZE,
++                                               &prefs);
++
++        ctx->save.lz4_staging_buf = malloc(MAX_BATCH_SIZE * PAGE_SIZE);
++        ctx->save.lz4_compress_buf = malloc(bound);
++        ctx->save.lz4_compress_buf_size = bound;
++
++        if ( !ctx->save.lz4_staging_buf || !ctx->save.lz4_compress_buf )
++        {
++            IPRINTF("Unable to allocate LZ4 buffers, sending uncompressed");
++            cleanup_compression(ctx);
++            ctx->save.compression = XC_SR_COMPRESS_NONE;
++            return iovcnt;
++        }
++    }
++
++    /* The iov must match nr_pages, or stale bytes would be compressed. */
++    for ( i = 2, staged = 0; i < iovcnt; ++i )
++        staged += iov[i].iov_len;
++    if ( staged != raw )
++    {
++        ERROR("Staged %zu bytes for a batch of %u pages", staged, nr_pages);
++        return -1;
++    }
++
++    /* LZ4 must not read live guest memory: the frame could decode wrong. */
++    for ( i = 2, dst = ctx->save.lz4_staging_buf; i < iovcnt; ++i )
++    {
++        memcpy(dst, iov[i].iov_base, iov[i].iov_len);
++        dst += iov[i].iov_len;
++    }
++
++    clen = LZ4F_compressFrame(ctx->save.lz4_compress_buf,
++                              ctx->save.lz4_compress_buf_size,
++                              ctx->save.lz4_staging_buf, raw, &prefs);
++
++    if ( LZ4F_isError(clen) )
++    {
++        IPRINTF("LZ4 compression failed: %s, sending uncompressed",
++                LZ4F_getErrorName(clen));
++        cleanup_compression(ctx);
++        ctx->save.compression = XC_SR_COMPRESS_NONE;
++        return iovcnt;
++    }
++
++    /* The stream format allows LZ4 only when strictly shorter. */
++    if ( clen >= raw )
++    {
++        DBGPRINTF("LZ4: %zu -> %zu bytes, sending uncompressed", raw, clen);
++        return iovcnt;
++    }
++
++    DBGPRINTF("LZ4: %zu -> %zu bytes (%zu.%zu%% ratio)", raw, clen,
++              (clen * 1000 / raw) / 10, (clen * 1000 / raw) % 10);
++
++    /* Pad in place: raw is a multiple of REC_ALIGN and > clen, so it fits. */
++    memset((uint8_t *)ctx->save.lz4_compress_buf + clen, 0,
++           ROUNDUP(clen, REC_ALIGN) - clen);
++
++    iov[2].iov_base = ctx->save.lz4_compress_buf;
++    iov[2].iov_len = ROUNDUP(clen, REC_ALIGN);
++
++    *flags |= PAGE_DATA_ALGO_LZ4;
++    *length -= raw - clen;
++
++    /* iov[0] headers, iov[1] pfns, iov[2] page data frame. */
++    return 3;
++}
++#endif /* XG_SR_LZ4 */
++
+ /*
+  * Writes a batch of memory as a PAGE_DATA record into the stream.  The batch
+  * is constructed in ctx->save.batch_pfns.
+@@ -252,6 +364,26 @@ static int write_batch(struct xc_sr_context *ctx)
+         }
+     }
+ 
++    switch ( ctx->save.compression )
++    {
++    case XC_SR_COMPRESS_NONE:
++        break;
++
++    case XC_SR_COMPRESS_LZ4:
++#if defined(XG_SR_LZ4)
++        iovcnt = lz4_compress_batch(ctx, iov, iovcnt, nr_pages,
++                                    &hdrs.page_data.flags, &hdrs.rec.length);
++        /*
++         * -1: iov[2..] is not nr_pages pages.  Compressed: stale bytes for
++         * missing pages, or extra pages dropped, unseen by the checksums.
++         * Uncompressed: rec.length would not match the bytes writev() writes.
++         */
++        if ( iovcnt < 0 )
++            goto err;
++#endif
++        break;
++    }
++
+     if ( writev_exact(ctx->fd, iov, iovcnt) )
+     {
+         PERROR("Failed to write page data to stream");
+@@ -837,6 +969,7 @@ static void cleanup(struct xc_sr_context *ctx)
+                                    NRPAGES(bitmap_size(ctx->save.p2m_size)));
+     free(ctx->save.deferred_pages);
+     free(ctx->save.batch_pfns);
++    cleanup_compression(ctx);
+ }
+ 
+ /*

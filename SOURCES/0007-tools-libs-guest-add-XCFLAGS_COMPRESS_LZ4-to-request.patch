@@ -1,0 +1,59 @@
+From 0eaa2c786f4a18fc20a7c716cc7a816702b7bf8b Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:34 +0100
+Subject: [PATCH] tools/libs/guest: add XCFLAGS_COMPRESS_LZ4 to request LZ4
+ compression
+
+Nothing sets ctx->save.compression to XC_SR_COMPRESS_LZ4, so the LZ4
+path in write_batch() is unreachable and a caller of xc_domain_save()
+has no way to ask for compressed PAGE_DATA records.
+
+Add XCFLAGS_COMPRESS_LZ4 and select LZ4 when it is set.  A caller which
+does not set it sees no change; one which does needs a receiver able to
+decompress LZ4.
+
+A libxenguest built without a supported liblz4 cannot honour the flag,
+so fail up front with EOPNOTSUPP rather than silently send uncompressed
+records.
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/tools/include/xenguest.h b/tools/include/xenguest.h
+index 72b0b010a7..11cbe4e00f 100644
+--- a/tools/include/xenguest.h
++++ b/tools/include/xenguest.h
+@@ -24,8 +24,9 @@
+ 
+ #define XC_NUMA_NO_NODE   (~0U)
+ 
+-#define XCFLAGS_LIVE      (1 << 0)
+-#define XCFLAGS_DEBUG     (1 << 1)
++#define XCFLAGS_LIVE         (1 << 0)
++#define XCFLAGS_DEBUG        (1 << 1)
++#define XCFLAGS_COMPRESS_LZ4 (1 << 2) /* LZ4 on save; restorer needs LZ4 */
+ 
+ #define X86_64_B_SIZE   64 
+ #define X86_32_B_SIZE   32
+diff --git a/tools/libs/guest/xg_sr_save.c b/tools/libs/guest/xg_sr_save.c
+index 133c70dceb..55d84cf9e1 100644
+--- a/tools/libs/guest/xg_sr_save.c
++++ b/tools/libs/guest/xg_sr_save.c
+@@ -1196,6 +1196,17 @@ int xc_domain_save(xc_interface *xch, int io_fd, uint32_t dom,
+     ctx.save.debug = !!(flags & XCFLAGS_DEBUG);
+     ctx.save.recv_fd = recv_fd;
+ 
++    if ( flags & XCFLAGS_COMPRESS_LZ4 )
++    {
++#if defined(XG_SR_LZ4)
++        ctx.save.compression = XC_SR_COMPRESS_LZ4;
++#else
++        ERROR("XCFLAGS_COMPRESS_LZ4 requested but libxenguest was built without a supported liblz4");
++        errno = EOPNOTSUPP;
++        return -1;
++#endif
++    }
++
+     if ( xc_domain_getinfo_single(xch, dom, &ctx.dominfo) < 0 )
+     {
+         PERROR("Failed to get domain info");

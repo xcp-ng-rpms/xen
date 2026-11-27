@@ -1,0 +1,119 @@
+From 480c609a29603b9ba2a3a6fa0068ec3d06867ff5 Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:29 +0100
+Subject: [PATCH] tools/libs/guest: reject non-zero reserved fields in
+ PAGE_DATA
+
+A PAGE_DATA record has two reserved fields: the 32-bit field after
+count, and bits 59-52 of each pfn entry.  libxenguest ignores both on
+restore, as the specification's general rule for reserved fields
+requires, while the Python stream validator
+(tools/python/xen/migration/libxc.py) rejects both.
+
+A receiver which ignores either field can silently misread a record
+which uses it to change how the record's contents are organised.
+
+Reject a PAGE_DATA record with either field non-zero.  Qualify the
+specification's general rule so that a record can override it, require
+rejection of both reserved fields, and bump the specification's
+revision.
+
+This deliberately tightens restore.  Every libxenguest since Xen 4.6,
+and convert-legacy-stream, writes both fields as zero, so no stream
+they produce is rejected.
+
+Backport: 4.17+
+Reported-by: Teddy Astie <teddy.astie@vates.tech>
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/docs/specs/libxc-migration-stream.pandoc b/docs/specs/libxc-migration-stream.pandoc
+index 8aeab3b11b..d1ed3a6ac9 100644
+--- a/docs/specs/libxc-migration-stream.pandoc
++++ b/docs/specs/libxc-migration-stream.pandoc
+@@ -3,7 +3,7 @@
+   Andrew Cooper <<andrew.cooper3@citrix.com>>
+   Wen Congyang <<wency@cn.fujitsu.com>>
+   Yang Hongyang <<hongyang.yang@easystack.cn>>
+-% Revision 3
++% Revision 4
+ 
+ Introduction
+ ============
+@@ -76,7 +76,8 @@ All the fields within the headers and records have a fixed width.
+ Fields are always aligned to their size.
+ 
+ Padding and reserved fields are set to zero on save and must be
+-ignored during restore.
++ignored during restore, unless the record containing them says
++otherwise.
+ 
+ Integer (numeric) fields in the image header are always in big-endian
+ byte order.
+@@ -298,12 +299,16 @@ Field       Description
+ ----------- --------------------------------------------------------
+ count       Number of pages described in this record.
+ 
++(reserved)  Set to zero on save.  A restoring side must reject a
++            record with this field non-zero.
++
+ pfn         An array of count PFNs and their types.
+ 
+             Bit 63-60: XEN_DOMCTL_PFINFO_* type (from
+             `public/domctl.h` but shifted by 32 bits)
+ 
+-            Bit 59-52: Reserved.
++            Bit 59-52: Reserved.  Set to zero on save.  A restoring
++            side must reject a record with any of these bits set.
+ 
+             Bit 51-0: PFN.
+ 
+diff --git a/tools/libs/guest/xg_sr_restore.c b/tools/libs/guest/xg_sr_restore.c
+index ec985eb924..ae985f9dcd 100644
+--- a/tools/libs/guest/xg_sr_restore.c
++++ b/tools/libs/guest/xg_sr_restore.c
+@@ -400,6 +400,14 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+         goto err;
+     }
+ 
++    /* Reject rather than ignore: a future use may change the layout. */
++    if ( pages->_res1 != 0 )
++    {
++        ERROR("Reserved field set in PAGE_DATA record: %#x",
++              (unsigned int)pages->_res1);
++        goto err;
++    }
++
+     if ( pages->count < 1 )
+     {
+         ERROR("Expected at least 1 pfn in PAGE_DATA record");
+@@ -424,6 +432,13 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+ 
+     for ( i = 0; i < pages->count; ++i )
+     {
++        if ( pages->pfn[i] & PAGE_DATA_PFN_RESZ_MASK )
++        {
++            ERROR("Reserved bits set in pfn[%u]: %#"PRIx64, i,
++                  pages->pfn[i]);
++            goto err;
++        }
++
+         pfn = pages->pfn[i] & PAGE_DATA_PFN_MASK;
+         if ( !ctx->restore.ops.pfn_is_valid(ctx, pfn) )
+         {
+diff --git a/tools/libs/guest/xg_sr_stream_format.h b/tools/libs/guest/xg_sr_stream_format.h
+index 8a0da26f75..69e6c1ccc4 100644
+--- a/tools/libs/guest/xg_sr_stream_format.h
++++ b/tools/libs/guest/xg_sr_stream_format.h
+@@ -87,8 +87,9 @@ struct xc_sr_rec_page_data_header
+     uint64_t pfn[0];
+ };
+ 
+-#define PAGE_DATA_PFN_MASK  0x000fffffffffffffULL
+-#define PAGE_DATA_TYPE_MASK 0xf000000000000000ULL
++#define PAGE_DATA_PFN_MASK      0x000fffffffffffffULL
++#define PAGE_DATA_PFN_RESZ_MASK 0x0ff0000000000000ULL
++#define PAGE_DATA_TYPE_MASK     0xf000000000000000ULL
+ 
+ /* X86_PV_INFO */
+ struct xc_sr_rec_x86_pv_info

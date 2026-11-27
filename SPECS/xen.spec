@@ -369,6 +369,15 @@ Patch1034: xsa535-4.18-1.patch
 Patch1035: xsa535-4.18-2.patch
 Patch1036: xsa535-4.18-3.patch
 
+# LZ4 migration compression
+Patch1037: 0001-tools-libs-guest-reject-non-zero-reserved-fields-in-.patch
+Patch1038: 0002-docs-specs-tools-define-the-PAGE_DATA-flags-field.patch
+Patch1039: 0003-tools-libs-guest-decompress-LZ4-PAGE_DATA-records-on.patch
+Patch1040: 0004-libs-guest-Reduce-number-of-iovecs-in-write_batch.patch
+Patch1041: 0005-tools-libs-guest-compress-PAGE_DATA-records-with-LZ4.patch
+Patch1042: 0006-tools-libs-guest-stop-compressing-PAGE_DATA-when-it-.patch
+Patch1043: 0007-tools-libs-guest-add-XCFLAGS_COMPRESS_LZ4-to-request.patch
+
 ExclusiveArch: x86_64
 
 BuildRequires: python3-devel
@@ -1223,6 +1232,10 @@ fi
 %{?_cov_results_package}
 
 %changelog
+* Fri Nov 27 2026 Lucas Pottier <lucas.pottier@vates.tech> - 4.17.7-7.2.0.lz4.1
+- Backport libxenguest LZ4 compression v2 patches 1-6
+- Backport additional patch for cleaner apply of patch 4
+
 * Thu Nov 26 2026 Teddy Astie <teddy.astie@vates.tech> - 4.17.7-7.2
 - Temporarily revert viridian patches
 - Fixes for:

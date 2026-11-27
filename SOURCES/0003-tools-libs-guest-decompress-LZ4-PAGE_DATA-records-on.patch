@@ -1,0 +1,434 @@
+From afd9b64b8cc28acf7c4e3c81241162b79d430272 Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:31 +0100
+Subject: [PATCH] tools/libs/guest: decompress LZ4 PAGE_DATA records on restore
+
+PAGE_DATA records carry page contents uncompressed; algorithm 0x00 is
+the only one assigned in their flags field.  Compressing them would put
+less data on the wire during migration, at a CPU cost on both hosts,
+worth paying where the bottleneck is the link, or encryption of the
+stream by ssh or TLS.
+
+Assign algorithm 0x01 (PAGE_DATA_ALGO_LZ4) to LZ4, and decode it on
+restore.  page_data is then one LZ4 frame: LZ4 for its speed, and its
+Frame Format because it is specified outside Xen, delimits itself and
+can carry block checksums.  This encoding requires these checksums, as
+without them a corrupted frame can decode into wrong page contents;
+liblz4 accepts a frame without them, so the decoder checks the
+block-checksum flag itself.
+
+The output size comes from the pfn array, and the frame must decode to
+exactly that size and end where the record ends.  Before decoding, the
+record must have no more pages of data than the decoder's buffer holds
+(the most the saver puts in a record), and a payload strictly shorter
+than the uncompressed page data.  The stream specification requires the
+latter for a saver: it makes an older libxenguest which ignores the
+flags field fail its exact length check on these records, rather than
+take the frame for page contents.
+
+Nothing emits algorithm 0x01 yet, so receivers can be updated first.
+Restore has no option to turn it on or off: any stream may use it.
+
+The decoder is guarded by XG_SR_LZ4, which xg_sr_common.h defines when
+HAVE_LZ4 is set and liblz4 is 1.8.1 or later, avoiding releases with
+known decoder bugs.  A build without XG_SR_LZ4 rejects
+algorithm 0x01 with an error naming the missing LZ4 support.  configure
+puts -DHAVE_LZ4 and liblz4's CFLAGS in ZLIB_CFLAGS, which only
+xg_dom_bzimageloader.o used: apply it to every libxenguest object, so
+that HAVE_LZ4, and the layout of any structure that depends on it,
+cannot differ between objects.
+
+The Python stream validator checks algorithm 0x01's payload length and
+block-checksum flag, and test_page_data_flags gains LZ4 cases.
+
+Suggested-by: Teddy Astie <teddy.astie@vates.tech>
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/docs/specs/libxc-migration-stream.pandoc b/docs/specs/libxc-migration-stream.pandoc
+index 96efaeddb8..8907f4a6e1 100644
+--- a/docs/specs/libxc-migration-stream.pandoc
++++ b/docs/specs/libxc-migration-stream.pandoc
+@@ -40,8 +40,6 @@ Not Yet Included
+ The following features are not yet fully specified and will be
+ included in a future draft.
+ 
+-* Page data compression.
+-
+ * ARM
+ 
+ 
+@@ -305,7 +303,24 @@ flags       Bit 7-0:  Algorithm used to encode page_data.
+                       0x00: None.  page_data is page_size octets of
+                             uncompressed contents per present page.
+ 
+-                      0x01 - 0xFF: Unassigned.
++                      0x01: LZ4.  page_data is a single LZ4 frame, as
++                            defined by the LZ4 Frame Format specification[^1],
++                            whose decompressed content is page_size octets
++                            for each present page.  A restoring side must
++                            reject a frame which does not decode to exactly
++                            that many octets, or which does not end where
++                            page_data ends.
++
++                            The frame must set the block-checksum flag in
++                            its frame descriptor, and a restoring side must
++                            reject one which does not.
++
++                            A saving side may only use this value when the
++                            frame is strictly shorter than the uncompressed
++                            page_data it replaces; otherwise it must send the
++                            record with algorithm 0x00.
++
++                      0x02 - 0xFF: Unassigned.
+ 
+                       A restoring side must fail on an algorithm value it
+                       does not implement, rather than attempting to
+@@ -371,6 +386,9 @@ guest's P2M table during a live migration[^2].
+ 
+ Restoring an image with unrecognised page types shall fail.
+ 
++[^1]: LZ4 Frame Format Description, version 1.6.4:
++<https://github.com/lz4/lz4/blob/v1.10.0/doc/lz4_Frame_format.md>
++
+ [^2]: In the legacy format, this is the list of unmapped PFNs in the
+ tail.
+ 
+diff --git a/tools/libs/guest/Makefile b/tools/libs/guest/Makefile
+index 19d3ff2fdb..867f6d89ab 100644
+--- a/tools/libs/guest/Makefile
++++ b/tools/libs/guest/Makefile
+@@ -3,7 +3,7 @@ include $(XEN_ROOT)/tools/Rules.mk
+ 
+ include Makefile.common
+ 
+-xg_dom_bzimageloader.o xg_dom_bzimageloader.opic: CFLAGS += $(ZLIB_CFLAGS)
++CFLAGS += $(ZLIB_CFLAGS)
+ 
+ $(LIBELF_OBJS:.o=.opic): CFLAGS += -Wno-pointer-sign
+ 
+diff --git a/tools/libs/guest/xg_sr_common.h b/tools/libs/guest/xg_sr_common.h
+index 2f058ee3a6..53c7d77bb2 100644
+--- a/tools/libs/guest/xg_sr_common.h
++++ b/tools/libs/guest/xg_sr_common.h
+@@ -3,6 +3,18 @@
+ 
+ #include <stdbool.h>
+ 
++#if defined(HAVE_LZ4)
++#include <lz4.h>
++/*
++ * 1.8.1 fixed a memcpy() from NULL in LZ4F_decompress().
++ * 1.9.0's decoder reads past its input (fixed in 1.9.1).
++ */
++#if LZ4_VERSION_NUMBER >= 10801 && LZ4_VERSION_NUMBER != 10900
++#include <lz4frame.h>
++#define XG_SR_LZ4
++#endif
++#endif
++
+ #include "xg_private.h"
+ #include "xg_save_restore.h"
+ #include "xc_bitops.h"
+@@ -270,6 +282,10 @@ struct xc_sr_context
+             /* Whether a STATIC_DATA_END record has been seen/inferred. */
+             bool seen_static_data_end;
+ 
++            /* LZ4 decoder buffer and context, allocated on first use. */
++            void *lz4_decomp_buf;
++            void *lz4_dctx;
++
+ /*
+  * With Remus/COLO, we buffer the records sent by the primary at checkpoint,
+  * in case the primary will fail, we can recover from the last
+diff --git a/tools/libs/guest/xg_sr_restore.c b/tools/libs/guest/xg_sr_restore.c
+index 8564175abe..0f4f71684f 100644
+--- a/tools/libs/guest/xg_sr_restore.c
++++ b/tools/libs/guest/xg_sr_restore.c
+@@ -354,6 +354,120 @@ static int process_page_data(struct xc_sr_context *ctx, unsigned int count,
+     return rc;
+ }
+ 
++#if defined(XG_SR_LZ4)
++/*
++ * Decode the LZ4 frame at src into ctx->restore.lz4_decomp_buf.  The
++ * decoded size comes from the pfn array.
++ */
++static void *decompress_page_data(struct xc_sr_context *ctx, const void *src,
++                                  size_t src_len, unsigned int nr_pages)
++{
++    xc_interface *xch = ctx->xch;
++    LZ4F_frameInfo_t info;
++    size_t expected = (size_t)nr_pages * PAGE_SIZE;
++    size_t out_len = expected, hdr_len = src_len, rest_len, in_len, ret;
++
++    /* The buffer is a fixed MAX_BATCH_SIZE pages. */
++    if ( nr_pages > MAX_BATCH_SIZE )
++    {
++        ERROR("Compressed PAGE_DATA record with %u pages exceeds MAX_BATCH_SIZE %u",
++              nr_pages, MAX_BATCH_SIZE);
++        return NULL;
++    }
++
++    /* The format requires the frame to be strictly shorter than the pages. */
++    if ( src_len >= expected )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record (%zu bytes) is not shorter than its page data (%zu bytes)",
++              src_len, expected);
++        return NULL;
++    }
++
++    if ( !ctx->restore.lz4_dctx )
++    {
++        LZ4F_dctx *dctx = NULL;
++
++        ret = LZ4F_createDecompressionContext(&dctx, LZ4F_VERSION);
++        if ( LZ4F_isError(ret) )
++        {
++            ERROR("Unable to create LZ4 decompression context");
++            return NULL;
++        }
++        ctx->restore.lz4_dctx = dctx;
++    }
++
++    /* Start each frame at its header (restore stops at any error). */
++    LZ4F_resetDecompressionContext(ctx->restore.lz4_dctx);
++
++    ret = LZ4F_getFrameInfo(ctx->restore.lz4_dctx, &info, src, &hdr_len);
++    if ( LZ4F_isError(ret) )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record has a bad header: %s",
++              LZ4F_getErrorName(ret));
++        return NULL;
++    }
++
++    /* liblz4 accepts frames without the block checksums required here. */
++    if ( info.blockChecksumFlag != LZ4F_blockChecksumEnabled )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record has no block checksums");
++        return NULL;
++    }
++
++    if ( !ctx->restore.lz4_decomp_buf )
++    {
++        ctx->restore.lz4_decomp_buf = malloc(MAX_BATCH_SIZE * PAGE_SIZE);
++        if ( !ctx->restore.lz4_decomp_buf )
++        {
++            ERROR("Unable to allocate %lu bytes for decompression",
++                  (unsigned long)MAX_BATCH_SIZE * PAGE_SIZE);
++            return NULL;
++        }
++    }
++
++    /* LZ4F_getFrameInfo() read the header; decode the rest of the frame. */
++    rest_len = src_len - hdr_len;
++    in_len = rest_len;
++
++    /* NULL options: checksums are verified; liblz4 keeps its own buffers. */
++    ret = LZ4F_decompress(ctx->restore.lz4_dctx, ctx->restore.lz4_decomp_buf,
++                          &out_len, (const uint8_t *)src + hdr_len, &in_len,
++                          NULL);
++
++    if ( LZ4F_isError(ret) )
++    {
++        ERROR("Failed to decompress PAGE_DATA record: %s",
++              LZ4F_getErrorName(ret));
++        return NULL;
++    }
++
++    /* Not an error, but the frame did not end: input or output ran out. */
++    if ( ret != 0 )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record is truncated or decodes to over %zu bytes",
++              expected);
++        return NULL;
++    }
++
++    /* in_len and out_len now hold the bytes consumed and produced. */
++    if ( out_len != expected )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record produced %zu bytes, expected %zu",
++              out_len, expected);
++        return NULL;
++    }
++
++    if ( in_len != rest_len )
++    {
++        ERROR("LZ4 frame in PAGE_DATA record followed by %zu unconsumed bytes",
++              rest_len - in_len);
++        return NULL;
++    }
++
++    return ctx->restore.lz4_decomp_buf;
++}
++#endif /* XG_SR_LZ4 */
++
+ /*
+  * Validate a PAGE_DATA record from the stream, and pass the results to
+  * process_page_data() to actually perform the legwork.
+@@ -363,6 +477,7 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+     xc_interface *xch = ctx->xch;
+     struct xc_sr_rec_page_data_header *pages = rec->data;
+     unsigned int i, pages_of_data = 0;
++    void *page_data;
+     int rc = -1;
+ 
+     xen_pfn_t *pfns = NULL, pfn;
+@@ -463,6 +578,8 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+         types[i] = type;
+     }
+ 
++    page_data = &pages->pfn[pages->count];
++
+     switch ( pages->flags & PAGE_DATA_ALGO_MASK )
+     {
+     case PAGE_DATA_ALGO_NONE:
+@@ -478,14 +595,29 @@ static int handle_page_data(struct xc_sr_context *ctx, struct xc_sr_record *rec)
+         }
+         break;
+ 
++    case PAGE_DATA_ALGO_LZ4:
++#if defined(XG_SR_LZ4)
++    {
++        size_t hdrsz = sizeof(*pages) + (sizeof(uint64_t) * pages->count);
++
++        page_data = decompress_page_data(ctx, page_data,
++                                         rec->length - hdrsz, pages_of_data);
++        if ( !page_data )
++            goto err;
++        break;
++    }
++#else
++        ERROR("LZ4 compressed PAGE_DATA record but LZ4 support not compiled in");
++        goto err;
++#endif
++
+     default:
+         ERROR("Unsupported algorithm %u in PAGE_DATA record",
+               (unsigned int)(pages->flags & PAGE_DATA_ALGO_MASK));
+         goto err;
+     }
+ 
+-    rc = process_page_data(ctx, pages->count, pfns, types,
+-                           &pages->pfn[pages->count]);
++    rc = process_page_data(ctx, pages->count, pfns, types, page_data);
+  err:
+     free(types);
+     free(pfns);
+@@ -835,6 +967,11 @@ static void cleanup(struct xc_sr_context *ctx)
+ 
+     free(ctx->restore.buffered_records);
+     free(ctx->restore.populated_pfns);
++    free(ctx->restore.lz4_decomp_buf);
++#if defined(XG_SR_LZ4)
++    if ( ctx->restore.lz4_dctx )
++        LZ4F_freeDecompressionContext(ctx->restore.lz4_dctx);
++#endif
+ 
+     if ( ctx->restore.ops.cleanup(ctx) )
+         PERROR("Failed to clean up");
+diff --git a/tools/libs/guest/xg_sr_stream_format.h b/tools/libs/guest/xg_sr_stream_format.h
+index a6103c9556..7c00828b7f 100644
+--- a/tools/libs/guest/xg_sr_stream_format.h
++++ b/tools/libs/guest/xg_sr_stream_format.h
+@@ -92,6 +92,7 @@ struct xc_sr_rec_page_data_header
+ #define PAGE_DATA_FLAGS_RESZ_MASK 0xffffff00U
+ 
+ #define PAGE_DATA_ALGO_NONE       0x00000000U
++#define PAGE_DATA_ALGO_LZ4        0x00000001U
+ 
+ #define PAGE_DATA_PFN_MASK      0x000fffffffffffffULL
+ #define PAGE_DATA_PFN_RESZ_MASK 0x0ff0000000000000ULL
+diff --git a/tools/python/xen/migration/libxc.py b/tools/python/xen/migration/libxc.py
+index cd694581f1..f59eea364c 100644
+--- a/tools/python/xen/migration/libxc.py
++++ b/tools/python/xen/migration/libxc.py
+@@ -91,6 +91,11 @@ PAGE_DATA_PFN_RESZ_MASK      = ((1 << 60) - 1) & ~((1 << 52) - 1)
+ PAGE_DATA_ALGO_MASK          = 0x000000ff
+ PAGE_DATA_FLAGS_RESZ_MASK    = 0xffffff00
+ PAGE_DATA_ALGO_NONE          = 0x00
++PAGE_DATA_ALGO_LZ4           = 0x01
++
++# LZ4 frame: at least magic, FLG, BD and HC; FLG bit 4 is B.Checksum
++PAGE_DATA_LZ4_FRAME_MIN      = 7
++PAGE_DATA_LZ4_FLG_BLOCKSUM   = 0x10
+ 
+ # flags from xen/public/domctl.h: XEN_DOMCTL_PFINFO_* shifted by 32 bits
+ PAGE_DATA_TYPE_SHIFT         = 60
+@@ -306,6 +311,24 @@ class VerifyLibxc(VerifyBase):
+                 raise RecordError("Expected %u + %u + %u, got %u" %
+                                   (minsz, pfnsz, pagesz, len(content)))
+ 
++        elif algo == PAGE_DATA_ALGO_LZ4:
++
++            # Without decompressing, check the saver's length rule.
++            if datasz >= pagesz:
++                raise RecordError(
++                    "LZ4 frame in PAGE_DATA record (%u bytes) is not shorter than its page data (%u bytes)"
++                    % (datasz, pagesz))
++
++            frame = content[minsz + pfnsz:]
++            if len(frame) < PAGE_DATA_LZ4_FRAME_MIN:
++                raise RecordError(
++                    "LZ4 frame in PAGE_DATA record too short: %u bytes"
++                    % (len(frame), ))
++
++            if not ord(frame[4:5]) & PAGE_DATA_LZ4_FLG_BLOCKSUM:
++                raise RecordError(
++                    "LZ4 frame in PAGE_DATA record has no block checksums")
++
+         else:
+             raise StreamError(
+                 "Unsupported algorithm %u in PAGE_DATA record" % (algo, ))
+diff --git a/tools/python/xen/migration/tests.py b/tools/python/xen/migration/tests.py
+index 099f9d2f5c..4021555689 100644
+--- a/tools/python/xen/migration/tests.py
++++ b/tools/python/xen/migration/tests.py
+@@ -35,19 +35,44 @@ class TestLibxc(unittest.TestCase):
+         v = libxc.VerifyLibxc(lambda *_: None, lambda *_: b"")
+         PAGE = b"\x00" * 4096
+         NOTAB = libxc.PAGE_DATA_TYPE_NOTAB | 0x1   # one normal page, pfn 1
++        XTAB = libxc.PAGE_DATA_TYPE_XTAB | 0x1     # no page of data, pfn 1
+ 
+-        def rec(flags, data):
++        def rec(flags, data, pfn=NOTAB):
+             return pack(libxc.PAGE_DATA_FORMAT, 1, flags) + \
+-                   pack("=Q", NOTAB) + data
++                   pack("=Q", pfn) + data
+ 
+         # Uncompressed: exactly one page of data, and nothing else accepted.
+         v.verify_record_page_data(rec(libxc.PAGE_DATA_ALGO_NONE, PAGE))
+         self.assertRaises(libxc.RecordError, v.verify_record_page_data,
+                           rec(libxc.PAGE_DATA_ALGO_NONE, PAGE[:-1]))
+ 
++        # An LZ4 frame header: magic, then FLG with the block-checksum bit.
++        FRAME = b"\x04\x22\x4d\x18\x70\x70\x72" + b"\x00" * 93
++
++        # LZ4: the payload is checked against the saver's length rule,
++        # 0 < len < the uncompressed size it replaces: one page here, and
++        # none with an XTAB pfn.  FULL is a valid frame header padded to one
++        # page, so only the length rule can reject it.
++        FULL = FRAME + b"\x00" * (4096 - len(FRAME))
++        v.verify_record_page_data(rec(libxc.PAGE_DATA_ALGO_LZ4, FULL[:-1]))
++        v.verify_record_page_data(rec(libxc.PAGE_DATA_ALGO_LZ4, FRAME))
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_LZ4, b""))
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_LZ4, FULL))
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_LZ4, FRAME, XTAB))
++
++        # ... and against the frame having a whole header with block checksums.
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_LZ4,
++                              FRAME[:4] + b"\x60" + FRAME[5:]))
++        self.assertRaises(libxc.RecordError, v.verify_record_page_data,
++                          rec(libxc.PAGE_DATA_ALGO_LZ4, FRAME[:6]))
++
+         # An unimplemented algorithm, and any reserved bit, are refused.
+         self.assertRaises(libxc.StreamError, v.verify_record_page_data,
+-                          rec(libxc.PAGE_DATA_ALGO_NONE + 1, PAGE))
++                          rec(libxc.PAGE_DATA_ALGO_LZ4 + 1, FRAME))
+         for bit in range(8, 32):
+             self.assertRaises(libxc.StreamError, v.verify_record_page_data,
+                               rec(1 << bit, PAGE))

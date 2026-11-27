@@ -1,0 +1,158 @@
+From 8cc1fdb8e57bd6f06c4db1c7465896bf7a3dd72b Mon Sep 17 00:00:00 2001
+From: Marcus Granado <marcus.granado@citrix.com>
+Date: Tue, 20 Oct 2026 21:02:33 +0100
+Subject: [PATCH] tools/libs/guest: stop compressing PAGE_DATA when it stops
+ paying off
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When LZ4 compression is in use, write_batch() compresses the page data
+of every batch until the end of the save, whatever the result.  For a
+guest whose memory hardly compresses, this spends CPU at both ends for
+little or no reduction of the stream.
+
+Total the page data bytes before and after compression over each
+precopy iteration, counting a batch sent uncompressed as no saving.  If
+an iteration's total after compression is 90% or more of its total
+before, stop compressing for the rest of the save.
+
+The check runs in send_memory_live() at the end of each precopy
+iteration.  A non-live save (xc_domain_save() without XCFLAGS_LIVE) has
+no precopy iterations, so it never stops compressing.
+
+The 90% threshold is a heuristic; a poor choice costs CPU or bandwidth,
+never correctness.  Log, at info level, the ratio of each judged
+iteration, the decision to stop and a summary of the batches sent while
+compression was on.
+
+Suggested-by: Edwin Török <edvin@tarides.com>
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Marcus Granado <marcus.granado@citrix.com>
+
+diff --git a/tools/libs/guest/xg_sr_common.h b/tools/libs/guest/xg_sr_common.h
+index b2ee2cc5d4..a56b17aa7c 100644
+--- a/tools/libs/guest/xg_sr_common.h
++++ b/tools/libs/guest/xg_sr_common.h
+@@ -268,6 +268,15 @@ struct xc_sr_context
+             /* Which algorithm to compress page data with. */
+             enum xc_sr_compression compression;
+ 
++            /*
++             * Page data bytes before (raw) and after (out) compression, in
++             * the current iteration and in all iterations so far.
++             */
++            uint64_t compress_raw_total;
++            uint64_t compress_out_total;
++            uint64_t compress_raw_all_total;
++            uint64_t compress_out_all_total;
++
+             /* LZ4 staging and output buffers, allocated on first use. */
+             void *lz4_staging_buf;
+             void *lz4_compress_buf;
+diff --git a/tools/libs/guest/xg_sr_save.c b/tools/libs/guest/xg_sr_save.c
+index 374fa96a9c..133c70dceb 100644
+--- a/tools/libs/guest/xg_sr_save.c
++++ b/tools/libs/guest/xg_sr_save.c
+@@ -84,6 +84,67 @@ static void cleanup_compression(struct xc_sr_context *ctx)
+ }
+ 
+ #if defined(XG_SR_LZ4)
++static void compress_stats_reset(struct xc_sr_context *ctx)
++{
++    ctx->save.compress_raw_total = 0;
++    ctx->save.compress_out_total = 0;
++}
++
++static void compress_stats_accumulate(struct xc_sr_context *ctx,
++                                      size_t raw_len, size_t compressed_len)
++{
++    ctx->save.compress_raw_total += raw_len;
++    ctx->save.compress_out_total += compressed_len;
++    ctx->save.compress_raw_all_total += raw_len;
++    ctx->save.compress_out_all_total += compressed_len;
++}
++
++static void compress_stats_summary(const struct xc_sr_context *ctx)
++{
++    xc_interface *xch = ctx->xch;
++    uint64_t raw = ctx->save.compress_raw_all_total;
++    uint64_t out = ctx->save.compress_out_all_total;
++    unsigned int permil;
++
++    if ( !raw )
++        return;
++
++    permil = out * 1000 / raw;
++    IPRINTF("Compression summary: compressed %"PRIu64" -> %"PRIu64" bytes (%u.%u%% average ratio) while compression was on",
++            raw, out, permil / 10, permil % 10);
++}
++
++#define XC_SR_COMPRESS_ITER_THRESHOLD 90
++
++static void compress_stats_evaluate(struct xc_sr_context *ctx)
++{
++    xc_interface *xch = ctx->xch;
++    uint64_t raw = ctx->save.compress_raw_total;
++    uint64_t out = ctx->save.compress_out_total;
++    unsigned int iter = ctx->save.stats.iteration;
++
++    if ( ctx->save.compression == XC_SR_COMPRESS_NONE )
++        return;
++
++    if ( raw )
++    {
++        unsigned int permil = out * 1000 / raw;
++
++        IPRINTF("Iteration %u: compressed %"PRIu64" -> %"PRIu64" bytes (%u.%u%% average ratio)",
++                iter, raw, out, permil / 10, permil % 10);
++
++        if ( out * 100 >= raw * XC_SR_COMPRESS_ITER_THRESHOLD )
++        {
++            IPRINTF("Iteration %u: at or above the %u%% threshold - disabling compression for remaining iterations",
++                    iter, XC_SR_COMPRESS_ITER_THRESHOLD);
++            ctx->save.compression = XC_SR_COMPRESS_NONE;
++            cleanup_compression(ctx);
++        }
++    }
++
++    compress_stats_reset(ctx);
++}
++
+ /*
+  * One block per 4MB batch: smaller blocks can be 2x slower to decode.
+  * liblz4 allows 64KB, 256KB, 1MB and 4MB.
+@@ -165,11 +226,13 @@ static int lz4_compress_batch(struct xc_sr_context *ctx, struct iovec *iov,
+     if ( clen >= raw )
+     {
+         DBGPRINTF("LZ4: %zu -> %zu bytes, sending uncompressed", raw, clen);
++        compress_stats_accumulate(ctx, raw, raw);
+         return iovcnt;
+     }
+ 
+     DBGPRINTF("LZ4: %zu -> %zu bytes (%zu.%zu%% ratio)", raw, clen,
+               (clen * 1000 / raw) / 10, (clen * 1000 / raw) % 10);
++    compress_stats_accumulate(ctx, raw, clen);
+ 
+     /* Pad in place: raw is a multiple of REC_ALIGN and > clen, so it fits. */
+     memset((uint8_t *)ctx->save.lz4_compress_buf + clen, 0,
+@@ -668,6 +731,9 @@ static int send_memory_live(struct xc_sr_context *ctx)
+             rc = send_dirty_pages(ctx, stats.dirty_count);
+             if ( rc )
+                 goto out;
++#if defined(XG_SR_LZ4)
++            compress_stats_evaluate(ctx);
++#endif
+         }
+ 
+         if ( policy_decision != XGS_POLICY_CONTINUE_PRECOPY )
+@@ -969,6 +1035,9 @@ static void cleanup(struct xc_sr_context *ctx)
+                                    NRPAGES(bitmap_size(ctx->save.p2m_size)));
+     free(ctx->save.deferred_pages);
+     free(ctx->save.batch_pfns);
++#if defined(XG_SR_LZ4)
++    compress_stats_summary(ctx);
++#endif
+     cleanup_compression(ctx);
+ }
+ 
